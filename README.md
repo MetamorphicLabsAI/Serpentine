@@ -13,7 +13,7 @@ Serpentine is a modern re-imagining of the classic arcade game built strictly wi
 * 🎨 **Hardware Accelerated UI**: Built with scanline CSS overlays, breathing glow elements, game-over screen shake mechanics, and dynamic arcade cabinet color grading that shifts to match your selected snake profile.
 * ⚙️ **Arcade OS Menu System**: A fully integrated main menu UI allowing seamless navigation between game modes, difficulty parameters, and character profiles.
 * 🐍 **Selectable Snake Profiles**: Choose between different retro-cyberpunk characters like Glitch-Wave, Void Walker, or Mecha-Serpent with unique lore and custom, fully color-matched neon aesthetics.
-* 🔓 **Unlockable Mechanics**: Complete in-game milestones (like consuming 20 standard food units) to permanently unlock exclusive profiles (like the brilliantly shifting *Chromatic Punch* algorithm).
+* 🔓 **Unlockable Mechanics**: Complete in-game milestones to permanently unlock exclusive profiles (like the shifting *Chromatic Punch* algorithm). Locked characters are shrouded in mystery as solid grey HUD silhouettes with '???' naming and yellow tactical unlock criteria displayed natively in their lore panels!
 * 🔥 **Dynamic Difficulty Modes**: Scale your challenge precisely across Easy (180ms tick rate), Medium (120ms tick rate), Hard (80ms tick rate), and Insane (50ms tick rate) speeds.
 
 ## Controls
