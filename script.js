@@ -982,8 +982,8 @@ function drawPrincess(seg, i, isHead, isTail) {
         // Broad rounded shoulders/hips (slightly wider, heavily rounded)
         ctx.roundRect(-gridSize/2 - 2, -gridSize/2 - 1, gridSize + 4, gridSize + 2, gridSize/2);
     } else {
-        // Medium tubular body (85% width)
-        const w = gridSize * 0.85;
+        // Medium tubular body (95% width)
+        const w = gridSize * 0.95;
         const h = gridSize + 2; // slightly longer to ensure sections overlap seamlessly
         ctx.roundRect(-w/2, -h/2, w, h, 6);
     }
@@ -993,7 +993,7 @@ function drawPrincess(seg, i, isHead, isTail) {
     ctx.strokeStyle = "rgba(45, 20, 5, 0.4)"; 
     ctx.lineWidth = 3;
     ctx.beginPath();
-    const wLimit = isLegSegment ? gridSize/2 : (gridSize * 0.85)/2;
+    const wLimit = isLegSegment ? gridSize/2 : (gridSize * 0.95)/2;
     ctx.moveTo(-wLimit/1.5, -gridSize/4);
     ctx.lineTo(wLimit/1.5, gridSize/4);
     ctx.moveTo(-wLimit/1.5, gridSize/4 - 2);
