@@ -211,11 +211,18 @@ let particles = [];
 let currentSpeed = currentDifficultySpeed;
 let pendingDirection = null; // Prevent double-turn death
 let foodEaten = 0; // Track food consumed per round
+let bank = parseInt(localStorage.getItem('serpentineBank')) || 0;
+let bought9193Hint = localStorage.getItem('bought9193Hint') === 'true';
+let boughtMasterHint = localStorage.getItem('boughtMasterHint') === 'true';
 
 // Initial DOM Setup
 highScoreElement.textContent = highScore;
 const initialsScreen = document.getElementById('initials-screen');
 const leaderboardScreen = document.getElementById('leaderboard-screen');
+const shopMenu = document.getElementById('shop-menu');
+const shopSnakes = document.getElementById('shop-snakes');
+const shopModes = document.getElementById('shop-modes');
+const shopOther = document.getElementById('shop-other');
 
 // --- Audio Engine (Synthesizer) ---
 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -848,6 +855,10 @@ function triggerGameOver() {
     
     finalScoreElement.textContent = score;
     
+    // Accumulate into the Bank
+    bank += score;
+    localStorage.setItem('serpentineBank', bank);
+    
     // Check if this score qualifies for leaderboard
     const profile = snakeProfiles[selectedProfileIndex];
     
@@ -888,6 +899,52 @@ function submitInitials() {
     isEnteringInitials = false;
     hideAllMenus();
     gameOverScreen.classList.remove('hidden');
+}
+
+function updateShopUI() {
+    const bankIds = ['shop-bank-main', 'shop-bank-snakes', 'shop-bank-modes', 'shop-bank-other'];
+    bankIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = bank.toLocaleString();
+    });
+
+    const label9193 = document.getElementById('label-9193');
+    const btnBuy9193 = document.getElementById('btn-buy-9193');
+    if (bought9193Hint) {
+        label9193.textContent = "EXPLOIT: Main Menu, 1-2-3-4-5-6-7-8-0";
+        btnBuy9193.textContent = "LOADED";
+        btnBuy9193.style.opacity = '0.5';
+        btnBuy9193.style.pointerEvents = 'none';
+        btnBuy9193.classList.add('btn-secondary');
+    }
+
+    const labelMaster = document.getElementById('label-master');
+    const btnBuyMaster = document.getElementById('btn-buy-master');
+    if (boughtMasterHint) {
+        labelMaster.textContent = "RITUAL: 9193 selected, Main Menu, push 9x9 times, wait 9s";
+        btnBuyMaster.textContent = "LOADED";
+        btnBuyMaster.style.opacity = '0.5';
+        btnBuyMaster.style.pointerEvents = 'none';
+        btnBuyMaster.classList.add('btn-secondary');
+    }
+}
+
+function buyItem(id, cost, successCallback) {
+    if (bank >= cost) {
+        bank -= cost;
+        localStorage.setItem('serpentineBank', bank);
+        successCallback();
+        updateShopUI();
+        playUnlockSound();
+    } else {
+        // Not enough points - red flash
+        const bankDisplays = document.querySelectorAll('.highlight');
+        bankDisplays.forEach(el => {
+            el.style.color = '#ff0055';
+            setTimeout(() => el.style.color = '', 300);
+        });
+        playDeathSound();
+    }
 }
 
 // --- Input Handling ---
@@ -1102,6 +1159,10 @@ const hideAllMenus = () => {
     gameOverScreen.classList.add('hidden');
     initialsScreen.classList.add('hidden');
     leaderboardScreen.classList.add('hidden');
+    shopMenu.classList.add('hidden');
+    shopSnakes.classList.add('hidden');
+    shopModes.classList.add('hidden');
+    shopOther.classList.add('hidden');
 };
 
 document.getElementById('btn-play-menu').addEventListener('click', () => {
@@ -1121,6 +1182,69 @@ document.getElementById('btn-scores-menu').addEventListener('click', () => {
     renderLeaderboard('medium');
     leaderboardScreen.classList.remove('hidden');
     document.getElementById('btn-back-leaderboard').focus();
+});
+
+document.getElementById('btn-shop-menu').addEventListener('click', () => {
+    hideAllMenus();
+    updateShopUI();
+    shopMenu.classList.remove('hidden');
+    document.getElementById('btn-shop-snakes').focus();
+});
+
+document.getElementById('btn-shop-snakes').addEventListener('click', () => {
+    hideAllMenus();
+    shopSnakes.classList.remove('hidden');
+    document.getElementById('btn-back-shop-snakes').focus();
+});
+
+document.getElementById('btn-shop-modes').addEventListener('click', () => {
+    hideAllMenus();
+    shopModes.classList.remove('hidden');
+    document.getElementById('btn-back-shop-modes').focus();
+});
+
+document.getElementById('btn-shop-other').addEventListener('click', () => {
+    hideAllMenus();
+    shopOther.classList.remove('hidden');
+    document.getElementById('btn-buy-9193').focus();
+});
+
+document.getElementById('btn-buy-9193').addEventListener('click', () => {
+    buyItem('9193', 900000, () => {
+        bought9193Hint = true;
+        localStorage.setItem('bought9193Hint', 'true');
+    });
+});
+
+document.getElementById('btn-buy-master').addEventListener('click', () => {
+    buyItem('master', 9000000, () => {
+        boughtMasterHint = true;
+        localStorage.setItem('boughtMasterHint', 'true');
+    });
+});
+
+document.getElementById('btn-back-shop').addEventListener('click', () => {
+    hideAllMenus();
+    mainMenu.classList.remove('hidden');
+    document.getElementById('btn-shop-menu').focus();
+});
+
+document.getElementById('btn-back-shop-snakes').addEventListener('click', () => {
+    hideAllMenus();
+    shopMenu.classList.remove('hidden');
+    document.getElementById('btn-shop-snakes').focus();
+});
+
+document.getElementById('btn-back-shop-modes').addEventListener('click', () => {
+    hideAllMenus();
+    shopMenu.classList.remove('hidden');
+    document.getElementById('btn-shop-modes').focus();
+});
+
+document.getElementById('btn-back-shop-other').addEventListener('click', () => {
+    hideAllMenus();
+    shopMenu.classList.remove('hidden');
+    document.getElementById('btn-shop-other').focus();
 });
 
 document.getElementById('btn-back-leaderboard').addEventListener('click', () => {

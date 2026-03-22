@@ -108,6 +108,27 @@ The system maintains a **Top 10** local board for each difficulty.
 
 ---
 
+## 🏦 System Shop & Point Bank
+
+Points earned across all game sessions are accumulated into a global **Point Bank**.
+
+### [BANK PROTOCOLS]
+- **Accumulation:** Total from every `SYSTEM FAILURE` (Game Over) is added to `serpentineBank`.
+- **Persistence:** Local browser storage.
+
+### [SHOP SUB-SECTORS]
+| Sector | Inventory |
+| :--- | :--- |
+| **SNAKES** | [EMPTY] - Future decryption available. |
+| **MODES** | [EMPTY] - Future decryption available. |
+| **OTHER** | Contains classified system hints/codes. |
+
+### [OTHER INVENTORY]
+- **900,000 PTS:** Decrypts the secret `9193` unlock sequence.
+- **9,000,000 PTS:** Decrypts the `Master Ritual` sequence for full system access.
+
+---
+
 ## 💾 Classified Data (Master Ritual)
 
 ### [THE 9x9 RITUAL]
