@@ -1337,12 +1337,14 @@ function drawArthropod(seg, i, isHead, isTail) {
     ctx.restore();
 }
 
-/* --- INFERNAL WYRM RENDERER (ELITE) --- */
+/* --- INFERNAL WYRM RENDERER (ULTIMATE APEX) --- */
 function drawDragon(seg, i, isHead, isTail) {
     const cx = seg.x * gridSize + gridSize / 2;
     const cy = seg.y * gridSize + gridSize / 2;
     const time = Date.now();
+    const len = snake.length;
 
+    // Direction & Rotation calc
     let sDx = dx, sDy = dy;
     if (i > 0) { sDx = Math.sign(snake[i-1].x - seg.x); sDy = Math.sign(snake[i-1].y - seg.y); }
     if (sDx === 0 && sDy === 0) sDy = -1;
@@ -1356,187 +1358,227 @@ function drawDragon(seg, i, isHead, isTail) {
     ctx.translate(cx, cy);
     ctx.rotate(angle);
 
-    // Dynamic Pulsing Logic
-    const glowPulse = Math.sin(time / 300) * 0.2 + 0.8;
-    const bodyWiggle = Math.sin(time / 150 + i * 0.5) * 2;
+    // Procedural Animation Constants
+    const bodyPulse = Math.sin(time / 200 + i * 0.4) * 0.15 + 0.85;
+    const wiggle = Math.sin(time / 150 + i * 0.8) * 3;
+    const isShoulders = i === 1;
+    const isNeck = i > 0 && i < 3;
+    const isMainBody = i >= 3 && i < len - 2;
 
-    // 1. BASE BODY & SCALES
-    ctx.fillStyle = '#0B2B15'; // Darker base for depth
-    ctx.shadowBlur = isHead ? 15 : 8;
-    ctx.shadowColor = 'rgba(255, 69, 0, 0.5)';
+    // ---------------------------------------------------------
+    // 1. DYNAMIC BODY SEGMENTATION (Tapering & Mass)
+    // ---------------------------------------------------------
+    let baseWidth = 18;
+    if (isHead) baseWidth = 22;
+    else if (isNeck) baseWidth = 14;
+    else if (isShoulders) baseWidth = 20;
+    else if (i > len - 3) baseWidth = 14 - (i - (len-3)) * 4; // Taper to tail
+
+    // Shadow / Ambient Occlusion
+    ctx.shadowBlur = isHead ? 20 : 10;
+    ctx.shadowColor = 'rgba(255, 69, 0, 0.4)';
     
-    // Main Segment Body (Tapering)
-    const segW = isTail ? 12 : 18;
-    const segH = 20;
+    // Core Flesh / Muscle
+    ctx.fillStyle = '#1A472A'; // Dark Emerald
     ctx.beginPath();
-    ctx.roundRect(-segW/2 + bodyWiggle, -10, segW, segH, 6);
+    ctx.roundRect(-baseWidth/2 + wiggle, -10, baseWidth, 20, 8);
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // Underbelly (Golden Plating)
-    ctx.fillStyle = '#B8860B';
-    ctx.beginPath();
-    ctx.roundRect(-4 + bodyWiggle, -6, 8, 16, 2);
-    ctx.fill();
-    // Segmented belly lines
-    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-    ctx.lineWidth = 1;
-    for (let by = -4; by <= 8; by += 4) {
-        ctx.beginPath(); ctx.moveTo(-4 + bodyWiggle, by); ctx.lineTo(4 + bodyWiggle, by); ctx.stroke();
+    // Underbelly (Segmented Gold Plates)
+    // Only shows on neck and body, not head/tail spade
+    if (!isHead && i < len - 1) {
+        const bellyW = baseWidth * 0.5;
+        ctx.fillStyle = '#DAA520';
+        ctx.beginPath();
+        ctx.roundRect(-bellyW/2 + wiggle, -6, bellyW, 14, 4);
+        ctx.fill();
+        // Belly Lines
+        ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+        ctx.lineWidth = 1;
+        for (let h = -4; h <= 6; h += 4) {
+            ctx.beginPath(); 
+            ctx.moveTo(-bellyW/2 + wiggle, h); 
+            ctx.lineTo(bellyW/2 + wiggle, h); 
+            ctx.stroke();
+        }
     }
 
-    // Overlapping Scale Highlights
-    ctx.fillStyle = '#1A472A';
-    for (let sy = -8; sy <= 4; sy += 6) {
+    // Procedural Scales (Layering)
+    ctx.fillStyle = '#0D3318';
+    for (let sy = -8; sy <= 2; sy += 5) {
         ctx.beginPath();
-        ctx.arc(-4 + bodyWiggle, sy, 4, 0, Math.PI);
-        ctx.arc(4 + bodyWiggle, sy, 4, 0, Math.PI);
+        ctx.arc(-baseWidth/4 + wiggle, sy, baseWidth/4, 0, Math.PI);
+        ctx.arc(baseWidth/4 + wiggle, sy, baseWidth/4, 0, Math.PI);
         ctx.fill();
     }
 
-    // 2. DORSAL SPINES (Animated)
-    const spineHeight = 6 + Math.sin(time/200 + i) * 3;
-    ctx.fillStyle = '#FF4500';
-    ctx.beginPath();
-    ctx.moveTo(bodyWiggle, -10);
-    ctx.lineTo(bodyWiggle - 3, -10 - spineHeight);
-    ctx.lineTo(bodyWiggle + 3, -10 - spineHeight);
-    ctx.closePath();
-    ctx.fill();
-
-    // 3. SHOULDER WINGS (High Detail)
-    if (i === 1) {
-        const wingFlap = Math.sin(time / 140) * 12;
-        const wingStretch = 28;
+    // ---------------------------------------------------------
+    // 2. APEX WING SYSTEM (Shoulders Only)
+    // ---------------------------------------------------------
+    if (isShoulders) {
+        const flap = Math.sin(time / 130) * 15;
+        const wingSpan = 35;
         
-        // Draw both wings
         [-1, 1].forEach(side => {
             ctx.save();
             ctx.scale(side, 1);
             
-            // Wing Membrane (Semi-transparent Gradient)
-            const grad = ctx.createRadialGradient(8, 0, 2, 25, 5, 25);
-            grad.addColorStop(0, 'rgba(180, 0, 0, 0.3)');
-            grad.addColorStop(1, 'rgba(40, 0, 0, 0.7)');
-            ctx.fillStyle = grad;
-            
+            // Outer Membrane (Deep Crimson)
+            ctx.fillStyle = 'rgba(139, 0, 0, 0.8)';
             ctx.beginPath();
-            ctx.moveTo(8, -2);
-            ctx.bezierCurveTo(15, -15 + wingFlap, 30, -10 + wingFlap, wingStretch, 10 + wingFlap);
-            ctx.lineTo(8, 6);
+            ctx.moveTo(8 + wiggle, -2);
+            ctx.bezierCurveTo(20, -20 + flap, 40, -10 + flap, wingSpan, 15 + flap);
+            ctx.quadraticCurveTo(20, 10 + flap, 8 + wiggle, 6);
             ctx.fill();
 
-            // Wing Claws & Structural Bones
+            // Inner Gradient Lighting
+            const wingGrad = ctx.createRadialGradient(10, 0, 2, 30, 0, 30);
+            wingGrad.addColorStop(0, 'rgba(255, 69, 0, 0.2)');
+            wingGrad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = wingGrad;
+            ctx.fill();
+
+            // Bone Structure
             ctx.strokeStyle = '#220000';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
             ctx.beginPath();
-            // Main spar
-            ctx.moveTo(8, -2);
-            ctx.lineTo(wingStretch, -5 + wingFlap);
-            // Secondary fingers
-            ctx.moveTo(8, 1);
-            ctx.lineTo(wingStretch - 4, 5 + wingFlap);
-            ctx.moveTo(8, 4);
-            ctx.lineTo(wingStretch - 10, 12 + wingFlap);
+            // Shoulder to tip
+            ctx.moveTo(8 + wiggle, -2);
+            ctx.lineTo(wingSpan, -5 + flap);
+            // Fingers
+            ctx.moveTo(8 + wiggle, 1);
+            ctx.lineTo(wingSpan - 5, 8 + flap);
+            ctx.moveTo(8 + wiggle, 4);
+            ctx.lineTo(wingSpan - 12, 18 + flap);
             ctx.stroke();
             
-            // Claw tip
-            ctx.fillStyle = '#DAA520';
+            // Golden Talon Tip
+            ctx.fillStyle = '#FFD700';
             ctx.beginPath();
-            ctx.arc(wingStretch, -5 + wingFlap, 2, 0, Math.PI*2);
+            ctx.arc(wingSpan, -5 + flap, 2.5, 0, Math.PI*2);
             ctx.fill();
-            
+
             ctx.restore();
         });
     }
 
-    // 4. THE SKULL (Elite Detail)
+    // ---------------------------------------------------------
+    // 3. ANCIENT SKULL (Legendary Head)
+    // ---------------------------------------------------------
     if (isHead) {
-        // Skull Base
+        // Head Base / Jawline
         ctx.fillStyle = '#1A472A';
         ctx.beginPath();
-        ctx.moveTo(-9, 4);
-        ctx.quadraticCurveTo(-11, -8, 0, -12); // Broad forehead
-        ctx.quadraticCurveTo(11, -8, 9, 4);
+        ctx.moveTo(-11, 6); // Back left neck
+        ctx.lineTo(-11, -4);
+        ctx.quadraticCurveTo(-11, -12, 0, -15); // Forehead
+        ctx.quadraticCurveTo(11, -12, 11, -4);
+        ctx.lineTo(11, 6);
         ctx.fill();
 
-        // Snout
+        // Elongated Snout (3D Form)
         ctx.fillStyle = '#0D3318';
         ctx.beginPath();
-        ctx.roundRect(-5, -20, 10, 12, 3);
+        ctx.roundRect(-6, -24, 12, 16, 4);
         ctx.fill();
-        
-        // Nostrils (Flaring)
-        const flare = Math.sin(time/200) * 0.5 + 1;
-        ctx.fillStyle = '#FF0000';
-        ctx.beginPath(); ctx.arc(-2.5, -18, 1.2 * flare, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(2.5, -18, 1.2 * flare, 0, Math.PI*2); ctx.fill();
-
-        // Massive Ancient Horns
-        ctx.strokeStyle = '#DAA520';
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'round';
-        // Left
-        ctx.beginPath();
-        ctx.moveTo(-7, -8);
-        ctx.quadraticCurveTo(-18, -20, -12, -30);
-        ctx.stroke();
-        // Right
-        ctx.beginPath();
-        ctx.moveTo(7, -8);
-        ctx.quadraticCurveTo(18, -20, 12, -30);
-        ctx.stroke();
-
-        // Glowing Eyes (Pulse)
-        ctx.fillStyle = `rgba(255, 215, 0, ${glowPulse})`;
-        ctx.shadowBlur = 10 * glowPulse;
-        ctx.shadowColor = '#FFD700';
-        ctx.beginPath(); ctx.ellipse(-5, -6, 3, 2, 0.2, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.ellipse(5, -6, 3, 2, -0.2, 0, Math.PI*2); ctx.fill();
-        ctx.shadowBlur = 0;
-        
-        // Pupils
-        ctx.fillStyle = '#000';
-        ctx.beginPath(); ctx.rect(-5.5, -7, 1, 3); ctx.fill();
-        ctx.beginPath(); ctx.rect(4.5, -7, 1, 3); ctx.fill();
-
-        // Particle FX (Nostril Smoke/Fire)
-        for (let p=0; p<5; p++) {
-            const px = (Math.random()-0.5) * 8;
-            const py = -20 - (Math.random() * 10);
-            const size = Math.random() * 2 + 1;
-            ctx.fillStyle = Math.random() > 0.4 ? '#FF4500' : '#888';
-            ctx.globalAlpha = 0.6;
-            ctx.beginPath(); ctx.arc(px, py, size, 0, Math.PI*2); ctx.fill();
-        }
-        ctx.globalAlpha = 1;
-    }
-
-    // 5. THE SPIKED TAIL
-    if (isTail) {
-        const tSwing = Math.sin(time/120) * 10;
+        // Nose plate
         ctx.fillStyle = '#1A472A';
         ctx.beginPath();
-        ctx.moveTo(-5, 0);
-        ctx.quadraticCurveTo(tSwing, 15, tSwing*1.5, 25);
-        ctx.lineTo(tSwing*1.5 - 2, 25);
-        ctx.quadraticCurveTo(tSwing, 10, 5, 0);
+        ctx.roundRect(-4, -26, 8, 8, 2);
         ctx.fill();
 
-        // Fire Spade / Spikes
-        ctx.fillStyle = '#FF4500';
+        // Spiraling Ancient Horns
+        ctx.strokeStyle = '#DAA520';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        const hornWiggle = Math.sin(time / 200) * 2;
+        // Left Horn
         ctx.beginPath();
-        ctx.moveTo(tSwing*1.5, 22);
-        ctx.lineTo(tSwing*1.5 - 8, 35);
-        ctx.lineTo(tSwing*1.5, 45);
-        ctx.lineTo(tSwing*1.5 + 8, 35);
+        ctx.moveTo(-8, -10);
+        ctx.bezierCurveTo(-15 + hornWiggle, -20, -25 + hornWiggle, -15, -20, -35);
+        ctx.stroke();
+        // Right Horn
+        ctx.beginPath();
+        ctx.moveTo(8, -10);
+        ctx.bezierCurveTo(15 - hornWiggle, -20, 25 - hornWiggle, -15, 20, -35);
+        ctx.stroke();
+
+        // Glowing Slit Eyes (Pulse)
+        const eyePulse = Math.sin(time / 300) * 0.3 + 0.7;
+        ctx.shadowBlur = 12 * eyePulse;
+        ctx.shadowColor = '#FFD700';
+        ctx.fillStyle = `rgba(255, 215, 0, ${eyePulse})`;
+        ctx.beginPath(); ctx.ellipse(-6, -7, 4, 3, 0.2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(6, -7, 4, 3, -0.2, 0, Math.PI*2); ctx.fill();
+        ctx.shadowBlur = 0;
+        // Vertical Slit Pupils
+        ctx.fillStyle = '#000';
+        ctx.beginPath(); ctx.rect(-7, -8, 1.5, 4); ctx.fill();
+        ctx.beginPath(); ctx.rect(5.5, -8, 1.5, 4); ctx.fill();
+
+        // Fire Breath / Smoke Emitters
+        for (let f = 0; f < 6; f++) {
+            const fx = (Math.random() - 0.5) * 10;
+            const fy = -25 - Math.random() * 15;
+            const fs = 1 + Math.random() * 3;
+            ctx.fillStyle = Math.random() > 0.4 ? '#FF4500' : '#FFD700';
+            ctx.globalAlpha = 0.5;
+            ctx.beginPath(); ctx.arc(fx, fy, fs, 0, Math.PI*2); ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    // ---------------------------------------------------------
+    // 4. THE SPIKED TAIL (Legendary Spade)
+    // ---------------------------------------------------------
+    if (isTail) {
+        const tailWag = Math.sin(time / 100) * 12;
+        ctx.fillStyle = '#1A472A';
+        // Tail segment extension
+        ctx.beginPath();
+        ctx.moveTo(-4, 0);
+        ctx.quadraticCurveTo(tailWag, 15, tailWag * 1.5, 30);
+        ctx.lineTo(tailWag * 1.5 - 2, 30);
+        ctx.quadraticCurveTo(tailWag, 10, 4, 0);
+        ctx.fill();
+
+        // Large Fire Spade
+        ctx.fillStyle = '#FF4500';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#FF4500';
+        ctx.beginPath();
+        ctx.moveTo(tailWag * 1.5, 25);
+        ctx.lineTo(tailWag * 1.5 - 12, 40);
+        ctx.lineTo(tailWag * 1.5, 55);
+        ctx.lineTo(tailWag * 1.5 + 12, 40);
         ctx.closePath();
         ctx.fill();
-        
-        // Ember trail from tail
-        if (Math.random() > 0.5) {
-             burstParticles(seg.x, seg.y, '#FFD700', 1);
+        ctx.shadowBlur = 0;
+
+        // Side Spikes
+        ctx.fillStyle = '#DAA520';
+        ctx.beginPath();
+        ctx.moveTo(tailWag * 1.5 - 10, 38); ctx.lineTo(tailWag * 1.5 - 18, 42); ctx.lineTo(tailWag * 1.5 - 8, 44);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(tailWag * 1.5 + 10, 38); ctx.lineTo(tailWag * 1.5 + 18, 42); ctx.lineTo(tailWag * 1.5 + 8, 44);
+        ctx.fill();
+
+        // Ember Trail (Constant)
+        if (Math.random() > 0.3) {
+            burstParticles(seg.x, seg.y, '#FFD700', 1);
         }
+    } else if (isMainBody) {
+        // Dorsal Spines (Body segments only)
+        const spineH = 8 + Math.sin(time / 200 + i) * 4;
+        ctx.fillStyle = '#FF4500';
+        ctx.beginPath();
+        ctx.moveTo(wiggle - 3, -10);
+        ctx.lineTo(wiggle, -10 - spineH);
+        ctx.lineTo(wiggle + 3, -10);
+        ctx.fill();
     }
 
     ctx.restore();
