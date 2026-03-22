@@ -169,3 +169,92 @@
 40. **Serpentine Prime**
     - **Lore:** The singular true form. Achieved only by the best.
     - **Color Pattern:** `Solid Gold / Prismatic Rainbow Aura`
+
+## 🎭 Advanced Value-Add Gamemodes ($15 Tier)
+
+These modes are designed to transform Serpentine into a deep, content-heavy experience.
+
+### 🕒 CHRONOSHIFT (Time Manipulation)
+*A high-skill survival mode where the player manages the flow of the OS clock to survive "impossible" maneuvers.*
+
+- **The Hook:** Manage a secondary resource to bend time.
+- **Mechanics:** 
+    - **Chrono-Meter:** A neon-blue energy bar that depletes when using abilities.
+    - **Slow-Mo (`Shift`):** Drops tick rate to 400ms. Perfect for navigating tight tail-loops.
+    - **Rewind (Passive):** If you die with >75% energy, the snake "rewinds" its path by 5 segments and gains 1s of invincibility.
+- **Aesthetics:** Blue-shift screen filter, warped/slowed procedural audio.
+- **Shop Unlock:** `1,500,000 PTS`.
+
+### 🔥 FIREWALL BREACH (Environmental Pressure)
+*A claustrophobic, high-intensity survival mode where the playable space is constantly under attack.*
+
+- **The Hook:** Fight for every inch of the grid.
+- **Mechanics:** 
+    - **Encroachment:** A red, pulsing "Firewall" border moves inward by 1 unit every 10 seconds.
+    - **The Breach:** Eating food "hacks" the firewall, pushing it back 1 unit.
+    - **Escalation:** The border moves faster as score increases.
+- **Aesthetics:** Pulsing red glow, border crackling with red particle static, alarm-drone audio.
+- **Shop Unlock:** `3,000,000 PTS`.
+
+### 🛡️ SYSTEM BREACH (Level-Based Campaign)
+*A structured, level-based campaign mode introducing static environmental obstacles (Data Walls).*
+
+- **The Hook:** Move from "Server to Server" across 50+ hand-crafted nodes.
+- **Mechanics:** 
+    - **Data Walls:** Static obstacles that are fatal to touch (grid-stored walls).
+    - **Byte Threshold:** You must eat X food items to open the "Gateway" to the next level.
+    - **Lives:** Players have 3 lives per run.
+- **Aesthetics:** Unique color palettes per level, digital block textures.
+- **Shop Unlock:** `5,000,000 PTS`.
+
+---
+
+## 🌩️ IP-Safe Transformed Modes (The Great Inspirations)
+
+These modes take inspiration from legendary arcade mechanics but transform them into original, brand-new experiences for the Serpentine OS universe.
+
+### ⚔️ SENTINEL BREACH (The Ultimate Arcade Combat Re-imagining)
+*A tactical, high-stakes combat and navigation mode where your body is your weapon and your shield.*
+
+- **THE HOOK:** Engage in digital jousting in a maze-like sub-grid. Collect the **Decryption Key** and escape while fighting off specialized **Sentinel AI** programs.
+- **STARTING CONFIG:** You and all Sentinels start at **Head + 4 segments**.
+
+#### 🛡️ THE GEAR ENGINE (Tactical Inventory)
+Players and elite Sentinels can pick up and equip hardware modules:
+-   **🔵 HELMET (Frontal Plate):** Protecting the head from direct collisions.
+    -   `Head-to-Head (No Helm)` → **SYSTEM FAILURE** (Player Death).
+    -   `Helm vs. No Helm` → The unequipped snake is deleted; the Helmet-user survives but their Helm shatters.
+    -   `Helm vs. Helm` → Both Helmets shatter. Snakes **"Ghost-Shift"** (transparently pass through each other) until they are clear.
+-   **🔴 TAIL ARMOR (Spikes):** Protecting the rear weak point.
+    -   `Biting Tail Armor (No Helm)` → **SYSTEM FAILURE** (Death).
+    -   `Tail Armor vs. Helmet` → Both pieces of equipment break.
+    -   `Scavenging Armor:` If you sever a tail that has armor, you must consume the tail from the *severed point down to the tip* to "Integrate" (steal) the armor for yourself.
+-   **🟢 CLOAK (Stealth Module):** Rare pickup. Provides 3 seconds of invisibility and total phase-shifting (invulnerability).
+
+#### ✂️ THE SEVERING ENGINE (Segment Destruction)
+-   **SEVERING:** Biting any middle segment of an enemy snake detaches their entire tail from that point down. The enemy head survives but is now a "Short Program."
+-   **SCAVENGING:** The severed tail segments remain on the grid as stationary "data blocks" you can eat for massive points. 
+-   **HEAD-SHOT (Sneak Attack):** Biting the head from the **rear or side** instantly deletes the program.
+-   **ULTIMATE SYNC:** Consuming an entire snake from **Tail to Head** in one continuous movement grants an **EXTRA LIFE**.
+
+#### 👾 BOSS ENCOUNTERS (The Master Programs)
+Standard high-score runs are interrupted by "The Guardians":
+-   **HYDRA.DLL (Fragmentation Boss):** A multi-colored boss. When severed, the detached tail **instantly compiles a new head**, creating two smaller, aggressive snakes. You must delete every head to clear the breach.
+-   **VOID COIL (Phase Boss):** A snake whose segments shift in and out of existence. It cannot be bitten while "Ghosted." It only solidifies for 3 seconds after eating one of your food units.
+-   **THE ARCHIVE (Cluster Boss):** A massive $3 \times 3$ block of data that moves like a tank. You must "chip away" at its outer segments to reveal its central core (the Head).
+
+#### 🛒 Shop Unlock: `15,000,000 PTS`
+*(Note: This is the flagship mode of the Serpentine OS.)*
+
+### 🧩 NEURAL FIT (Inspired by Shape-Matching)
+*A logic-based reflex puzzle where your body is the missing piece.*
+
+- **The Hook:** Falling digital archetypes (blocks) must be matched by the exact geometry of your snake.
+- **Mechanics:** 
+    - **Archetypes:** A block of 5 segments (random shape) falls slowly from the top.
+    - **The Fit:** Your snake is locked at 5 segments. You must maneuver into the correct orientation and **shape your body** to match the falling block exactly before it reaches the bottom.
+    - **Success:** Matching clearing the block and awards massive points.
+    - **Failure:** If the block lands and you haven't matched its shape/position, you lose a "Sync Charge."
+- **Hard Difficulty:** Unlocks "Advanced Neural Fit" with **7-segment** complex shapes.
+- **The Transformation:** This shifts the focus from "clearing lines" to "geometric mimicry." The challenge is in the movement and self-intersection prevention to form the shape. It’s a "Shape-Sync" puzzle, not a Tetris clone.
+- **Shop Unlock:** `10,000,000 PTS`.
