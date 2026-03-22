@@ -1,6 +1,6 @@
 # 📂 Serpentine: Field Manual (v1.0)
 > **STATUS:** [FULLY UPDATED]  
-> **CLASSIFICATION:** LEVEL 9 ACCESS REQUIRED
+> **CLASSIFICATION:** LEVEL 9 ACCESS
 
 This manual serves as the definitive reference for the Serpentine OS, documenting all active characters, system secrets, and operational protocols.
 
@@ -76,8 +76,8 @@ Profiles that require specific milestones to decrypt.
 - **Character Options:**
     - **PLAY STYLE:** Toggle between `SERPENTINE` (Classic) and `REALISTIC` (Caps growth at 5 segments).
 
-### [CENTIPEDE]
-- **ID:** `centipede`
+### [ARTHROPOD]
+- **ID:** `arthropod`
 - **Lore:** An ancient arthropod virus with a thousand legs and no mercy. Each segment pulses with predatory instinct.
 - **Unlock Condition:** Decrypt via the **System Shop** for `75,000 PTS`.
 - **Aesthetics:** Neon green exoskeleton with animated legs on every segment and a stinger tail.
@@ -146,7 +146,7 @@ Points earned across all game sessions are accumulated into a global **Point Ban
 ### [SHOP SUB-SECTORS]
 | Sector | Inventory |
 | :--- | :--- |
-| **SNAKES** | Includes `PRINCESS`, `CENTIPEDE`, and `INFERNAL WYRM`. |
+| **SNAKES** | Includes `PRINCESS`, `ARTHROPOD`, and `INFERNAL WYRM`. |
 | **MODES** | [EMPTY] - Future decryption available. |
 | **OTHER** | Contains classified system hints/codes. |
 

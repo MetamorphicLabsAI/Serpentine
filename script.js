@@ -34,7 +34,8 @@ const colors = {
 let unlockedSpectrum = localStorage.getItem('serpentineUnlockedSpectrum') === 'true';
 let unlocked9193 = localStorage.getItem('serpentineUnlocked9193') === 'true';
 let unlockedPrincess = localStorage.getItem('serpentineUnlockedPrincess') === 'true';
-let unlockedCentipede = localStorage.getItem('serpentineUnlockedCentipede') === 'true';
+// Legal Rename: old 'Centipede' is now 'Arthropod'. Check both keys for legacy support.
+let unlockedArthropod = (localStorage.getItem('serpentineUnlockedArthropod') === 'true') || (localStorage.getItem('serpentineUnlockedCentipede') === 'true');
 let unlockedDragon = localStorage.getItem('serpentineUnlockedDragon') === 'true';
 
 const snakeProfiles = [
@@ -50,7 +51,7 @@ const snakeProfiles = [
             { key: 'playStyle', label: 'PLAY STYLE', values: ['SERPENTINE', 'REALISTIC'], defaultValue: 'SERPENTINE' }
         ]
     },
-    { id: "centipede", name: "CENTIPEDE", lore: "An ancient arthropod virus with a thousand legs and no mercy. Each segment pulses with predatory instinct.", head: "#39FF14", body: "#2E8B00", glow: "rgba(57, 255, 20, 0.6)", food: "#ff0055", foodGlow: "rgba(255, 0, 85, 0.8)", accent: "#39FF14", locked: !unlockedCentipede, unlockCondition: "DECRYPT IN SYSTEM SHOP (75,000 PTS)",
+    { id: "arthropod", name: "ARTHROPOD", lore: "An ancient arthropod virus with a thousand legs and no mercy. Each segment pulses with predatory instinct.", head: "#39FF14", body: "#2E8B00", glow: "rgba(57, 255, 20, 0.6)", food: "#ff0055", foodGlow: "rgba(255, 0, 85, 0.8)", accent: "#39FF14", locked: !unlockedArthropod, unlockCondition: "DECRYPT IN SYSTEM SHOP (75,000 PTS)",
         characterOptions: [
             { key: 'skin', label: 'SKIN', values: ['VENOMOUS', 'INFERNO', 'PHANTOM'], defaultValue: 'VENOMOUS' }
         ]
@@ -147,7 +148,7 @@ function unlockEverything() {
     localStorage.setItem('serpentineUnlockedSpectrum', 'true');
     localStorage.setItem('serpentineUnlocked9193', 'true');
     localStorage.setItem('serpentineUnlockedPrincess', 'true');
-    localStorage.setItem('serpentineUnlockedCentipede', 'true');
+    localStorage.setItem('serpentineUnlockedArthropod', 'true');
     localStorage.setItem('serpentineUnlockedDragon', 'true');
     // Future-proof: any new unlockable IDs can be added here
     
@@ -195,8 +196,8 @@ function updateProfileStyle() {
         let foodColor = profile.food;
         let accentColor = profile.accent;
 
-        if (profile.id === 'centipede') {
-            const skin = CENTIPEDE_SKINS[getCharOption('centipede', 'skin') || 'VENOMOUS'];
+        if (profile.id === 'arthropod') {
+            const skin = ARTHROPOD_SKINS[getCharOption('arthropod', 'skin') || 'VENOMOUS'];
             bodyColor = skin.shell;
             headColor = skin.segment;
             glowColor = skin.glow;
@@ -994,8 +995,8 @@ function draw() {
 
         if (profile.id === 'princess') {
             drawPrincess(segment, index, isHead, isTail);
-        } else if (profile.id === 'centipede') {
-            drawCentipede(segment, index, isHead, isTail);
+        } else if (profile.id === 'arthropod') {
+            drawArthropod(segment, index, isHead, isTail);
         } else if (profile.id === 'dragon') {
             drawDragon(segment, index, isHead, isTail);
         } else {
@@ -1195,15 +1196,15 @@ function drawPrincess(seg, i, isHead, isTail) {
     ctx.restore();
 }
 
-/* --- CENTIPEDE RENDERER --- */
-const CENTIPEDE_SKINS = {
+/* --- ARTHROPOD RENDERER --- */
+const ARTHROPOD_SKINS = {
     VENOMOUS: { shell: '#1B5E00', segment: '#39FF14', legs: '#00FF00', eye: '#FF0000', glow: 'rgba(57,255,20,0.5)', mandible: '#7CFC00', antenna: '#ADFF2F' },
     INFERNO:  { shell: '#8B0000', segment: '#FF4500', legs: '#FF6600', eye: '#FFD700', glow: 'rgba(255,69,0,0.5)', mandible: '#FF8C00', antenna: '#FF4500' },
     PHANTOM:  { shell: '#2E0854', segment: '#9B59B6', legs: '#C39BDB', eye: '#E0E0FF', glow: 'rgba(155,89,182,0.4)', mandible: '#D2B4DE', antenna: '#BB8FCE' }
 };
 
-function drawCentipede(seg, i, isHead, isTail) {
-    const skin = CENTIPEDE_SKINS[getCharOption('centipede', 'skin') || 'VENOMOUS'];
+function drawArthropod(seg, i, isHead, isTail) {
+    const skin = ARTHROPOD_SKINS[getCharOption('arthropod', 'skin') || 'VENOMOUS'];
     const cx = seg.x * gridSize + gridSize / 2;
     const cy = seg.y * gridSize + gridSize / 2;
     const time = Date.now();
@@ -1683,14 +1684,14 @@ function updateShopUI() {
         btnBuyPrincess.classList.add('btn-secondary');
     }
 
-    const labelCentipede = document.getElementById('label-centipede');
-    const btnBuyCentipede = document.getElementById('btn-buy-centipede');
-    if (unlockedCentipede) {
-        labelCentipede.textContent = "CENTIPEDE: DECRYPTED";
-        btnBuyCentipede.textContent = "LOADED";
-        btnBuyCentipede.style.opacity = '0.5';
-        btnBuyCentipede.style.pointerEvents = 'none';
-        btnBuyCentipede.classList.add('btn-secondary');
+    const labelArthropod = document.getElementById('label-arthropod');
+    const btnBuyArthropod = document.getElementById('btn-buy-arthropod');
+    if (unlockedArthropod) {
+        labelArthropod.textContent = "ARTHROPOD: DECRYPTED";
+        btnBuyArthropod.textContent = "LOADED";
+        btnBuyArthropod.style.opacity = '0.5';
+        btnBuyArthropod.style.pointerEvents = 'none';
+        btnBuyArthropod.classList.add('btn-secondary');
     }
 
     const labelDragon = document.getElementById('label-dragon');
@@ -2029,11 +2030,11 @@ document.getElementById('btn-buy-princess').addEventListener('click', () => {
     });
 });
 
-document.getElementById('btn-buy-centipede').addEventListener('click', () => {
-    buyItem('centipede', 75000, () => {
-        unlockedCentipede = true;
-        localStorage.setItem('serpentineUnlockedCentipede', 'true');
-        const p = snakeProfiles.find(prof => prof.id === 'centipede');
+document.getElementById('btn-buy-arthropod').addEventListener('click', () => {
+    buyItem('arthropod', 75000, () => {
+        unlockedArthropod = true;
+        localStorage.setItem('serpentineUnlockedArthropod', 'true');
+        const p = snakeProfiles.find(prof => prof.id === 'arthropod');
         if (p) p.locked = false;
     });
 });
