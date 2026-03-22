@@ -239,8 +239,10 @@ function playMenuNavSound() {
 }
 
 function playMenuSelectSound() {
-    playTone(400, 'square', 0.2, 0.08); // Mechanical thud
-    setTimeout(() => playTone(800, 'square', 0.1, 0.05), 30); // Confirmation pop
+    // Gritty Tactical Thud (No Mario-jump vibes)
+    playTone(180, 'sawtooth', 0.25, 0.12); 
+    // Add a very short high-freq digital click for "snap"
+    playTone(3000, 'square', 0.02, 0.05);
 }
 
 function playMenuBackSound() {
@@ -454,32 +456,44 @@ function startMusic() {
 
 function startMenuMusic() {
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    stopMusic(); // Absolute clean start
+    stopMusic(); 
     
     musicGain = audioCtx.createGain();
-    musicGain.gain.value = 0.3;
+    musicGain.gain.value = 0.35;
     musicGain.connect(audioCtx.destination);
     currentMenuStep = 0;
     
     musicInterval = setInterval(() => {
         const time = audioCtx.currentTime;
         
-        // Deep Atmospheric Drone Progression: Am -> F -> C -> G
-        const progression = [110, 87.31, 130.81, 98]; // A2, F2, C3, G2
-        const root = progression[Math.floor(currentMenuStep / 16) % 4] / 2; // Low A1, F1, etc.
-        
-        // Menacing sawtooth bass pulsing every two beats
-        if (currentMenuStep % 4 === 0) {
-            playSynthTone(root, 'sawtooth', 0.6, 0.4, 400, time);
+        // --- 64-Step Menu Progression ---
+        // 0-31: Deep Atmospheric Drone
+        // 32-63: "The Drop" (Rhythmic Bass + Arp)
+        const isDroning = currentMenuStep < 32;
+        const progression = [110, 87.31, 130.81, 98]; 
+        const root = progression[Math.floor(currentMenuStep / 8) % 4] / 2;
+
+        // 1. Bass: Persistent low pulse
+        if (currentMenuStep % 2 === 0) {
+            const vol = isDroning ? 0.35 : 0.55;
+            const length = isDroning ? 0.6 : 0.15;
+            playSynthTone(root, 'sawtooth', length, vol, isDroning ? 300 : 600, time);
         }
         
-        // Ghostly "Sync" high square echo every 16 steps
-        if (currentMenuStep % 16 === 8) {
-             playSynthTone(root * 4, 'square', 0.4, 0.1, 1500, time);
+        // 2. Lead: Subtle arpeggio (only during the "Drop" half)
+        if (!isDroning) {
+            const arp = [0, 7, 12, 19]; // Root, 5th, Octave, 12th
+            const note = root * 2 * Math.pow(2, arp[currentMenuStep % 4] / 12);
+            playSynthTone(note, 'square', 0.1, 0.15, 1200, time);
+        }
+
+        // 3. Kick: Soft kick every 4 steps
+        if (!isDroning && currentMenuStep % 4 === 0) {
+            playKick(time);
         }
 
         currentMenuStep = (currentMenuStep + 1) % 64;
-    }, 200); // Slower tempo for atmospheric tension
+    }, 175); // Faster tempo for better momentum
 }
 
 function stopMusic() {
