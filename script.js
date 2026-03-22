@@ -231,6 +231,32 @@ const AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioCtx = new AudioContext();
 let musicGain = null;
 let musicInterval = null;
+let currentMenuStep = 0;
+
+// Logic for Menu UI Sounds
+function playMenuNavSound() {
+    playTone(1800, 'square', 0.05, 0.03); // Precision high-freq blip
+}
+
+function playMenuSelectSound() {
+    playTone(400, 'square', 0.2, 0.08); // Mechanical thud
+    setTimeout(() => playTone(800, 'square', 0.1, 0.05), 30); // Confirmation pop
+}
+
+function playMenuBackSound() {
+    // Whooshing downward frequency shift
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(350, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.3);
+}
 
 function playTone(freq, type, duration, vol = 0.1) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -406,7 +432,7 @@ function playSynthTone(freq, type, length, vol, filterFreq, time) {
 
 function startMusic() {
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    if (musicInterval) clearInterval(musicInterval);
+    stopMusic(); // Clear any existing music
     
     musicGain = audioCtx.createGain();
     musicGain.gain.value = 0.4;
@@ -417,28 +443,52 @@ function startMusic() {
         if (!isPlaying) return;
         
         const time = audioCtx.currentTime;
-        
-        // 1. Bassline (Constant driving 8th notes)
         playSynthTone(getBassFreq(currentStep), 'sawtooth', 0.15, 0.6, 800, time);
-        
-        // 2. Melody (Drops in at halfway mark on step 128)
         const melFreq = getMelodyFreq(currentStep);
         if (melFreq) playSynthTone(melFreq, 'square', 0.15, 0.25, 1200, time);
-        
-        // 3. Drums: 4-on-the-floor kick pattern
         if (currentStep % 4 === 0) playKick(time);
-        
-        // 4. Drums: Snare on backbeat
         if (currentStep % 8 === 4) playSnare(time);
-        
-        // Advance sequencer tape
         currentStep = (currentStep + 1) % SEQUENCER_STEPS;
     }, 150); 
+}
+
+function startMenuMusic() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    stopMusic(); // Absolute clean start
+    
+    musicGain = audioCtx.createGain();
+    musicGain.gain.value = 0.3;
+    musicGain.connect(audioCtx.destination);
+    currentMenuStep = 0;
+    
+    musicInterval = setInterval(() => {
+        const time = audioCtx.currentTime;
+        
+        // Deep Atmospheric Drone Progression: Am -> F -> C -> G
+        const progression = [110, 87.31, 130.81, 98]; // A2, F2, C3, G2
+        const root = progression[Math.floor(currentMenuStep / 16) % 4] / 2; // Low A1, F1, etc.
+        
+        // Menacing sawtooth bass pulsing every two beats
+        if (currentMenuStep % 4 === 0) {
+            playSynthTone(root, 'sawtooth', 0.6, 0.4, 400, time);
+        }
+        
+        // Ghostly "Sync" high square echo every 16 steps
+        if (currentMenuStep % 16 === 8) {
+             playSynthTone(root * 4, 'square', 0.4, 0.1, 1500, time);
+        }
+
+        currentMenuStep = (currentMenuStep + 1) % 64;
+    }, 200); // Slower tempo for atmospheric tension
 }
 
 function stopMusic() {
     if (musicInterval) clearInterval(musicInterval);
     musicInterval = null;
+    if (musicGain) {
+        musicGain.disconnect();
+        musicGain = null;
+    }
 }
 
 // --- Particle Engine Implementation ---
@@ -839,6 +889,11 @@ function triggerGameOver() {
     stopMusic();
     playDeathSound();
     
+    // Resume menu atmosphere after a short delay (post-explosion)
+    setTimeout(() => {
+        if (!isPlaying) startMenuMusic();
+    }, 3000);
+    
     // Shake effect
     document.querySelector('.arcade-machine').classList.add('shake');
     
@@ -1064,9 +1119,11 @@ window.addEventListener('keydown', e => {
                 if (e.code === 'ArrowDown' || e.key === 's' || e.key === 'S') {
                     const nextIndex = (currentIndex + 1) % buttons.length;
                     buttons[nextIndex].focus();
+                    playMenuNavSound();
                 } else if (e.code === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
                     const prevIndex = (currentIndex - 1 + buttons.length) % buttons.length;
                     buttons[prevIndex].focus();
+                    playMenuNavSound();
                 } else if (e.code === 'Space' || e.code === 'Enter') {
                     if (document.activeElement && document.activeElement.tagName === 'BUTTON') {
                         document.activeElement.click();
@@ -1175,6 +1232,7 @@ const hideAllMenus = () => {
     shopModes.classList.add('hidden');
     shopOther.classList.add('hidden');
     pauseScreen.classList.add('hidden');
+    document.getElementById('init-screen').classList.add('hidden');
 };
 
 const togglePause = () => {
@@ -1371,17 +1429,38 @@ document.getElementById('btn-pause-controls').addEventListener('click', () => {
     document.getElementById('btn-back-controls').focus();
 });
 document.getElementById('btn-pause-quit').addEventListener('click', () => {
-    isPaused = false; // Reset pause state
-    hideAllMenus(); // MUST hide the pause screen to see the Game Over sequence
-    triggerGameOver(); // Ends the game and triggers high score/bank logic
+    isPaused = false; 
+    hideAllMenus(); 
+    triggerGameOver(); 
+    startMenuMusic(); // Immediate return of atmosphere
 });
 
+// Initialization
+document.getElementById('btn-initialize').addEventListener('click', () => {
+    hideAllMenus();
+    mainMenu.classList.remove('hidden');
+    startMenuMusic();
+    document.getElementById('btn-play-menu').focus();
+});
 
+// Global Button Sounds
+document.querySelectorAll('.btn-menu').forEach(btn => {
+    btn.addEventListener('mouseenter', () => {
+        if (!btn.disabled && !btn.style.pointerEvents) playMenuNavSound();
+    });
+    btn.addEventListener('click', () => {
+        if (btn.classList.contains('btn-secondary') || btn.classList.contains('btn-danger')) {
+            playMenuBackSound();
+        } else {
+            playMenuSelectSound();
+        }
+    });
+});
 
 // Start global animation loop
 hideAllMenus();
-mainMenu.classList.remove('hidden');
-document.getElementById('btn-play-menu').focus();
+document.getElementById('init-screen').classList.remove('hidden');
+document.getElementById('btn-initialize').focus();
 updateProfileStyle(); // Sets Initial snake Profile
 initGrid();
 window.requestAnimationFrame(main);
