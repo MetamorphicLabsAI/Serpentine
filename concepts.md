@@ -279,6 +279,38 @@ To ensure every sector is a fresh tactical challenge:
 #### 🛒 Shop Unlock: `15,000,000 PTS`
 *(Note: This is the flagship mode of the Serpentine OS.)*
 
+---
+
+## 🏁 GRID WARFARE (Multiplayer / Battle Royale)
+*A high-stakes, multi-node conflict where only the most optimized program survives.*
+
+- **THE ARENA:** Complex, procedurally generated labyrinths with multiple start points and a central "Core."
+- **THE COMPETITION:** 1-4 Players (Local or AI).
+- **GRID WARFARE MODES:**
+    - **🏁 MAZE RACE:** A pure speed and pathfinding challenge. The first node to penetrate the central Core wins.
+    - **🚩 CAPTURE THE FLAG (CTF):** Tactical objective-based play. You must reach the center, secure the "Master Bit" (Flag), and navigate safely to any of the 4 perimeter Exits. Dropping the flag (by getting hit) resets it to the center.
+    - **💀 TERMINAL DEATHMATCH (TDM):** An all-out battle for survival. No objectives—just pure combat until only one program remains.
+- **COMBAT PROTOCOL:**
+    - **HEAD-TO-HEAD:** If two snakes collide head-on, **both are purged** (Eliminated).
+    - **SEGMENT IMPACT:** Touching any part of another snake’s body causes instant **Elimination.**
+- **THE "DEICIDE" RULE (Auto-Win Override):** 
+    - Regardless of the mode (Race, CTF, or TDM), if you successfully consume an opponent from **Tail-tip to Head** in one continuous chain, you **automatically win the entire match.**
+    
+#### 🔄 VARIANT COMPATIBILITY MATRIX
+Each **Grid Warfare** mode behaves differently across the two primary architectural styles:
+
+| Mode | Legacy Trace (Infinite) | Strategic Combat (Power-ups) |
+| :--- | :--- | :--- |
+| **MAZE RACE** | **HIGH TENSION:** Racing to the center while permanently cutting off paths for others. | **CHAOTIC BRAWL:** Using speed-boosts and freezes to slow opponents. |
+| **CTF** | **ELITE CHALLENGE:** Requires **Pulse Decay** (Tail lasts exactly 500 segments) to prevent instant self-trapping while returning to base. | **CLASSIC CTF:** Agile, item-based capture and defense. |
+| **TERMINAL DM** | **CLASSIC ARCADE:** Pure area-denial. Last node moving wins. | **COMBAT ARENA:** Using Lag Spikes and Phase-shifts to destroy gear. |
+
+#### ⚡ ARENA RULES & EXCEPTIONS
+-   **LEGACY CTF (Pulse Decay):** In Legacy Trace mode, reaching the "Master Bit" (Flag) activates **Pulse Decay.** Your infinite tail begins to "digest" from the starting wall, allowing you a limited window to navigate back to your exit without the grid becoming unplayable.
+
+#### 🛒 Shop Unlock: `25,000,000 PTS`
+*(Note: The flagship Multiplayer/AI Competitive mode of Serpentine.)*
+
 ### 🧩 NEURAL FIT (Inspired by Shape-Matching)
 *A logic-based reflex puzzle where your body is the missing piece.*
 
