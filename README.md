@@ -44,8 +44,21 @@ For deep-dives into the game's architecture, legal standing, and future roadmap,
 
 ## Getting Started
 1. Clone the repository to your local machine.
-2. Double-click the `index.html` file to open it in any modern browser.
-3. Turn up your volume and hit **INITIALIZE**.
+
+---
+
+### [NOTE] SECURITY ORIGIN ERRORS
+If you encounter a **"CORS"** or **"Unsafe attempt to load URL"** error in your browser, it is because modern browsers treat `file://` URLs as unique, untrusted security origins. 
+
+To resolve this, you **must** run a local dev server:
+- **Using Node.js:** `npx serve`
+- **Using Python:** `python -m http.server 8000`
+- **Using VS Code:** Install the **Live Server** extension.
+2. **Launch a Local Server (Recommended)**: Modern browsers restrict `localStorage` and other features when running from `file://` URLs.
+   - **Using Node:** Run `npx serve` in the project directory.
+   - **Using Python:** Run `python -m http.server 8000`.
+3. Open the provided `localhost` URL in your browser.
+4. Turn up your volume and hit **INITIALIZE**.
 
 ## Tech Stack
 * **HTML5 Canvas:** Fluid rendering using 2D Web API perfectly suited for 2D game grids.
