@@ -215,6 +215,7 @@ let currentSpeed = currentDifficultySpeed;
 let pendingDirection = null; // Prevent double-turn death
 let foodEaten = 0; // Track food consumed per round
 let barkCounter = 3; // Track when princess barks
+let princessInDoghouse = false; // Interactive Doghouse state
 let bank = parseInt(localStorage.getItem('serpentineBank')) || 0;
 let bought9193Hint = localStorage.getItem('bought9193Hint') === 'true';
 let boughtMasterHint = localStorage.getItem('boughtMasterHint') === 'true';
@@ -609,6 +610,7 @@ function initGrid() {
     foodEaten = 0;
     scoreElement.textContent = score;
     scoreElement.style.color = colors.snakeBody;
+    princessInDoghouse = false;
     placeFood();
     particles = [];
 }
@@ -617,7 +619,7 @@ function placeFood() {
     let newFoodPosition;
     let foodIsOnSnake = true;
     
-    while (foodIsOnSnake) {
+    while (foodIsOnSnake || (snakeProfiles[selectedProfileIndex].id === 'princess' && newFoodPosition?.x === tileCount - 2 && newFoodPosition?.y === 1)) {
         newFoodPosition = {
             x: Math.floor(Math.random() * tileCount),
             y: Math.floor(Math.random() * tileCount)
@@ -650,6 +652,8 @@ function main(currentTime) {
 }
 
 function updateLogic() {
+    if (princessInDoghouse) return;
+
     // Apply pending direction
     if (pendingDirection) {
         dx = pendingDirection.dx;
@@ -687,6 +691,13 @@ function updateLogic() {
     
     // Move Head Forward
     snake.unshift(head); 
+    
+    // Princess Doghouse Entry Protocol
+    if (profile.id === 'princess' && head.x === tileCount - 2 && head.y === 1) {
+        princessInDoghouse = true;
+        snake.pop(); // Prevent snake from growing artificially
+        return; // Halt logic this tick and all future ticks until awoken
+    }
     
     // 3. Collision Check - Food
     if (head.x === food.x && head.y === food.y) {
@@ -761,6 +772,51 @@ function drawGrid() {
     }
 }
 
+function drawDoghouse() {
+    const dhX = (tileCount - 2) * gridSize + gridSize/2;
+    const dhY = 1 * gridSize + gridSize/2;
+    
+    ctx.save();
+    ctx.translate(dhX, dhY);
+
+    // Back interior (Dark Shadow)
+    ctx.fillStyle = "#220000";
+    ctx.beginPath();
+    ctx.roundRect(-gridSize * 0.9, -gridSize * 0.3, gridSize * 1.8, gridSize * 1.3, 8);
+    ctx.fill();
+    
+    // Roof (Wood Red Triangle)
+    ctx.fillStyle = "#A52A2A"; 
+    ctx.beginPath();
+    ctx.moveTo(-gridSize * 1.5, -gridSize * 0.3);
+    ctx.lineTo(0, -gridSize * 1.8);
+    ctx.lineTo(gridSize * 1.5, -gridSize * 0.3);
+    ctx.fill();
+    // Trim
+    ctx.strokeStyle = "#800000";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    
+    // Side Walls
+    ctx.fillStyle = "#D2691E"; // Orange Wood
+    ctx.fillRect(-gridSize * 0.9, -gridSize * 0.3, gridSize * 0.5, gridSize * 1.3); // Left wall
+    ctx.fillRect(gridSize * 0.4, -gridSize * 0.3, gridSize * 0.5, gridSize * 1.3);  // Right wall
+    
+    // Archway Header
+    ctx.beginPath();
+    ctx.arc(0, -gridSize*0.3, gridSize*0.9, Math.PI, Math.PI * 2);
+    ctx.fill();
+    
+    // Sleep Zzzs
+    if (princessInDoghouse) {
+        ctx.fillStyle = "white";
+        ctx.font = "italic bold 16px Courier New";
+        ctx.fillText("Zzz", -12, -25);
+    }
+    
+    ctx.restore();
+}
+
 let previewAngle = 0;
 function drawPreviewSnake() {
     const cx = canvas.width / 2;
@@ -815,6 +871,10 @@ function draw() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     drawGrid();
+    
+    if (profile.id === 'princess') {
+        drawDoghouse();
+    }
     
     if (!isPlaying) {
         drawPreviewSnake();
@@ -1398,6 +1458,15 @@ window.addEventListener('keydown', e => {
     // Use pendingDirection to prevent "U-turn" death on rapid double pressing
     const activeDx = pendingDirection ? pendingDirection.dx : dx;
     const activeDy = pendingDirection ? pendingDirection.dy : dy;
+
+    if (princessInDoghouse) {
+        if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+            princessInDoghouse = false;
+            playBarkSound();
+            pendingDirection = { dx: 0, dy: 1 };
+        }
+        return; // Ignore all other keys
+    }
 
     switch (e.key) {
         case 'ArrowUp':
