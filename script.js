@@ -188,11 +188,26 @@ function updateProfileStyle() {
         colors.foodGlow = `rgba(136, 136, 136, 0.8)`;
         colors.accent = '#333333';
     } else {
-        document.documentElement.style.setProperty('--snake-color', profile.body);
-        document.documentElement.style.setProperty('--snake-glow', `0 0 10px ${profile.body}, 0 0 20px ${profile.body}`);
+        // Dynamic color overrides for certain characters (Skins)
+        let bodyColor = profile.body;
+        let headColor = profile.head;
+        let glowColor = profile.glow;
+        let foodColor = profile.food;
+        let accentColor = profile.accent;
+
+        if (profile.id === 'centipede') {
+            const skin = CENTIPEDE_SKINS[getCharOption('centipede', 'skin') || 'VENOMOUS'];
+            bodyColor = skin.shell;
+            headColor = skin.segment;
+            glowColor = skin.glow;
+            accentColor = skin.segment;
+        }
+
+        document.documentElement.style.setProperty('--snake-color', bodyColor);
+        document.documentElement.style.setProperty('--snake-glow', `0 0 10px ${bodyColor}, 0 0 20px ${bodyColor}`);
         
-        if (profile.food) document.documentElement.style.setProperty('--food-color', profile.food);
-        if (profile.accent) document.documentElement.style.setProperty('--accent-color', profile.accent);
+        if (foodColor) document.documentElement.style.setProperty('--food-color', foodColor);
+        if (accentColor) document.documentElement.style.setProperty('--accent-color', accentColor);
         
         document.getElementById('char-name').textContent = profile.name;
         
@@ -200,17 +215,17 @@ function updateProfileStyle() {
         loreElement.textContent = profile.lore;
         loreElement.style.color = ''; // clear overriding color
         
-        document.getElementById('char-name').style.color = profile.body;
-        document.getElementById('char-name').style.textShadow = `0 0 10px ${profile.body}`;
+        document.getElementById('char-name').style.color = bodyColor;
+        document.getElementById('char-name').style.textShadow = `0 0 10px ${bodyColor}`;
         
         if (!profile.isShifting) {
-            colors.snakeHead = profile.head;
-            colors.snakeBody = profile.body;
-            colors.snakeGlow = profile.glow;
+            colors.snakeHead = headColor;
+            colors.snakeBody = bodyColor;
+            colors.snakeGlow = glowColor;
         }
-        if (profile.food) colors.food = profile.food;
+        if (foodColor) colors.food = foodColor;
         if (profile.foodGlow) colors.foodGlow = profile.foodGlow;
-        if (profile.accent) colors.accent = profile.accent;
+        if (accentColor) colors.accent = accentColor;
     }
     
     const lockText = document.getElementById('char-lock-status');
@@ -2175,7 +2190,8 @@ function renderCharOptionsScreen() {
             const newVal = opt.values[nextIdx];
             setCharOption(profile.id, opt.key, newVal);
             playMenuSelectSound();
-            renderCharOptionsScreen(); // Re-render to reflect change
+            renderCharOptionsScreen(); // Re-render text/buttons
+            updateProfileStyle();     // Update Cabinet colors & card immediately
         });
 
         row.appendChild(label);
