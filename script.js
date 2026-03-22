@@ -32,6 +32,7 @@ const colors = {
 
 /* --- Snake Profiles --- */
 let unlockedSpectrum = localStorage.getItem('serpentineUnlockedSpectrum') === 'true';
+let unlocked9193 = localStorage.getItem('serpentineUnlocked9193') === 'true';
 
 const snakeProfiles = [
     { id: "neon", name: "NEON PROTOCOL", lore: "The original OS baseline. Reliable, bright, and fiercely fast.", head: "#00ffcc", body: "#00ffcc", glow: "rgba(0, 255, 204, 0.5)", food: "#ff0055", foodGlow: "rgba(255, 0, 85, 0.8)", accent: "#b026ff" },
@@ -39,9 +40,69 @@ const snakeProfiles = [
     { id: "gold", name: "GOLD-FI", lore: "A luxury data-packet miner. Runs hot, blindingly bright, and leaves a trail of pure wealth.", head: "#ffd700", body: "#ffd700", glow: "rgba(255, 215, 0, 0.6)", food: "#ff4500", foodGlow: "rgba(255, 69, 0, 0.8)", accent: "#ffffff" },
     { id: "glitch", name: "GLITCH-WAVE", lore: "An unstable remnant of a deleted game file. It doesn't play by the rules.", head: "#ff0055", body: "#ff0055", glow: "rgba(255, 0, 85, 0.6)", food: "#00ffcc", foodGlow: "rgba(0, 255, 204, 0.8)", accent: "#ffff00" },
     { id: "mecha", name: "MECHA-SERPENT", lore: "Military-grade intrusion software. Designed to violently overwrite hostile firewalls.", head: "#708090", body: "#708090", glow: "rgba(112, 128, 144, 0.5)", food: "#ff0000", foodGlow: "rgba(255, 0, 0, 0.8)", accent: "#ffaa00" },
-    { id: "spectrum", name: "CHROMATIC PUNCH", lore: "A multi-colored shifting anomaly unlocked by eating 20 food in a standard run. Smells like fruit punch.", head: "#ff0055", body: "#ff0055", glow: "rgba(255, 0, 85, 0.6)", food: "#00ffcc", foodGlow: "rgba(0, 255, 204, 0.8)", accent: "#ffff00", isShifting: true, locked: !unlockedSpectrum, unlockCondition: "Survive and ingest 20 food units in a single standard attempt." }
+    { id: "spectrum", name: "CHROMATIC PUNCH", lore: "A multi-colored shifting anomaly unlocked by eating 20 food in a standard run. Smells like fruit punch.", head: "#ff0055", body: "#ff0055", glow: "rgba(255, 0, 85, 0.6)", food: "#00ffcc", foodGlow: "rgba(0, 255, 204, 0.8)", accent: "#ffff00", isShifting: true, locked: !unlockedSpectrum, unlockCondition: "Survive and ingest 20 food units in a single standard attempt." },
+    { id: "9193", name: "9193", lore: "ERROR: Entity 9193 is not a snake. It is an exploit. A backdoor left open by the original developer. 9 length. 90 per byte. No rules.", head: "#ffd700", body: "#ffd700", glow: "rgba(255, 215, 0, 0.6)", food: "#ffd700", foodGlow: "rgba(255, 215, 0, 0.8)", accent: "#ffd700", locked: !unlocked9193, unlockCondition: "???", isCheater: true }
 ];
 let selectedProfileIndex = 0;
+
+/* --- 9193 Cheat Code Listener --- */
+const CHEAT_SEQUENCE = ['1','2','3','4','5','6','7','8','0'];
+let cheatBuffer = [];
+
+/* --- Leaderboard System --- */
+const DIFFICULTY_KEYS = ['easy', 'medium', 'hard', 'insane'];
+let currentDifficultyLabel = 'medium';
+
+function getLeaderboard(diff) {
+    const data = localStorage.getItem(`serpentineLB_${diff}`);
+    return data ? JSON.parse(data) : [];
+}
+
+function saveLeaderboard(diff, board) {
+    localStorage.setItem(`serpentineLB_${diff}`, JSON.stringify(board.slice(0, 10)));
+}
+
+function isHighScore(diff, score) {
+    if (score <= 0) return false;
+    const board = getLeaderboard(diff);
+    return board.length < 10 || score > board[board.length - 1].score;
+}
+
+function addHighScore(diff, initials, score, isCheater) {
+    const board = getLeaderboard(diff);
+    board.push({ initials, score, cheater: isCheater || false });
+    board.sort((a, b) => b.score - a.score);
+    saveLeaderboard(diff, board.slice(0, 10));
+}
+
+function renderLeaderboard(diff) {
+    const list = document.getElementById('leaderboard-list');
+    const board = getLeaderboard(diff);
+    
+    // Update active tab
+    document.querySelectorAll('.btn-lb-tab').forEach(t => t.classList.remove('active'));
+    const activeTab = document.querySelector(`.btn-lb-tab[data-diff="${diff}"]`);
+    if (activeTab) activeTab.classList.add('active');
+    
+    if (board.length === 0) {
+        list.innerHTML = '<div class="lb-empty">NO RECORDS</div>';
+        return;
+    }
+    list.innerHTML = board.map((entry, i) => `
+        <div class="lb-row">
+            <span class="lb-rank">${i + 1}.</span>
+            <span class="lb-initials" style="color: ${entry.cheater ? '#ffd700' : '#fff'};">${entry.initials}</span>
+            <span class="lb-score">${entry.score}</span>
+        </div>
+    `).join('');
+}
+
+/* --- Initials Entry System --- */
+const ALPHABET = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+let initialsChars = [0, 0, 0]; // indices into ALPHABET
+let initialsSlot = 0;
+let pendingHighScoreDiff = null;
+let pendingHighScoreValue = 0;
 
 function updateProfileStyle() {
     const profile = snakeProfiles[selectedProfileIndex];
@@ -119,13 +180,17 @@ let dy = 0;
 let score = 0;
 let highScore = localStorage.getItem('serpentineHighScore') || 0;
 let isPlaying = false;
+let isEnteringInitials = false;
 let lastRenderTime = 0;
 let particles = [];
 let currentSpeed = currentDifficultySpeed;
 let pendingDirection = null; // Prevent double-turn death
+let foodEaten = 0; // Track food consumed per round
 
 // Initial DOM Setup
 highScoreElement.textContent = highScore;
+const initialsScreen = document.getElementById('initials-screen');
+const leaderboardScreen = document.getElementById('leaderboard-screen');
 
 // --- Audio Engine (Synthesizer) ---
 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -386,15 +451,27 @@ function burstParticles(x, y, color = null, amount = 20) {
 // --- Core Game Functions ---
 
 function initGrid() {
-    // Start at center
-    snake = [
-        { x: Math.floor(tileCount / 2), y: Math.floor(tileCount / 2) }
-    ];
+    const profile = snakeProfiles[selectedProfileIndex];
+    const cx = Math.floor(tileCount / 2);
+    const cy = Math.floor(tileCount / 2);
+    
+    // 9193 starts at fixed 9 length
+    if (profile.isCheater) {
+        snake = [];
+        for (let i = 0; i < 9; i++) {
+            snake.push({ x: cx, y: cy + i });
+        }
+        currentSpeed = 120; // Always medium
+    } else {
+        snake = [{ x: cx, y: cy }];
+        currentSpeed = currentDifficultySpeed;
+    }
+    
     dx = 0;
     dy = -1; // Moving up to start
     pendingDirection = { dx, dy };
     score = 0;
-    currentSpeed = currentDifficultySpeed;
+    foodEaten = 0;
     scoreElement.textContent = score;
     scoreElement.style.color = colors.snakeBody;
     placeFood();
@@ -469,7 +546,10 @@ function updateLogic() {
     
     // 3. Collision Check - Food
     if (head.x === food.x && head.y === food.y) {
-        score += 10;
+        const profile = snakeProfiles[selectedProfileIndex];
+        const pointsPerFood = profile.isCheater ? 90 : 10;
+        score += pointsPerFood;
+        foodEaten++;
         scoreElement.textContent = score;
         
         // UI Juice: Pop the score element
@@ -481,25 +561,31 @@ function updateLogic() {
         burstParticles(food.x, food.y);
         placeFood();
         
-        // Slightly increase speed (cap at 60ms)
-                currentSpeed = Math.max(currentDifficultySpeed / 2, currentDifficultySpeed - (score * 0.5));
+        // 9193 keeps fixed speed, normal snakes accelerate
+        if (!profile.isCheater) {
+            currentSpeed = Math.max(currentDifficultySpeed / 2, currentDifficultySpeed - (score * 0.5));
+        }
         
-        // Unlock Spectrum check
-        if (score >= 200 && localStorage.getItem('serpentineUnlockedSpectrum') !== 'true') {
+        // Unlock Spectrum check (20 food eaten)
+        if (foodEaten >= 20 && localStorage.getItem('serpentineUnlockedSpectrum') !== 'true') {
             localStorage.setItem('serpentineUnlockedSpectrum', 'true');
             const spectrum = snakeProfiles.find(p => p.id === 'spectrum');
             if (spectrum) spectrum.locked = false;
             
             playUnlockSound();
-            
-            // Burst thematic full-spectrum celebration particles
             for(let i=0; i<6; i++) {
                setTimeout(() => burstParticles(Math.random() * tileCount, Math.random() * tileCount, `hsl(${Math.random()*360},100%,50%)`, 40), i * 150);
             }
         }
     } else {
         // Pop Tail if we didn't eat
-        snake.pop();
+        // 9193 never grows past 9
+        const profile = snakeProfiles[selectedProfileIndex];
+        if (profile.isCheater && snake.length > 9) {
+            snake.pop();
+        } else if (!profile.isCheater) {
+            snake.pop();
+        }
     }
 }
 
@@ -692,12 +778,9 @@ function drawEyes(x, y) {
 
 function startGame() {
     isPlaying = true;
+    isEnteringInitials = false;
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    mainMenu.classList.add('hidden');
-    modeSelect.classList.add('hidden');
-    diffSelect.classList.add('hidden');
-    startScreen.classList.add('hidden');
-    gameOverScreen.classList.add('hidden');
+    hideAllMenus();
     
     // Clear shake
     document.querySelector('.arcade-machine').classList.remove('shake');
@@ -731,9 +814,8 @@ function triggerGameOver() {
         highScore = score;
         localStorage.setItem('serpentineHighScore', highScore);
         highScoreElement.textContent = highScore;
-        scoreElement.style.color = colors.accent; // highlight new best
+        scoreElement.style.color = colors.accent;
         
-        // Celebrate new high score with random particles
         for(let i=0; i<3; i++) {
            setTimeout(() => burstParticles(Math.random() * tileCount, Math.random() * tileCount, colors.accent, 30), i * 300);
         }
@@ -741,9 +823,46 @@ function triggerGameOver() {
     
     finalScoreElement.textContent = score;
     
+    // Check if this score qualifies for leaderboard
+    const profile = snakeProfiles[selectedProfileIndex];
+    
     setTimeout(() => {
-        gameOverScreen.classList.remove('hidden');
+        if (isHighScore(currentDifficultyLabel, score)) {
+            if (profile.isCheater) {
+                // 9193 auto-submits as CTR in yellow
+                addHighScore(currentDifficultyLabel, 'CTR', score, true);
+                gameOverScreen.classList.remove('hidden');
+            } else {
+                // Show initials entry
+                isEnteringInitials = true;
+                initialsChars = [0, 0, 0];
+                initialsSlot = 0;
+                pendingHighScoreDiff = currentDifficultyLabel;
+                pendingHighScoreValue = score;
+                updateInitialsDisplay();
+                document.getElementById('initials-score').textContent = score;
+                initialsScreen.classList.remove('hidden');
+            }
+        } else {
+            gameOverScreen.classList.remove('hidden');
+        }
     }, 1500);
+}
+
+function updateInitialsDisplay() {
+    const slots = document.querySelectorAll('.initial-slot');
+    slots.forEach((slot, i) => {
+        slot.querySelector('span').textContent = initialsChars[i] === 0 ? '_' : ALPHABET[initialsChars[i]];
+        slot.classList.toggle('active', i === initialsSlot);
+    });
+}
+
+function submitInitials() {
+    const initials = initialsChars.map(i => ALPHABET[i] || ' ').join('');
+    addHighScore(pendingHighScoreDiff, initials, pendingHighScoreValue, false);
+    isEnteringInitials = false;
+    hideAllMenus();
+    gameOverScreen.classList.remove('hidden');
 }
 
 // --- Input Handling ---
@@ -754,8 +873,50 @@ window.addEventListener('keydown', e => {
         e.preventDefault();
     }
     
+    // --- Initials Entry Input ---
+    if (isEnteringInitials) {
+        if (e.code === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+            initialsChars[initialsSlot] = (initialsChars[initialsSlot] + 1) % ALPHABET.length;
+            updateInitialsDisplay();
+        } else if (e.code === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+            initialsChars[initialsSlot] = (initialsChars[initialsSlot] - 1 + ALPHABET.length) % ALPHABET.length;
+            updateInitialsDisplay();
+        } else if (e.code === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+            initialsSlot = Math.min(2, initialsSlot + 1);
+            updateInitialsDisplay();
+        } else if (e.code === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+            initialsSlot = Math.max(0, initialsSlot - 1);
+            updateInitialsDisplay();
+        } else if (e.code === 'Enter' || e.code === 'Space') {
+            submitInitials();
+        }
+        return;
+    }
+    
     if (!isPlaying) {
+        // --- 9193 Cheat Code Detection (main menu only) ---
         const activeOverlay = Array.from(document.querySelectorAll('.overlay')).find(o => !o.classList.contains('hidden'));
+        if (activeOverlay && activeOverlay.id === 'main-menu') {
+            if (e.key >= '0' && e.key <= '9') {
+                cheatBuffer.push(e.key);
+                if (cheatBuffer.length > CHEAT_SEQUENCE.length) cheatBuffer.shift();
+                if (cheatBuffer.length === CHEAT_SEQUENCE.length && cheatBuffer.every((k, i) => k === CHEAT_SEQUENCE[i])) {
+                    cheatBuffer = [];
+                    if (localStorage.getItem('serpentineUnlocked9193') !== 'true') {
+                        localStorage.setItem('serpentineUnlocked9193', 'true');
+                        const entity = snakeProfiles.find(p => p.id === '9193');
+                        if (entity) entity.locked = false;
+                        playUnlockSound();
+                        for(let i=0; i<6; i++) {
+                            setTimeout(() => burstParticles(Math.random() * tileCount, Math.random() * tileCount, '#ffd700', 40), i * 150);
+                        }
+                    }
+                }
+            }
+        } else {
+            cheatBuffer = [];
+        }
+        
         if (activeOverlay) {
             const buttons = Array.from(activeOverlay.querySelectorAll('button:not([style*="pointer-events: none"])'));
             let currentIndex = buttons.indexOf(document.activeElement);
@@ -883,6 +1044,8 @@ const hideAllMenus = () => {
     controlsScreen.classList.add('hidden');
     startScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
+    initialsScreen.classList.add('hidden');
+    leaderboardScreen.classList.add('hidden');
 };
 
 document.getElementById('btn-play-menu').addEventListener('click', () => {
@@ -895,6 +1058,26 @@ document.getElementById('btn-char-menu').addEventListener('click', () => {
     hideAllMenus();
     startScreen.classList.remove('hidden');
     document.getElementById('btn-select-char').focus();
+});
+
+document.getElementById('btn-scores-menu').addEventListener('click', () => {
+    hideAllMenus();
+    renderLeaderboard('medium');
+    leaderboardScreen.classList.remove('hidden');
+    document.getElementById('btn-back-leaderboard').focus();
+});
+
+document.getElementById('btn-back-leaderboard').addEventListener('click', () => {
+    hideAllMenus();
+    mainMenu.classList.remove('hidden');
+    document.getElementById('btn-scores-menu').focus();
+});
+
+// Leaderboard tab switching
+document.querySelectorAll('.btn-lb-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        renderLeaderboard(tab.dataset.diff);
+    });
 });
 
 document.getElementById('btn-controls-menu').addEventListener('click', () => {
@@ -929,6 +1112,9 @@ const diffBtns = document.querySelectorAll('.diff-btn');
 diffBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
         currentDifficultySpeed = parseInt(e.target.dataset.speed) || 120;
+        // Map speed to label
+        const speedMap = { '180': 'easy', '120': 'medium', '80': 'hard', '50': 'insane' };
+        currentDifficultyLabel = speedMap[e.target.dataset.speed] || 'medium';
         startGame();
     });
 });
@@ -952,6 +1138,8 @@ document.getElementById('btn-back-char').addEventListener('click', () => {
     mainMenu.classList.remove('hidden');
     document.getElementById('btn-char-menu').focus();
 });
+
+document.getElementById('btn-submit-initials').addEventListener('click', submitInitials);
 
 // Button Bindings
 restartBtn.addEventListener('click', startGame);

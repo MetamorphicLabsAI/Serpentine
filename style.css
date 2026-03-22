@@ -415,3 +415,76 @@ button:hover, button:focus {
 .character-select {
     margin-bottom: 20px;
 }
+
+/* --- Initials Entry --- */
+.initial-slot {
+    width: 55px;
+    height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.initial-slot.active {
+    border-color: var(--snake-color);
+    box-shadow: 0 0 15px var(--snake-color);
+    color: var(--snake-color);
+}
+
+/* --- Leaderboard --- */
+.lb-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lb-row:nth-child(1) { color: #ffd700; }
+.lb-row:nth-child(2) { color: #c0c0c0; }
+.lb-row:nth-child(3) { color: #cd7f32; }
+
+.lb-row .lb-rank { width: 30px; text-align: center; }
+.lb-row .lb-initials { width: 80px; text-align: center; letter-spacing: 4px; }
+.lb-row .lb-score { flex: 1; text-align: right; }
+
+.lb-empty {
+    color: #555;
+    text-align: center;
+    padding: 30px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+}
+
+.btn-lb-tab {
+    padding: 6px 12px;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 4px;
+    background: transparent;
+    color: #aaa;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    transition: all 0.2s;
+}
+
+.btn-lb-tab.active,
+.btn-lb-tab:hover,
+.btn-lb-tab:focus {
+    color: var(--snake-color);
+    border-color: var(--snake-color);
+    background: rgba(255, 255, 255, 0.05);
+    outline: none;
+}
