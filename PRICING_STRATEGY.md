@@ -35,7 +35,7 @@ To reach the **$20 - $25** threshold, we must transition from marketing "A Snake
 ### [REVISED VALUE DRIVERS]
 1.  **Grid Warfare (Competitive Architecture):** The inclusion of Battle Royale, CTF, and Maze-Race turns a single-player high-score game into a social, competitive platform.
 2.  **Procedural Boss Gauntlets:** The "Hydra Matrix" ensures no two runs are the same, providing infinite hours of content.
-3.  **Elite Decryption Economy:** The Shop/Bank system now handles "Long-Game" unlocks (up to 25,000,000 PTS), justifying the $24.99 price for the sheer depth of meta-progression.
+3.  **Elite Decryption Economy:** The Shop/Bank system now handles "Long-Game" unlocks (up to 25,000,000 PTS), justifying the $24.99 price for the sheer depth of meta-progression. Characters are no longer simple skins; with entities like **PRINCESS** (procedural anatomy), **CENTIPEDE** (animated leg-physics), and **INFERNAL WYRM** (wing-logic), each purchase introduces specialized localized gameplay logic and visual systems.
 1.  **Procedural Audio Composition:** (ALREADY COMPLETED) - Advertise the "Zero-Audio-Asset" mathematical synth engine as a unique tech feature.
 2.  **Lore & Mystery:** (EXPANDING) - The "Arcade OS" narrative and hidden entities (9193) create a sense of discovery that classic Snake clones lack.
 3.  **Economy & Unlocks:** (ALREADY COMPLETED) - The Point Bank and Shop system encourages long-term retention. 

@@ -66,14 +66,30 @@ Profiles that require specific milestones to decrypt.
     - **Growth:** Does not grow past 9 segments.
     - **Leaderboard Signature:** Initials are permanently set to `CTR` (Yellow).
 
-### [(PLACEHOLDER) PRINCESS]
+### [PRINCESS]
 - **ID:** `princess`
 - **Lore:** A brindle dachshund guest protocol. Short legs, long body, infinite loyalty. 
 - **Unlock Condition:** Decrypt via the **System Shop** for `50,000 PTS`.
-- **Special Status:** Currently defined as a visual `[PLACEHOLDER]` character.
 - **Unique Stats:** 
-    - Custom Canvas-rendered anatomy (floppy ears, snout, legs, wagging tail).
-    - Replaces standard digital 'eat' sounds with a custom double-bark SFX every 3-5 food intakes.
+    - Custom Canvas-rendered anatomy (floppy ears, elongated snout, legs, wagging tail).
+    - Replaces standard digital 'eat' sounds with a real **mp3-sampled** double-bark SFX.
+- **Character Options:**
+    - **PLAY STYLE:** Toggle between `SERPENTINE` (Classic) and `REALISTIC` (Caps growth at 5 segments).
+
+### [CENTIPEDE]
+- **ID:** `centipede`
+- **Lore:** An ancient arthropod virus with a thousand legs and no mercy. Each segment pulses with predatory instinct.
+- **Unlock Condition:** Decrypt via the **System Shop** for `75,000 PTS`.
+- **Aesthetics:** Neon green exoskeleton with animated legs on every segment and a stinger tail.
+- **Character Options:**
+    - **SKIN:** Toggle between `VENOMOUS` (Green), `INFERNO` (Fire), and `PHANTOM` (Ghostly Purple).
+
+### [INFERNAL WYRM]
+- **ID:** `dragon`
+- **Lore:** A primordial fire-dragon protocol. Scales of obsidian, breath of molten data. The apex predator of the grid.
+- **Unlock Condition:** Decrypt via the **System Shop** for `100,000 PTS`.
+- **Aesthetics:** Dark emerald scales, golden belly, **flapping wings**, and glowing fire breath.
+- **Special Effect:** Emits flickering ember particles from the head during movement.
 
 ---
 
@@ -130,7 +146,7 @@ Points earned across all game sessions are accumulated into a global **Point Ban
 ### [SHOP SUB-SECTORS]
 | Sector | Inventory |
 | :--- | :--- |
-| **SNAKES** | [EMPTY] - Future decryption available. |
+| **SNAKES** | Includes `PRINCESS`, `CENTIPEDE`, and `INFERNAL WYRM`. |
 | **MODES** | [EMPTY] - Future decryption available. |
 | **OTHER** | Contains classified system hints/codes. |
 
