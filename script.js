@@ -842,15 +842,41 @@ function draw() {
     // Center the pulsing origin
     const offset = pulse / 2;
     
-    ctx.beginPath();
-    ctx.roundRect(
-        food.x * gridSize + padding - offset, 
-        food.y * gridSize + padding - offset, 
-        foodSize, 
-        foodSize, 
-        6 // border radius
-    );
-    ctx.fill();
+    if (profile.id === 'princess') {
+        const cx = food.x * gridSize + gridSize / 2;
+        const cy = food.y * gridSize + gridSize / 2;
+        ctx.save();
+        ctx.translate(cx, cy);
+        
+        // Spin the bone slowly
+        ctx.rotate(time / 400);
+        
+        // Bone dimensions
+        const bw = 10 + pulse;    // Bone shaft width
+        const bh = 4 + pulse/2;   // Bone shaft height
+        const knob = 3 + pulse/2; // Ear knobs
+        
+        ctx.beginPath();
+        ctx.rect(-bw/2, -bh/2, bw, bh);
+        // 4 knobs on the corners
+        ctx.arc(-bw/2, -bh/2, knob, 0, Math.PI * 2);
+        ctx.arc(-bw/2, bh/2, knob, 0, Math.PI * 2);
+        ctx.arc(bw/2, -bh/2, knob, 0, Math.PI * 2);
+        ctx.arc(bw/2, bh/2, knob, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.restore();
+    } else {
+        ctx.beginPath();
+        ctx.roundRect(
+            food.x * gridSize + padding - offset, 
+            food.y * gridSize + padding - offset, 
+            foodSize, 
+            foodSize, 
+            6 // border radius
+        );
+        ctx.fill();
+    }
     ctx.restore();
     
     // --- Draw Snake ---
