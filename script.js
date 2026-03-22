@@ -38,27 +38,65 @@ const snakeProfiles = [
     { id: "gold", name: "GOLD-FI", lore: "A luxury data-packet miner. Runs hot, blindingly bright, and leaves a trail of pure wealth.", head: "#ffd700", body: "#ffd700", glow: "rgba(255, 215, 0, 0.6)", food: "#ff4500", foodGlow: "rgba(255, 69, 0, 0.8)", accent: "#ffffff" },
     { id: "glitch", name: "GLITCH-WAVE", lore: "An unstable remnant of a deleted game file. It doesn't play by the rules.", head: "#ff0055", body: "#ff0055", glow: "rgba(255, 0, 85, 0.6)", food: "#00ffcc", foodGlow: "rgba(0, 255, 204, 0.8)", accent: "#ffff00" },
     { id: "mecha", name: "MECHA-SERPENT", lore: "Military-grade intrusion software. Designed to violently overwrite hostile firewalls.", head: "#708090", body: "#708090", glow: "rgba(112, 128, 144, 0.5)", food: "#ff0000", foodGlow: "rgba(255, 0, 0, 0.8)", accent: "#ffaa00" },
-    { id: "spectrum", name: "CHROMATIC PUNCH", lore: "A multi-colored shifting anomaly unlocked by eating 20 food in a standard run. Smells like fruit punch.", head: "#ff0055", body: "#ff0055", glow: "rgba(255, 0, 85, 0.6)", food: "#00ffcc", foodGlow: "rgba(0, 255, 204, 0.8)", accent: "#ffff00", isShifting: true, locked: !unlockedSpectrum }
+    { id: "spectrum", name: "CHROMATIC PUNCH", lore: "A multi-colored shifting anomaly unlocked by eating 20 food in a standard run. Smells like fruit punch.", head: "#ff0055", body: "#ff0055", glow: "rgba(255, 0, 85, 0.6)", food: "#00ffcc", foodGlow: "rgba(0, 255, 204, 0.8)", accent: "#ffff00", isShifting: true, locked: !unlockedSpectrum, unlockCondition: "Survive and ingest 20 food units in a single standard attempt." }
 ];
 let selectedProfileIndex = 0;
 
 function updateProfileStyle() {
     const profile = snakeProfiles[selectedProfileIndex];
-    document.documentElement.style.setProperty('--snake-color', profile.body);
-    document.documentElement.style.setProperty('--snake-glow', `0 0 10px ${profile.body}, 0 0 20px ${profile.body}`);
-    
-    if (profile.food) document.documentElement.style.setProperty('--food-color', profile.food);
-    if (profile.accent) document.documentElement.style.setProperty('--accent-color', profile.accent);
-    
-    document.getElementById('char-name').textContent = profile.name;
-    document.getElementById('char-lore').textContent = profile.lore;
-    document.getElementById('char-name').style.color = profile.body;
-    document.getElementById('char-name').style.textShadow = `0 0 10px ${profile.body}`;
+    let isLocked = profile.locked;
+
+    if (isLocked) {
+        document.documentElement.style.setProperty('--snake-color', '#555555');
+        document.documentElement.style.setProperty('--snake-glow', `0 0 10px #555555, 0 0 20px #555555`);
+        document.documentElement.style.setProperty('--food-color', '#888888');
+        document.documentElement.style.setProperty('--accent-color', '#333333');
+        
+        document.getElementById('char-name').textContent = '???';
+        
+        const loreElement = document.getElementById('char-lore');
+        loreElement.textContent = profile.unlockCondition || 'CLASSIFIED';
+        loreElement.style.color = '#ffd700'; // Yellow
+        
+        document.getElementById('char-name').style.color = '#555555';
+        document.getElementById('char-name').style.textShadow = `0 0 10px #555555`;
+        
+        colors.snakeHead = '#777777';
+        colors.snakeBody = '#555555';
+        colors.snakeGlow = `rgba(85, 85, 85, 0.5)`;
+        colors.food = '#888888';
+        colors.foodGlow = `rgba(136, 136, 136, 0.8)`;
+        colors.accent = '#333333';
+    } else {
+        document.documentElement.style.setProperty('--snake-color', profile.body);
+        document.documentElement.style.setProperty('--snake-glow', `0 0 10px ${profile.body}, 0 0 20px ${profile.body}`);
+        
+        if (profile.food) document.documentElement.style.setProperty('--food-color', profile.food);
+        if (profile.accent) document.documentElement.style.setProperty('--accent-color', profile.accent);
+        
+        document.getElementById('char-name').textContent = profile.name;
+        
+        const loreElement = document.getElementById('char-lore');
+        loreElement.textContent = profile.lore;
+        loreElement.style.color = ''; // clear overriding color
+        
+        document.getElementById('char-name').style.color = profile.body;
+        document.getElementById('char-name').style.textShadow = `0 0 10px ${profile.body}`;
+        
+        if (!profile.isShifting) {
+            colors.snakeHead = profile.head;
+            colors.snakeBody = profile.body;
+            colors.snakeGlow = profile.glow;
+        }
+        if (profile.food) colors.food = profile.food;
+        if (profile.foodGlow) colors.foodGlow = profile.foodGlow;
+        if (profile.accent) colors.accent = profile.accent;
+    }
     
     const lockText = document.getElementById('char-lock-status');
     const selectBtn = document.getElementById('btn-select-char');
     if (lockText && selectBtn) {
-        if (profile.locked) {
+        if (isLocked) {
             lockText.classList.remove('hidden');
             selectBtn.style.opacity = '0.5';
             selectBtn.style.pointerEvents = 'none';
@@ -70,15 +108,6 @@ function updateProfileStyle() {
             selectBtn.textContent = 'SELECT';
         }
     }
-    
-    if (!profile.isShifting) {
-        colors.snakeHead = profile.head;
-        colors.snakeBody = profile.body;
-        colors.snakeGlow = profile.glow;
-    }
-    if (profile.food) colors.food = profile.food;
-    if (profile.foodGlow) colors.foodGlow = profile.foodGlow;
-    if (profile.accent) colors.accent = profile.accent;
 }
 
 // State Variables
@@ -485,7 +514,7 @@ function drawPreviewSnake() {
 // Main rendering pass
 function draw() {
     const profile = snakeProfiles[selectedProfileIndex];
-    if (profile.isShifting) {
+    if (profile.isShifting && !profile.locked) {
         const time = Date.now() / 15;
         const shiftHue = time % 360;
         colors.snakeBody = `hsl(${(shiftHue + 30) % 360}, 100%, 50%)`;
