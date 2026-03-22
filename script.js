@@ -761,7 +761,8 @@ window.addEventListener('keydown', e => {
             let currentIndex = buttons.indexOf(document.activeElement);
             if (currentIndex === -1) currentIndex = 0;
             
-            if (e.code === 'Escape') {
+            if (e.code === 'Escape' || e.code === 'Backspace') {
+                e.preventDefault();
                 const backBtn = buttons.find(b => b.textContent === 'BACK' || b.textContent === 'MAIN MENU');
                 if (backBtn) backBtn.click();
                 return;

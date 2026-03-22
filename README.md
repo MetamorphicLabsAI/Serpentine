@@ -17,9 +17,15 @@ Serpentine is a modern re-imagining of the classic arcade game built strictly wi
 * 🔥 **Dynamic Difficulty Modes**: Scale your challenge precisely across Easy (180ms tick rate), Medium (120ms tick rate), Hard (80ms tick rate), and Insane (50ms tick rate) speeds.
 
 ## Controls
-- **Start/Restart**: `Spacebar`, `Enter`, or click/tap the button.
-- **Move**: `Arrow Keys`, `WASD`, or **Swipe directly on touchscreen displays.**
-- **Main Menu Navigation**: Return to the robust main menu system after a Game Over to freely swap between active game modes and character routines.
+### Menu Navigation
+- **Navigate Up/Down**: `W`/`S` or `↑`/`↓` Arrow Keys
+- **Select / Confirm**: `Spacebar` or `Enter`
+- **Go Back**: `Escape` or `Backspace`
+- **Browse Characters**: `A`/`D` or `←`/`→` Arrow Keys
+
+### In-Game
+- **Move Snake**: `Arrow Keys` or `WASD`
+- **Touch Devices**: Swipe directly on the game canvas
 
 ## Getting Started
 1. Clone the repository to your local machine.
