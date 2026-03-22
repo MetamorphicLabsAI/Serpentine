@@ -34,6 +34,8 @@ const colors = {
 let unlockedSpectrum = localStorage.getItem('serpentineUnlockedSpectrum') === 'true';
 let unlocked9193 = localStorage.getItem('serpentineUnlocked9193') === 'true';
 let unlockedPrincess = localStorage.getItem('serpentineUnlockedPrincess') === 'true';
+let unlockedCentipede = localStorage.getItem('serpentineUnlockedCentipede') === 'true';
+let unlockedDragon = localStorage.getItem('serpentineUnlockedDragon') === 'true';
 
 const snakeProfiles = [
     { id: "neon", name: "NEON PROTOCOL", lore: "The original OS baseline. Reliable, bright, and fiercely fast.", head: "#00ffcc", body: "#00ffcc", glow: "rgba(0, 255, 204, 0.5)", food: "#ff0055", foodGlow: "rgba(255, 0, 85, 0.8)", accent: "#b026ff" },
@@ -47,7 +49,13 @@ const snakeProfiles = [
         characterOptions: [
             { key: 'playStyle', label: 'PLAY STYLE', values: ['SERPENTINE', 'REALISTIC'], defaultValue: 'SERPENTINE' }
         ]
-    }
+    },
+    { id: "centipede", name: "CENTIPEDE", lore: "An ancient arthropod virus with a thousand legs and no mercy. Each segment pulses with predatory instinct.", head: "#39FF14", body: "#2E8B00", glow: "rgba(57, 255, 20, 0.6)", food: "#ff0055", foodGlow: "rgba(255, 0, 85, 0.8)", accent: "#39FF14", locked: !unlockedCentipede, unlockCondition: "DECRYPT IN SYSTEM SHOP (75,000 PTS)",
+        characterOptions: [
+            { key: 'skin', label: 'SKIN', values: ['VENOMOUS', 'INFERNO', 'PHANTOM'], defaultValue: 'VENOMOUS' }
+        ]
+    },
+    { id: "dragon", name: "INFERNAL WYRM", lore: "A primordial fire-dragon protocol. Scales of obsidian, breath of molten data. The apex predator of the grid.", head: "#FF4500", body: "#228B22", glow: "rgba(255, 69, 0, 0.7)", food: "#FFD700", foodGlow: "rgba(255, 215, 0, 0.8)", accent: "#FF6347", locked: !unlockedDragon, unlockCondition: "DECRYPT IN SYSTEM SHOP (100,000 PTS)" }
 ];
 let selectedProfileIndex = 0;
 
@@ -139,6 +147,8 @@ function unlockEverything() {
     localStorage.setItem('serpentineUnlockedSpectrum', 'true');
     localStorage.setItem('serpentineUnlocked9193', 'true');
     localStorage.setItem('serpentineUnlockedPrincess', 'true');
+    localStorage.setItem('serpentineUnlockedCentipede', 'true');
+    localStorage.setItem('serpentineUnlockedDragon', 'true');
     // Future-proof: any new unlockable IDs can be added here
     
     playUnlockSound();
@@ -969,6 +979,10 @@ function draw() {
 
         if (profile.id === 'princess') {
             drawPrincess(segment, index, isHead, isTail);
+        } else if (profile.id === 'centipede') {
+            drawCentipede(segment, index, isHead, isTail);
+        } else if (profile.id === 'dragon') {
+            drawDragon(segment, index, isHead, isTail);
         } else {
             if (isHead) {
                 ctx.fillStyle = colors.snakeHead;
@@ -1166,6 +1180,318 @@ function drawPrincess(seg, i, isHead, isTail) {
     ctx.restore();
 }
 
+/* --- CENTIPEDE RENDERER --- */
+const CENTIPEDE_SKINS = {
+    VENOMOUS: { shell: '#1B5E00', segment: '#39FF14', legs: '#00FF00', eye: '#FF0000', glow: 'rgba(57,255,20,0.5)', mandible: '#7CFC00', antenna: '#ADFF2F' },
+    INFERNO:  { shell: '#8B0000', segment: '#FF4500', legs: '#FF6600', eye: '#FFD700', glow: 'rgba(255,69,0,0.5)', mandible: '#FF8C00', antenna: '#FF4500' },
+    PHANTOM:  { shell: '#2E0854', segment: '#9B59B6', legs: '#C39BDB', eye: '#E0E0FF', glow: 'rgba(155,89,182,0.4)', mandible: '#D2B4DE', antenna: '#BB8FCE' }
+};
+
+function drawCentipede(seg, i, isHead, isTail) {
+    const skin = CENTIPEDE_SKINS[getCharOption('centipede', 'skin') || 'VENOMOUS'];
+    const cx = seg.x * gridSize + gridSize / 2;
+    const cy = seg.y * gridSize + gridSize / 2;
+    const time = Date.now();
+
+    // Direction calc
+    let sDx = dx, sDy = dy;
+    if (i > 0) { sDx = Math.sign(snake[i-1].x - seg.x); sDy = Math.sign(snake[i-1].y - seg.y); }
+    if (sDx === 0 && sDy === 0) sDy = -1;
+    let angle = 0;
+    if (sDx === 1) angle = Math.PI / 2;
+    else if (sDx === -1) angle = -Math.PI / 2;
+    else if (sDy === 1) angle = Math.PI;
+    else if (sDy === -1) angle = 0;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angle);
+
+    // Animated leg wiggle
+    const legPhase = Math.sin(time / 60 + i * 1.2) * 15;
+
+    // Legs on EVERY segment (except head)
+    if (!isHead) {
+        ctx.strokeStyle = skin.legs;
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        // Left leg pair
+        ctx.beginPath();
+        ctx.moveTo(-6, -2);
+        ctx.lineTo(-14, -4 + legPhase * 0.3);
+        ctx.lineTo(-16, 2 + legPhase * 0.5);
+        ctx.stroke();
+        // Right leg pair
+        ctx.beginPath();
+        ctx.moveTo(6, -2);
+        ctx.lineTo(14, -4 - legPhase * 0.3);
+        ctx.lineTo(16, 2 - legPhase * 0.5);
+        ctx.stroke();
+        // Second set of legs (staggered)
+        ctx.beginPath();
+        ctx.moveTo(-5, 3);
+        ctx.lineTo(-13, 5 - legPhase * 0.4);
+        ctx.lineTo(-15, 9 - legPhase * 0.3);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(5, 3);
+        ctx.lineTo(13, 5 + legPhase * 0.4);
+        ctx.lineTo(15, 9 + legPhase * 0.3);
+        ctx.stroke();
+    }
+
+    // Exoskeleton segment body
+    ctx.fillStyle = skin.shell;
+    ctx.shadowBlur = 6;
+    ctx.shadowColor = skin.glow;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 8, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Segment inner plate
+    ctx.fillStyle = skin.segment;
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 5, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Segment ridge line
+    ctx.strokeStyle = skin.shell;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(-5, 0);
+    ctx.lineTo(5, 0);
+    ctx.stroke();
+
+    if (isHead) {
+        // Mandibles
+        ctx.strokeStyle = skin.mandible;
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        const mandibleWiggle = Math.sin(time / 100) * 3;
+        ctx.beginPath();
+        ctx.moveTo(-3, -8);
+        ctx.quadraticCurveTo(-6 - mandibleWiggle, -16, -2, -18);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(3, -8);
+        ctx.quadraticCurveTo(6 + mandibleWiggle, -16, 2, -18);
+        ctx.stroke();
+
+        // Antennae
+        ctx.strokeStyle = skin.antenna;
+        ctx.lineWidth = 1.5;
+        const antWiggle = Math.sin(time / 80) * 5;
+        ctx.beginPath();
+        ctx.moveTo(-4, -7);
+        ctx.quadraticCurveTo(-8 + antWiggle, -20, -3 + antWiggle, -24);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(4, -7);
+        ctx.quadraticCurveTo(8 - antWiggle, -20, 3 - antWiggle, -24);
+        ctx.stroke();
+        // Antenna tips
+        ctx.fillStyle = skin.segment;
+        ctx.beginPath(); ctx.arc(-3 + antWiggle, -24, 1.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(3 - antWiggle, -24, 1.5, 0, Math.PI * 2); ctx.fill();
+
+        // Eyes
+        ctx.fillStyle = skin.eye;
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = skin.eye;
+        ctx.beginPath(); ctx.arc(-4, -5, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(4, -5, 2.5, 0, Math.PI * 2); ctx.fill();
+        // Pupils
+        ctx.fillStyle = '#000';
+        ctx.shadowBlur = 0;
+        ctx.beginPath(); ctx.arc(-4, -5.5, 1, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(4, -5.5, 1, 0, Math.PI * 2); ctx.fill();
+    }
+
+    if (isTail) {
+        // Tail stinger
+        ctx.fillStyle = skin.mandible;
+        ctx.beginPath();
+        ctx.moveTo(-3, 8);
+        ctx.lineTo(0, 16);
+        ctx.lineTo(3, 8);
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
+/* --- DRAGON RENDERER --- */
+function drawDragon(seg, i, isHead, isTail) {
+    const cx = seg.x * gridSize + gridSize / 2;
+    const cy = seg.y * gridSize + gridSize / 2;
+    const time = Date.now();
+
+    let sDx = dx, sDy = dy;
+    if (i > 0) { sDx = Math.sign(snake[i-1].x - seg.x); sDy = Math.sign(snake[i-1].y - seg.y); }
+    if (sDx === 0 && sDy === 0) sDy = -1;
+    let angle = 0;
+    if (sDx === 1) angle = Math.PI / 2;
+    else if (sDx === -1) angle = -Math.PI / 2;
+    else if (sDy === 1) angle = Math.PI;
+    else if (sDy === -1) angle = 0;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angle);
+
+    // Scale body
+    ctx.fillStyle = '#1A472A'; // Dark emerald
+    ctx.shadowBlur = 5;
+    ctx.shadowColor = 'rgba(255, 69, 0, 0.4)';
+    ctx.beginPath();
+    ctx.roundRect(-9, -10, 18, 20, 5);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Belly plate (golden underside)
+    ctx.fillStyle = '#DAA520';
+    ctx.beginPath();
+    ctx.roundRect(-5, -4, 10, 14, 3);
+    ctx.fill();
+
+    // Scale texture
+    ctx.strokeStyle = 'rgba(0,80,0,0.5)';
+    ctx.lineWidth = 1;
+    for (let s = -6; s <= 6; s += 4) {
+        ctx.beginPath();
+        ctx.arc(s, -3, 3, Math.PI * 0.8, Math.PI * 0.2);
+        ctx.stroke();
+    }
+
+    // Dorsal spines on every body segment
+    if (!isHead && !isTail) {
+        ctx.fillStyle = '#FF4500';
+        for (let s = -1; s <= 1; s++) {
+            ctx.beginPath();
+            ctx.moveTo(s * 3 - 2, -10);
+            ctx.lineTo(s * 3, -15);
+            ctx.lineTo(s * 3 + 2, -10);
+            ctx.fill();
+        }
+    }
+
+    // WINGS on segment 1 (shoulders)
+    if (i === 1) {
+        const wingFlap = Math.sin(time / 120) * 8;
+        ctx.fillStyle = 'rgba(139, 0, 0, 0.6)'; // Dark red membrane
+        ctx.strokeStyle = '#8B0000';
+        ctx.lineWidth = 1.5;
+        // Left wing
+        ctx.beginPath();
+        ctx.moveTo(-8, -4);
+        ctx.quadraticCurveTo(-24, -12 + wingFlap, -20, 4 + wingFlap);
+        ctx.lineTo(-8, 4);
+        ctx.fill(); ctx.stroke();
+        // Wing bones
+        ctx.strokeStyle = '#4A0000';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(-8, -3);
+        ctx.lineTo(-20, -6 + wingFlap);
+        ctx.moveTo(-8, 0);
+        ctx.lineTo(-18, 0 + wingFlap);
+        ctx.stroke();
+        // Right wing
+        ctx.fillStyle = 'rgba(139, 0, 0, 0.6)';
+        ctx.strokeStyle = '#8B0000';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(8, -4);
+        ctx.quadraticCurveTo(24, -12 - wingFlap, 20, 4 - wingFlap);
+        ctx.lineTo(8, 4);
+        ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#4A0000';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(8, -3);
+        ctx.lineTo(20, -6 - wingFlap);
+        ctx.moveTo(8, 0);
+        ctx.lineTo(18, 0 - wingFlap);
+        ctx.stroke();
+    }
+
+    if (isHead) {
+        // Dragon skull (broader)
+        ctx.fillStyle = '#1A472A';
+        ctx.beginPath();
+        ctx.ellipse(0, -4, 9, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Snout ridge
+        ctx.fillStyle = '#0D3318';
+        ctx.beginPath();
+        ctx.ellipse(0, -12, 5, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Horns
+        ctx.fillStyle = '#8B8000';
+        ctx.beginPath();
+        ctx.moveTo(-7, -6);
+        ctx.quadraticCurveTo(-14, -16, -8, -22);
+        ctx.lineTo(-5, -8);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(7, -6);
+        ctx.quadraticCurveTo(14, -16, 8, -22);
+        ctx.lineTo(5, -8);
+        ctx.fill();
+
+        // Nostrils
+        ctx.fillStyle = '#FF4500';
+        ctx.beginPath(); ctx.arc(-2, -16, 1.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(2, -16, 1.5, 0, Math.PI * 2); ctx.fill();
+
+        // Eyes (glowing amber slits)
+        ctx.fillStyle = '#FFD700';
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = '#FFD700';
+        ctx.beginPath(); ctx.ellipse(-5, -7, 2.5, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(5, -7, 2.5, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+        // Slit pupils
+        ctx.fillStyle = '#000';
+        ctx.beginPath(); ctx.ellipse(-5, -7, 0.8, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(5, -7, 0.8, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Fire breath particles (small flickering embers from nostrils)
+        ctx.globalAlpha = 0.7;
+        for (let f = 0; f < 3; f++) {
+            const fx = (Math.random() - 0.5) * 6;
+            const fy = -18 - Math.random() * 8;
+            const fr = 1 + Math.random() * 1.5;
+            ctx.fillStyle = Math.random() > 0.5 ? '#FF4500' : '#FFD700';
+            ctx.beginPath(); ctx.arc(fx, fy, fr, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    if (isTail) {
+        // Spiked tail
+        ctx.fillStyle = '#1A472A';
+        const tailSwing = Math.sin(time / 90) * 6;
+        // Tail extension
+        ctx.beginPath();
+        ctx.moveTo(-4, 8);
+        ctx.quadraticCurveTo(tailSwing, 16, tailSwing * 0.8, 22);
+        ctx.quadraticCurveTo(tailSwing * 0.3, 16, 4, 8);
+        ctx.fill();
+        // Tail spade
+        ctx.fillStyle = '#FF4500';
+        ctx.beginPath();
+        ctx.moveTo(tailSwing * 0.8 - 4, 20);
+        ctx.lineTo(tailSwing * 0.8, 28);
+        ctx.lineTo(tailSwing * 0.8 + 4, 20);
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
 function drawEyes(x, y) {
     ctx.fillStyle = colors.bg;
     ctx.shadowBlur = 0; // Turn off glow for eyes
@@ -1340,6 +1666,26 @@ function updateShopUI() {
         btnBuyPrincess.style.opacity = '0.5';
         btnBuyPrincess.style.pointerEvents = 'none';
         btnBuyPrincess.classList.add('btn-secondary');
+    }
+
+    const labelCentipede = document.getElementById('label-centipede');
+    const btnBuyCentipede = document.getElementById('btn-buy-centipede');
+    if (unlockedCentipede) {
+        labelCentipede.textContent = "CENTIPEDE: DECRYPTED";
+        btnBuyCentipede.textContent = "LOADED";
+        btnBuyCentipede.style.opacity = '0.5';
+        btnBuyCentipede.style.pointerEvents = 'none';
+        btnBuyCentipede.classList.add('btn-secondary');
+    }
+
+    const labelDragon = document.getElementById('label-dragon');
+    const btnBuyDragon = document.getElementById('btn-buy-dragon');
+    if (unlockedDragon) {
+        labelDragon.textContent = "INFERNAL WYRM: DECRYPTED";
+        btnBuyDragon.textContent = "LOADED";
+        btnBuyDragon.style.opacity = '0.5';
+        btnBuyDragon.style.pointerEvents = 'none';
+        btnBuyDragon.classList.add('btn-secondary');
     }
 }
 
@@ -1664,6 +2010,24 @@ document.getElementById('btn-buy-princess').addEventListener('click', () => {
         unlockedPrincess = true;
         localStorage.setItem('serpentineUnlockedPrincess', 'true');
         const p = snakeProfiles.find(prof => prof.id === 'princess');
+        if (p) p.locked = false;
+    });
+});
+
+document.getElementById('btn-buy-centipede').addEventListener('click', () => {
+    buyItem('centipede', 75000, () => {
+        unlockedCentipede = true;
+        localStorage.setItem('serpentineUnlockedCentipede', 'true');
+        const p = snakeProfiles.find(prof => prof.id === 'centipede');
+        if (p) p.locked = false;
+    });
+});
+
+document.getElementById('btn-buy-dragon').addEventListener('click', () => {
+    buyItem('dragon', 100000, () => {
+        unlockedDragon = true;
+        localStorage.setItem('serpentineUnlockedDragon', 'true');
+        const p = snakeProfiles.find(prof => prof.id === 'dragon');
         if (p) p.locked = false;
     });
 });
