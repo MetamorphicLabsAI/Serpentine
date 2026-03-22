@@ -214,6 +214,7 @@ let particles = [];
 let currentSpeed = currentDifficultySpeed;
 let pendingDirection = null; // Prevent double-turn death
 let foodEaten = 0; // Track food consumed per round
+let barkCounter = 3; // Track when princess barks
 let bank = parseInt(localStorage.getItem('serpentineBank')) || 0;
 let bought9193Hint = localStorage.getItem('bought9193Hint') === 'true';
 let boughtMasterHint = localStorage.getItem('boughtMasterHint') === 'true';
@@ -284,6 +285,39 @@ function playTone(freq, type, duration, vol = 0.1) {
 function playEatSound() {
     playTone(800, 'square', 0.1, 0.1);
     setTimeout(() => playTone(1200, 'square', 0.15, 0.1), 50);
+}
+
+function playBarkSound() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    
+    // First bark (high pitch drop)
+    let osc1 = audioCtx.createOscillator();
+    let gain1 = audioCtx.createGain();
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(600, now);
+    osc1.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+    gain1.gain.setValueAtTime(0.12, now);
+    gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+    
+    osc1.connect(gain1);
+    gain1.connect(audioCtx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.1);
+
+    // Second bark (slightly higher, quicker drop)
+    let osc2 = audioCtx.createOscillator();
+    let gain2 = audioCtx.createGain();
+    osc2.type = 'sawtooth';
+    osc2.frequency.setValueAtTime(650, now + 0.12);
+    osc2.frequency.exponentialRampToValueAtTime(320, now + 0.22);
+    gain2.gain.setValueAtTime(0.12, now + 0.12);
+    gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+    
+    osc2.connect(gain2);
+    gain2.connect(audioCtx.destination);
+    osc2.start(now + 0.12);
+    osc2.stop(now + 0.22);
 }
 
 function playDeathSound() {
@@ -667,7 +701,18 @@ function updateLogic() {
         setTimeout(() => scoreElement.style.transform = 'scale(1)', 150);
         
         // Sound and Visual effects
-        playEatSound();
+        if (profile.id === 'princess') {
+            barkCounter--;
+            if (barkCounter <= 0) {
+                playBarkSound();
+                barkCounter = Math.floor(Math.random() * 3) + 3; // Randomly 3 to 5
+            } else {
+                playEatSound();
+            }
+        } else {
+            playEatSound();
+        }
+
         burstParticles(food.x, food.y);
         placeFood();
         

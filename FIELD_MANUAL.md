@@ -66,6 +66,15 @@ Profiles that require specific milestones to decrypt.
     - **Growth:** Does not grow past 9 segments.
     - **Leaderboard Signature:** Initials are permanently set to `CTR` (Yellow).
 
+### [(PLACEHOLDER) PRINCESS]
+- **ID:** `princess`
+- **Lore:** A brindle dachshund guest protocol. Short legs, long body, infinite loyalty. 
+- **Unlock Condition:** Decrypt via the **System Shop** for `50,000 PTS`.
+- **Special Status:** Currently defined as a visual `[PLACEHOLDER]` character.
+- **Unique Stats:** 
+    - Custom Canvas-rendered anatomy (floppy ears, snout, legs, wagging tail).
+    - Replaces standard digital 'eat' sounds with a custom double-bark SFX every 3-5 food intakes.
+
 ---
 
 ## ⚙️ Operational Modes
