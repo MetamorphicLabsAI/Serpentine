@@ -230,12 +230,24 @@ const shopModes = document.getElementById('shop-modes');
 const shopOther = document.getElementById('shop-other');
 const pauseScreen = document.getElementById('pause-screen');
 
-// --- Audio Engine (Synthesizer) ---
+// --- Audio Engine (Synthesizer & Sampler) ---
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioCtx = new AudioContext();
 let musicGain = null;
 let musicInterval = null;
 let currentMenuStep = 0;
+
+let princessBarkBuffer = null;
+async function loadPrincessBark() {
+    try {
+        const response = await fetch('./resources/sounds/princess_bark.mp3');
+        const arrayBuffer = await response.arrayBuffer();
+        princessBarkBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    } catch (e) {
+        console.warn("Could not load Princess bark sound.", e);
+    }
+}
+loadPrincessBark();
 
 // Logic for Menu UI Sounds
 function playMenuNavSound() {
@@ -289,35 +301,48 @@ function playEatSound() {
 
 function playBarkSound() {
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    const now = audioCtx.currentTime;
     
-    // First bark (high pitch drop)
-    let osc1 = audioCtx.createOscillator();
-    let gain1 = audioCtx.createGain();
-    osc1.type = 'sawtooth';
-    osc1.frequency.setValueAtTime(600, now);
-    osc1.frequency.exponentialRampToValueAtTime(300, now + 0.1);
-    gain1.gain.setValueAtTime(0.12, now);
-    gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-    
-    osc1.connect(gain1);
-    gain1.connect(audioCtx.destination);
-    osc1.start(now);
-    osc1.stop(now + 0.1);
+    if (princessBarkBuffer) {
+        const source = audioCtx.createBufferSource();
+        source.buffer = princessBarkBuffer;
+        
+        // Cartoonify effect! Pitch it up and randomize it slightly for variation
+        const pitchShift = 1.3 + Math.random() * 0.4; // Ranges from 1.3x to 1.7x speed
+        source.playbackRate.value = pitchShift;
+        
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = 0.7; // Tame the volume of the raw file
+        
+        source.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        source.start(0);
+    } else {
+        // Fallback to synthetic bark if the file is still loading or failed
+        const now = audioCtx.currentTime;
+        let osc1 = audioCtx.createOscillator();
+        let gain1 = audioCtx.createGain();
+        osc1.type = 'sawtooth';
+        osc1.frequency.setValueAtTime(600, now);
+        osc1.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+        gain1.gain.setValueAtTime(0.12, now);
+        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.1);
 
-    // Second bark (slightly higher, quicker drop)
-    let osc2 = audioCtx.createOscillator();
-    let gain2 = audioCtx.createGain();
-    osc2.type = 'sawtooth';
-    osc2.frequency.setValueAtTime(650, now + 0.12);
-    osc2.frequency.exponentialRampToValueAtTime(320, now + 0.22);
-    gain2.gain.setValueAtTime(0.12, now + 0.12);
-    gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
-    
-    osc2.connect(gain2);
-    gain2.connect(audioCtx.destination);
-    osc2.start(now + 0.12);
-    osc2.stop(now + 0.22);
+        let osc2 = audioCtx.createOscillator();
+        let gain2 = audioCtx.createGain();
+        osc2.type = 'sawtooth';
+        osc2.frequency.setValueAtTime(650, now + 0.12);
+        osc2.frequency.exponentialRampToValueAtTime(320, now + 0.22);
+        gain2.gain.setValueAtTime(0.12, now + 0.12);
+        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start(now + 0.12);
+        osc2.stop(now + 0.22);
+    }
 }
 
 function playDeathSound() {
