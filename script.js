@@ -33,6 +33,7 @@ const colors = {
 /* --- Snake Profiles --- */
 let unlockedSpectrum = localStorage.getItem('serpentineUnlockedSpectrum') === 'true';
 let unlocked9193 = localStorage.getItem('serpentineUnlocked9193') === 'true';
+let unlockedPrincess = localStorage.getItem('serpentineUnlockedPrincess') === 'true';
 
 const snakeProfiles = [
     { id: "neon", name: "NEON PROTOCOL", lore: "The original OS baseline. Reliable, bright, and fiercely fast.", head: "#00ffcc", body: "#00ffcc", glow: "rgba(0, 255, 204, 0.5)", food: "#ff0055", foodGlow: "rgba(255, 0, 85, 0.8)", accent: "#b026ff" },
@@ -41,7 +42,8 @@ const snakeProfiles = [
     { id: "glitch", name: "GLITCH-WAVE", lore: "An unstable remnant of a deleted game file. It doesn't play by the rules.", head: "#ff0055", body: "#ff0055", glow: "rgba(255, 0, 85, 0.6)", food: "#00ffcc", foodGlow: "rgba(0, 255, 204, 0.8)", accent: "#ffff00" },
     { id: "mecha", name: "MECHA-SERPENT", lore: "Military-grade intrusion software. Designed to violently overwrite hostile firewalls.", head: "#708090", body: "#708090", glow: "rgba(112, 128, 144, 0.5)", food: "#ff0000", foodGlow: "rgba(255, 0, 0, 0.8)", accent: "#ffaa00" },
     { id: "spectrum", name: "CHROMATIC PUNCH", lore: "A multi-colored shifting anomaly unlocked by eating 20 food in a standard run. Smells like fruit punch.", head: "#ff0055", body: "#ff0055", glow: "rgba(255, 0, 85, 0.6)", food: "#00ffcc", foodGlow: "rgba(0, 255, 204, 0.8)", accent: "#ffff00", isShifting: true, locked: !unlockedSpectrum, unlockCondition: "Survive and ingest 20 food units in a single standard attempt." },
-    { id: "9193", name: "9193", lore: "ERROR: Entity 9193 is not a snake. It is an exploit. A backdoor left open by the original developer. 9 length. 90 per byte. No rules.", head: "#ffd700", body: "#ffd700", glow: "rgba(255, 215, 0, 0.6)", food: "#ffd700", foodGlow: "rgba(255, 215, 0, 0.8)", accent: "#ffd700", locked: !unlocked9193, unlockCondition: "???", isCheater: true }
+    { id: "9193", name: "9193", lore: "ERROR: Entity 9193 is not a snake. It is an exploit. A backdoor left open by the original developer. 9 length. 90 per byte. No rules.", head: "#ffd700", body: "#ffd700", glow: "rgba(255, 215, 0, 0.6)", food: "#ffd700", foodGlow: "rgba(255, 215, 0, 0.8)", accent: "#ffd700", locked: !unlocked9193, unlockCondition: "???", isCheater: true },
+    { id: "princess", name: "PRINCESS", lore: "A brindle dachshund protocol. Short legs, long body, infinite loyalty. Features floppy ears and a wagging tail.", head: "#8B4513", body: "#A0522D", glow: "rgba(160, 82, 45, 0.5)", food: "#E97451", foodGlow: "rgba(233, 116, 81, 0.8)", accent: "#2D1405", locked: !unlockedPrincess, unlockCondition: "DECRYPT IN SYSTEM SHOP (50,000 PTS)" }
 ];
 let selectedProfileIndex = 0;
 
@@ -116,6 +118,7 @@ function unlockEverything() {
     // Persist all unlocks
     localStorage.setItem('serpentineUnlockedSpectrum', 'true');
     localStorage.setItem('serpentineUnlocked9193', 'true');
+    localStorage.setItem('serpentineUnlockedPrincess', 'true');
     // Future-proof: any new unlockable IDs can be added here
     
     playUnlockSound();
@@ -809,38 +812,119 @@ function draw() {
     snake.forEach((segment, index) => {
         ctx.save();
         const isHead = index === 0;
-        
-        if (isHead) {
-            ctx.fillStyle = colors.snakeHead;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#ffffff';
+        const isTail = index === snake.length - 1;
+        const profile = snakeProfiles[selectedProfileIndex];
+
+        if (profile.id === 'princess') {
+            drawPrincess(segment, index, isHead, isTail);
         } else {
-            // Apply a slight gradient/fade effect down the tail
-            const opacity = Math.max(0.4, 1 - (index / snake.length) * 0.8);
-            ctx.globalAlpha = opacity;
-            ctx.fillStyle = colors.snakeBody;
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = colors.snakeGlow;
-        }
-        
-        const pad = 1;
-        ctx.beginPath();
-        ctx.roundRect(
-            segment.x * gridSize + pad, 
-            segment.y * gridSize + pad, 
-            gridSize - pad * 2, 
-            gridSize - pad * 2,
-            isHead ? 5 : 3
-        );
-        ctx.fill();
-        
-        // Add "eyes" to the head for character
-        if (isHead) {
-            drawEyes(segment.x, segment.y);
+            if (isHead) {
+                ctx.fillStyle = colors.snakeHead;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#ffffff';
+            } else {
+                // Apply a slight gradient/fade effect down the tail
+                const opacity = Math.max(0.4, 1 - (index / snake.length) * 0.8);
+                ctx.globalAlpha = opacity;
+                ctx.fillStyle = colors.snakeBody;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = colors.snakeGlow;
+            }
+            
+            const pad = 1;
+            ctx.beginPath();
+            ctx.roundRect(
+                segment.x * gridSize + pad, 
+                segment.y * gridSize + pad, 
+                gridSize - pad * 2, 
+                gridSize - pad * 2,
+                isHead ? 5 : 3
+            );
+            ctx.fill();
+            
+            // Add "eyes" to the head for character
+            if (isHead) {
+                drawEyes(segment.x, segment.y);
+            }
         }
         
         ctx.restore();
     });
+}
+
+function drawPrincess(seg, i, isHead, isTail) {
+    const cx = seg.x * gridSize + gridSize / 2;
+    const cy = seg.y * gridSize + gridSize / 2;
+    const isBrindle = true;
+
+    ctx.save();
+    // Brindle brown tones
+    ctx.fillStyle = i % 2 === 0 ? "#8B4513" : "#5D2E0B"; 
+    ctx.shadowBlur = isHead ? 15 : 5;
+    ctx.shadowColor = "rgba(139, 69, 19, 0.4)";
+
+    // Rounded body segment
+    ctx.beginPath();
+    ctx.roundRect(seg.x * gridSize + 1, seg.y * gridSize + 1, gridSize - 2, gridSize - 2, 8);
+    ctx.fill();
+
+    // Little Wiener Dog Legs (First body segment after head AND the tail segment)
+    if (i === 1 || isTail) {
+        ctx.fillStyle = "#3D1E07"; // Dark brown paws
+        // Draw little stumpy legs on the sides
+        ctx.fillRect(seg.x * gridSize - 2, cy - 2, 4, 6);
+        ctx.fillRect(seg.x * gridSize + gridSize - 2, cy - 2, 4, 6);
+    }
+
+    if (isHead) {
+        // Snout
+        ctx.fillStyle = "#A0522D";
+        ctx.beginPath();
+        // Shift snout based on direction
+        let snX = 0, snY = 0;
+        if (dx === 1) snX = 4; else if (dx === -1) snX = -4;
+        if (dy === 1) snY = 4; else if (dy === -1) snY = -4;
+        ctx.arc(cx + snX, cy + snY, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Black Nose
+        ctx.fillStyle = "#000";
+        ctx.beginPath();
+        ctx.arc(cx + snX*1.4, cy + snY*1.4, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Floppy Ears (Always on sides relative to movement?)
+        ctx.fillStyle = "#4B280A";
+        if (dx !== 0) { // Moving Horizontally
+            ctx.ellipse(cx, cy - 6, 3, 7, 0, 0, Math.PI * 2);
+            ctx.ellipse(cx, cy + 6, 3, 7, 0, 0, Math.PI * 2);
+        } else { // Moving Vertically (or start)
+            ctx.ellipse(cx - 8, cy, 3, 7, 0, 0, Math.PI * 2);
+            ctx.ellipse(cx + 8, cy, 3, 7, 0, 0, Math.PI * 2);
+        }
+        ctx.fill();
+        
+        drawEyes(seg.x, seg.y);
+    }
+
+    if (isTail) {
+        // Animated Wagging Tail
+        const wag = Math.sin(Date.now() / 80) * 8;
+        ctx.strokeStyle = "#8B4513";
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        // Tail position based on direction
+        let tx = 0, ty = 0;
+        if (dx === 1) tx = -8; else if (dx === -1) tx = 8;
+        if (dy === 1) ty = -8; else if (dy === -1) ty = 8;
+        
+        ctx.moveTo(cx + tx, cy + ty);
+        // Curve the tail
+        ctx.quadraticCurveTo(cx + tx * 1.5, cy + ty * 1.5, cx + tx * 2 + (dx !== 0 ? 0 : wag), cy + ty * 2 + (dy !== 0 ? 0 : wag));
+        ctx.stroke();
+    }
+    ctx.restore();
 }
 
 function drawEyes(x, y) {
@@ -1008,6 +1092,16 @@ function updateShopUI() {
         btnBuyMaster.style.pointerEvents = 'none';
         btnBuyMaster.classList.add('btn-secondary');
     }
+
+    const labelPrincess = document.getElementById('label-princess');
+    const btnBuyPrincess = document.getElementById('btn-buy-princess');
+    if (unlockedPrincess) {
+        labelPrincess.textContent = "PRINCESS: DECRYPTED";
+        btnBuyPrincess.textContent = "LOADED";
+        btnBuyPrincess.style.opacity = '0.5';
+        btnBuyPrincess.style.pointerEvents = 'none';
+        btnBuyPrincess.classList.add('btn-secondary');
+    }
 }
 
 function buyItem(id, cost, successCallback) {
@@ -1073,6 +1167,7 @@ window.addEventListener('keydown', e => {
                     cheatBuffer = [];
                     if (localStorage.getItem('serpentineUnlocked9193') !== 'true') {
                         localStorage.setItem('serpentineUnlocked9193', 'true');
+                        unlocked9193 = true;
                         const entity = snakeProfiles.find(p => p.id === '9193');
                         if (entity) entity.locked = false;
                         playUnlockSound();
@@ -1321,6 +1416,15 @@ document.getElementById('btn-buy-master').addEventListener('click', () => {
     buyItem('master', 9000000, () => {
         boughtMasterHint = true;
         localStorage.setItem('boughtMasterHint', 'true');
+    });
+});
+
+document.getElementById('btn-buy-princess').addEventListener('click', () => {
+    buyItem('princess', 50000, () => {
+        unlockedPrincess = true;
+        localStorage.setItem('serpentineUnlockedPrincess', 'true');
+        const p = snakeProfiles.find(prof => prof.id === 'princess');
+        if (p) p.locked = false;
     });
 });
 
