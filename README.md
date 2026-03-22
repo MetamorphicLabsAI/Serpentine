@@ -11,6 +11,7 @@ Neon Snake Arcade is a modern re-imagining of the classic arcade game built stri
 * 🕹️ **Arcade Mechanics**: Multi-directional logic built for keyboard (WASD/Arrows) and touch screens (fluid swipe gestures on mobile devices).
 * 💾 **Persistent Memory**: Uses browser `localStorage` to permanently save your highest game score on your machine.
 * 🎨 **Hardware Accelerated UI**: Built with scanline CSS overlays, breathing glow elements, game-over screen shake mechanics, and smooth neon color grading matching the retro 80s arcade aesthetic.
+* 🐍 **Selectable Snake Profiles**: Choose between different retro-cyberpunk characters like Glitch-Wave, Void Walker, or Mecha-Serpent with unique lore and custom, fully color-matched neon aesthetics.
 
 ## Controls
 - **Start/Restart**: `Spacebar`, `Enter`, or click/tap the button.

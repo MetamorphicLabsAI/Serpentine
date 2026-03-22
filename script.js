@@ -17,13 +17,37 @@ const initialSpeed = 120; // MS per frame
 const colors = {
     bg: '#0a0a0f',
     grid: '#1a1a2e',
-    snakeHead: '#ffffff',
+    snakeHead: '#00ffcc',
     snakeBody: '#00ffcc',
     snakeGlow: 'rgba(0, 255, 204, 0.5)',
     food: '#ff0055',
     foodGlow: 'rgba(255, 0, 85, 0.8)',
     accent: '#b026ff'
 };
+
+/* --- Snake Profiles --- */
+const snakeProfiles = [
+    { name: "NEON PROTOCOL", lore: "The original OS baseline. Reliable, bright, and fiercely fast.", head: "#00ffcc", body: "#00ffcc", glow: "rgba(0, 255, 204, 0.5)" },
+    { name: "VOID WALKER", lore: "Born in the corrupted null-sectors of the mainframe. Siphons energy from the background.", head: "#8a2be2", body: "#8a2be2", glow: "rgba(138, 43, 226, 0.8)" },
+    { name: "GOLD-FI", lore: "A luxury data-packet miner. Runs hot, blindingly bright, and leaves a trail of pure wealth.", head: "#ffd700", body: "#ffd700", glow: "rgba(255, 215, 0, 0.6)" },
+    { name: "GLITCH-WAVE", lore: "An unstable remnant of a deleted game file. It doesn't play by the rules.", head: "#ff0055", body: "#ff0055", glow: "rgba(255, 0, 85, 0.6)" },
+    { name: "MECHA-SERPENT", lore: "Military-grade intrusion software. Designed to violently overwrite hostile firewalls.", head: "#708090", body: "#708090", glow: "rgba(112, 128, 144, 0.5)" }
+];
+let selectedProfileIndex = 0;
+
+function updateProfileStyle() {
+    const profile = snakeProfiles[selectedProfileIndex];
+    document.documentElement.style.setProperty('--snake-color', profile.body);
+    document.documentElement.style.setProperty('--snake-glow', `0 0 10px ${profile.body}, 0 0 20px ${profile.body}`);
+    document.getElementById('char-name').textContent = profile.name;
+    document.getElementById('char-lore').textContent = profile.lore;
+    document.getElementById('char-name').style.color = profile.body;
+    document.getElementById('char-name').style.textShadow = `0 0 10px ${profile.body}`;
+    
+    colors.snakeHead = profile.head;
+    colors.snakeBody = profile.body;
+    colors.snakeGlow = profile.glow;
+}
 
 // State Variables
 let snake = [];
@@ -383,6 +407,42 @@ function drawGrid() {
     }
 }
 
+let previewAngle = 0;
+function drawPreviewSnake() {
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2 - 20; 
+    const radius = 100;
+    
+    previewAngle += 0.08;
+    
+    // Infinity loop path
+    for (let i = 50; i >= 0; i--) {
+        const theta = previewAngle - (i * 0.08);
+        const x = cx + Math.sin(theta) * radius * 1.8; 
+        const y = cy + Math.sin(theta * 2) * (radius * 0.9);
+        
+        ctx.save();
+        const isHead = (i === 0);
+        if (isHead) {
+            ctx.fillStyle = colors.snakeHead;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#ffffff';
+        } else {
+            const opacity = Math.max(0.05, 1 - (i / 50) * 0.95);
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = colors.snakeBody;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = colors.snakeGlow;
+        }
+        
+        ctx.beginPath();
+        const size = isHead ? (gridSize) : (gridSize - 4);
+        ctx.arc(x, y, size/2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
 // Main rendering pass
 function draw() {
     // Fill Background
@@ -390,6 +450,11 @@ function draw() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     drawGrid();
+    
+    if (!isPlaying && document.getElementById('start-screen').classList.contains('hidden') === false) {
+        drawPreviewSnake();
+        return; // Don't draw the actual game logic if we are on the menu!
+    }
     
     // --- Update and Draw Particles ---
     particles = particles.filter(p => {
@@ -435,7 +500,8 @@ function draw() {
         } else {
             // Apply a slight gradient/fade effect down the tail
             const opacity = Math.max(0.4, 1 - (index / snake.length) * 0.8);
-            ctx.fillStyle = `rgba(0, 255, 204, ${opacity})`;
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = colors.snakeBody;
             ctx.shadowBlur = 10;
             ctx.shadowColor = colors.snakeGlow;
         }
@@ -632,10 +698,25 @@ canvas.addEventListener('touchend', e => {
     }
 });
 
+// Menu Nav Bindings
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+
+prevBtn.addEventListener('click', () => {
+    selectedProfileIndex = (selectedProfileIndex - 1 + snakeProfiles.length) % snakeProfiles.length;
+    updateProfileStyle();
+});
+
+nextBtn.addEventListener('click', () => {
+    selectedProfileIndex = (selectedProfileIndex + 1) % snakeProfiles.length;
+    updateProfileStyle();
+});
+
 // Button Bindings
 startBtn.addEventListener('click', startGame);
 restartBtn.addEventListener('click', startGame);
 
 // Start global animation loop
+updateProfileStyle(); // Sets Initial snake Profile
 initGrid();
 window.requestAnimationFrame(main);
