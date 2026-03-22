@@ -572,8 +572,8 @@ function updateLogic() {
     }
     
     // 2. Collision Check - Self
-    // We only check if there is movement (dx or dy)
-    if (dx !== 0 || dy !== 0) {
+    // 9193 (isCheater) can safely pass through its own segments
+    if (!profile.isCheater && (dx !== 0 || dy !== 0)) {
         for (let i = 0; i < snake.length; i++) {
             if (head.x === snake[i].x && head.y === snake[i].y) {
                 triggerGameOver();

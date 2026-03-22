@@ -62,6 +62,7 @@ Profiles that require specific milestones to decrypt.
     - **Scoring Value:** +90 per food unit.
     - **Locked Speed:** 50ms (Permanent Insane-level speed).
     - **Portal Override:** Walls act as portals; 9193 wraps to the opposite side instead of failing.
+    - **Self-Phase:** 9193 can safely pass through its own segments without collision.
     - **Growth:** Does not grow past 9 segments.
     - **Leaderboard Signature:** Initials are permanently set to `CTR` (Yellow).
 
