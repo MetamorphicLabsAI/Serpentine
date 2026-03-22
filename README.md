@@ -5,6 +5,9 @@ A highly stylized, neon outrun/cyberpunk-themed Snake Game.
 ## Overview
 Serpentine is a modern re-imagining of the classic arcade game built strictly with Vanilla HTML, CSS, and JS. It requires no frameworks, plugins, or package managers. 
 
+> [!IMPORTANT]
+> **Check the [Field Manual](FIELD_MANUAL.md) for a complete list of features, character lore, unlockable entities, and secret system protocols.**
+
 ## Features 🚀
 * 🎵 **Procedural Synthwave Synth**: A complete 38.4-second looping background track composed mathematically using the browser's native Web Audio API. Zero external MP3 downloads required! Includes driving basslines, arpeggiated synth melodies, kicks, and snares.
 * ✨ **Particle Physics Collision Engine**: Eating food or dying erupts into dynamic, fading retro-neon particle explosions rendered beautifully at 60fps using `requestAnimationFrame`.
