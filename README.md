@@ -16,7 +16,7 @@ Serpentine is a modern re-imagining of the classic arcade game built strictly wi
 * 🔓 **Unlockable Mechanics**: Complete in-game milestones to permanently unlock exclusive profiles (like the shifting *Chromatic Punch* algorithm). Locked characters are shrouded in mystery as solid grey HUD silhouettes with '???' naming and yellow tactical unlock criteria displayed natively in their lore panels! Satisfying an unlock condition triggers a triumphant global synthesized audio chord alongside a full-spectrum particle eruption mid-gameplay.
 * 🔥 **Dynamic Difficulty Modes**: Scale your challenge precisely across Easy (180ms tick rate), Medium (120ms tick rate), Hard (80ms tick rate), and Insane (50ms tick rate) speeds.
 * 🏆 **Per-Difficulty Leaderboards**: Top 10 local high score boards tracked independently for each standard difficulty. Players enter 3-character initials (first, middle, last — blanks allowed) using arcade-style arrow key scrolling after qualifying.
-* 🤫 **Hidden Entities**: Rumors persist of an exploit left behind by the original developer. Those who know the right sequence of numbers might find something that doesn't play by the rules...
+* 🤫 **Hidden Entities**: Rumors persist of an exploit left behind by the original developer. Those who know the right sequence of numbers might find something that doesn't play by the rules... and if you go deep enough, you might just unlock *everything*.
 
 ## Controls
 ### Menu Navigation

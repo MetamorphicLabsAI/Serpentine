@@ -104,6 +104,31 @@ let initialsSlot = 0;
 let pendingHighScoreDiff = null;
 let pendingHighScoreValue = 0;
 
+/* --- 9193 Master Unlock Ritual --- */
+let nineBuffer = 0; // counts consecutive '9' presses on main menu
+let masterUnlockTimer = null;
+
+function unlockEverything() {
+    // Unlock all snakes
+    snakeProfiles.forEach(p => {
+        if (p.locked) p.locked = false;
+    });
+    // Persist all unlocks
+    localStorage.setItem('serpentineUnlockedSpectrum', 'true');
+    localStorage.setItem('serpentineUnlocked9193', 'true');
+    // Future-proof: any new unlockable IDs can be added here
+    
+    playUnlockSound();
+    for(let i = 0; i < 9; i++) {
+        setTimeout(() => burstParticles(Math.random() * tileCount, Math.random() * tileCount, '#ffd700', 50), i * 100);
+    }
+}
+
+function resetMasterUnlock() {
+    nineBuffer = 0;
+    if (masterUnlockTimer) { clearTimeout(masterUnlockTimer); masterUnlockTimer = null; }
+}
+
 function updateProfileStyle() {
     const profile = snakeProfiles[selectedProfileIndex];
     let isLocked = profile.locked;
@@ -461,7 +486,7 @@ function initGrid() {
         for (let i = 0; i < 9; i++) {
             snake.push({ x: cx, y: cy + i });
         }
-        currentSpeed = 120; // Always medium
+        currentSpeed = 90; // 9193 default speed
     } else {
         snake = [{ x: cx, y: cy }];
         currentSpeed = currentDifficultySpeed;
@@ -898,6 +923,7 @@ window.addEventListener('keydown', e => {
         const activeOverlay = Array.from(document.querySelectorAll('.overlay')).find(o => !o.classList.contains('hidden'));
         if (activeOverlay && activeOverlay.id === 'main-menu') {
             if (e.key >= '0' && e.key <= '9') {
+                // --- 9193 unlock cheat code ---
                 cheatBuffer.push(e.key);
                 if (cheatBuffer.length > CHEAT_SEQUENCE.length) cheatBuffer.shift();
                 if (cheatBuffer.length === CHEAT_SEQUENCE.length && cheatBuffer.every((k, i) => k === CHEAT_SEQUENCE[i])) {
@@ -912,9 +938,30 @@ window.addEventListener('keydown', e => {
                         }
                     }
                 }
+                
+                // --- 9x9 Master Unlock Ritual ---
+                const profile9193 = snakeProfiles.find(p => p.id === '9193');
+                if (e.key === '9' && profile9193 && !profile9193.locked && selectedProfileIndex === snakeProfiles.indexOf(profile9193)) {
+                    nineBuffer++;
+                    if (nineBuffer >= 9) {
+                        nineBuffer = 0;
+                        // Start 9-second idle countdown
+                        if (masterUnlockTimer) clearTimeout(masterUnlockTimer);
+                        masterUnlockTimer = setTimeout(() => {
+                            unlockEverything();
+                            masterUnlockTimer = null;
+                        }, 9000);
+                    }
+                } else if (e.key !== '9') {
+                    resetMasterUnlock();
+                }
+            } else {
+                // Non-number key resets master unlock
+                resetMasterUnlock();
             }
         } else {
             cheatBuffer = [];
+            resetMasterUnlock();
         }
         
         if (activeOverlay) {
@@ -984,8 +1031,17 @@ window.addEventListener('keydown', e => {
         case 'D':
             if (activeDx !== -1) pendingDirection = { dx: 1, dy: 0 };
             break;
+        case '9':
+            // 9193 in-game speed toggle: 90ms <-> 900ms
+            if (snakeProfiles[selectedProfileIndex].isCheater) {
+                currentSpeed = (currentSpeed === 90) ? 900 : 90;
+            }
+            break;
     }
 });
+
+// Cancel master unlock ritual on any click
+document.addEventListener('click', () => resetMasterUnlock());
 
 // Mobile Swipe Controls (Makes it robust for any device)
 let touchStartX = 0;
