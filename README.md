@@ -30,6 +30,7 @@ For deep-dives into the game's architecture, legal standing, and future roadmap,
 - 📈 **[Pricing strategy](PRICING_STRATEGY.md)**: Market analysis and commercial expansion roadmap ($5–$15 tier).
 - ⚖️ **[Legal Audit](LEGAL_OBSERVATIONS.md)**: Full IP review of the "Zero-Asset" procedural architecture.
 - 📜 **[Commercial License](LICENSE.md)**: The Five Dollar Games (FDG) proprietary license agreement.
+- 🎵 **[Audio Manifest](AUDIO_MANIFEST.md)**: Full breakdown of procedural synth tracks and tactical sound effects.
 
 ## Controls
 ### Menu Navigation
