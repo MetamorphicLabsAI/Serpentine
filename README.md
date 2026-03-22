@@ -43,25 +43,23 @@ For deep-dives into the game's architecture, legal standing, and future roadmap,
 - **Touch Devices**: Swipe directly on the game canvas
 
 ## Getting Started
-1. Clone the repository to your local machine.
+1. **Clone the Repo**: Download the source code to your machine.
+2. **Launch a Local Server (Required)**: Modern browsers restrict `localStorage` and dynamic audio when running from `file://` URLs.
+   - **Using Node:** `npx serve`
+   - **Using Python:** `python -m http.server 8000`
+   - **Using VS Code:** Install the **Live Server** extension.
+3. **Initialize the OS**: Open the `localhost` URL provided by the server and click **INITIALIZE**.
 
----
+### 🛡️ Browser Security Note
+If you see **"CORS"** or **"Unsafe attempt to load URL"** errors, it's because you are trying to open the `index.html` file directly. Always use the local server steps above to ensure the game saves your progress and plays audio correctly.
 
-### [NOTE] SECURITY ORIGIN ERRORS
-If you encounter a **"CORS"** or **"Unsafe attempt to load URL"** error in your browser, it is because modern browsers treat `file://` URLs as unique, untrusted security origins. 
-
-To resolve this, you **must** run a local dev server:
-- **Using Node.js:** `npx serve`
-- **Using Python:** `python -m http.server 8000`
-- **Using VS Code:** Install the **Live Server** extension.
-2. **Launch a Local Server (Recommended)**: Modern browsers restrict `localStorage` and other features when running from `file://` URLs.
-   - **Using Node:** Run `npx serve` in the project directory.
-   - **Using Python:** Run `python -m http.server 8000`.
-3. Open the provided `localhost` URL in your browser.
-4. Turn up your volume and hit **INITIALIZE**.
+### 🔄 Live Updates & Refreshes
+You do **not** need to reboot your local server to see code changes. Simply save your files and perform a **Hard Refresh** in your browser to bypass the cache:
+- **Windows/Linux**: `Ctrl + Shift + R` (or `Ctrl + F5`)
+- **Mac**: `Cmd + Shift + R`
 
 ## Tech Stack
-* **HTML5 Canvas:** Fluid rendering using 2D Web API perfectly suited for 2D game grids.
-* **Vanilla JavaScript:** Zero-dependency logic natively engineered for speed.
-* **Web Audio API:** Custom sound engine utilizing layered `OscillatorNode`, `BiquadFilterNode`, and `GainNode` calculations producing authentic synth waves.
-* **Vanilla CSS3:** Native keyframe animations, glow-boxing, and grid geometry.
+* **HTML5 Canvas:** Fluid 60fps rendering using native 2D Web API.
+* **Vanilla JavaScript:** Zero-dependency game logic.
+* **Web Audio API:** Custom procedural synth engine for zero-asset music and SFX.
+* **Vanilla CSS3:** Modern neon aesthetics with glassmorphism and scanline shaders.

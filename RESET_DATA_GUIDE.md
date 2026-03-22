@@ -52,3 +52,6 @@ To resolve this, you **must** run a local dev server:
 - **Using Node.js:** `npx serve`
 - **Using Python:** `python -m http.server 8000`
 - **Using VS Code:** Install the **Live Server** extension.
+
+### 🔄 Live Refresh Pro-Tip
+You do **not** need to restart your server to see changes. Just save the files and **Hard Refresh** your browser (`Ctrl + Shift + R`) to force the newest version of the scripts to load.
