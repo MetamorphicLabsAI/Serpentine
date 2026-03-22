@@ -5,9 +5,6 @@ const highScoreElement = document.getElementById('high-score');
 const mainMenu = document.getElementById('main-menu');
 const modeSelect = document.getElementById('mode-select');
 const diffSelect = document.getElementById('difficulty-select');
-const mainMenu = document.getElementById('main-menu');
-const modeSelect = document.getElementById('mode-select');
-const diffSelect = document.getElementById('difficulty-select');
 const startScreen = document.getElementById('start-screen');
 const gameOverScreen = document.getElementById('game-over');
 const finalScoreElement = document.getElementById('final-score');
@@ -457,9 +454,9 @@ function drawPreviewSnake() {
     
     previewAngle += 0.08;
     
-    // Infinity loop path
-    for (let i = 50; i >= 0; i--) {
-        const theta = previewAngle - (i * 0.08);
+    // Infinity loop path - Reduced count from 50 to 25 to dramatically improve main menu frame rates
+    for (let i = 25; i >= 0; i--) {
+        const theta = previewAngle - (i * 0.12);
         const x = cx + Math.sin(theta) * radius * 1.8; 
         const y = cy + Math.sin(theta * 2) * (radius * 0.9);
         
@@ -467,13 +464,13 @@ function drawPreviewSnake() {
         const isHead = (i === 0);
         if (isHead) {
             ctx.fillStyle = colors.snakeHead;
-            ctx.shadowBlur = 20;
+            ctx.shadowBlur = 10;
             ctx.shadowColor = '#ffffff';
         } else {
-            const opacity = Math.max(0.05, 1 - (i / 50) * 0.95);
+            const opacity = Math.max(0.1, 1 - (i / 25) * 0.9);
             ctx.globalAlpha = opacity;
             ctx.fillStyle = colors.snakeBody;
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 5;
             ctx.shadowColor = colors.snakeGlow;
         }
         
@@ -494,8 +491,11 @@ function draw() {
         colors.snakeBody = `hsl(${(shiftHue + 30) % 360}, 100%, 50%)`;
         colors.snakeHead = `hsl(${shiftHue}, 100%, 60%)`;
         colors.snakeGlow = `hsla(${shiftHue}, 100%, 50%, 0.6)`;
-        document.documentElement.style.setProperty('--snake-color', colors.snakeBody);
-        document.documentElement.style.setProperty('--snake-glow', `0 0 10px ${colors.snakeBody}, 0 0 20px ${colors.snakeBody}`);
+        // Only trigger CSS layout updates if it's the 1st frame out of 5 to fix lag
+        if (Math.floor(time) % 5 === 0) {
+            document.documentElement.style.setProperty('--snake-color', colors.snakeBody);
+            document.documentElement.style.setProperty('--snake-glow', `0 0 10px ${colors.snakeBody}, 0 0 20px ${colors.snakeBody}`);
+        }
     }
 
     // Fill Background
@@ -625,9 +625,6 @@ function startGame() {
     mainMenu.classList.add('hidden');
     modeSelect.classList.add('hidden');
     diffSelect.classList.add('hidden');
-        if (mainMenu) mainMenu.classList.add('hidden');
-    if (modeSelect) modeSelect.classList.add('hidden');
-    if (diffSelect) diffSelect.classList.add('hidden');
     startScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
     

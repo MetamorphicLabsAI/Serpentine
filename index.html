@@ -29,34 +29,34 @@
                 <div id="game-over" class="overlay hidden">
                     <h2>SYSTEM FAILURE</h2>
                     <p>FINAL SCORE: <span id="final-score" class="highlight">0</span></p>
-                    <button id="restart-btn">REBOOT SYSTEM</button>
-                    <button id="menu-btn" style="margin-top: 15px; font-size: 1rem; padding: 10px 30px; background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.3); color: #fff; box-shadow: none;">MAIN MENU</button>
+                    <button id="restart-btn" class="btn-menu">REBOOT SYSTEM</button>
+                    <button id="menu-btn" class="btn-menu btn-secondary">MAIN MENU</button>
                 </div>
                 <div id="main-menu" class="overlay">
-                    <h2 style="font-size: 3.5rem; margin-bottom: 40px; color: var(--snake-color); text-shadow: var(--snake-glow);">SERPENTINE</h2>
+                    <h2 class="menu-title" style="font-size: 3.5rem; margin-bottom: 40px;">SERPENTINE</h2>
                     <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 15px;">
-                        <button id="btn-play-menu" style="width: 300px;">GAME MODES</button>
-                        <button id="btn-char-menu" style="width: 300px;">CHARACTER SELECT</button>
-                        <button id="btn-exit-menu" style="width: 300px; background: rgba(255,0,0,0.1); border-color: #ff0055; color: #ff0055; box-shadow: none;">EXIT SYSTEM</button>
+                        <button id="btn-play-menu" class="btn-menu">GAME MODES</button>
+                        <button id="btn-char-menu" class="btn-menu">CHARACTER SELECT</button>
+                        <button id="btn-exit-menu" class="btn-menu btn-danger">EXIT SYSTEM</button>
                     </div>
                 </div>
 
                 <div id="mode-select" class="overlay hidden">
-                    <h2 style="font-size: 2.5rem; margin-bottom: 30px;">GAME MODES</h2>
+                    <h2 class="menu-title" style="font-size: 2.5rem; margin-bottom: 30px;">GAME MODES</h2>
                     <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 15px;">
-                        <button id="btn-standard" style="width: 300px;">STANDARD</button>
-                        <button id="btn-back-mode" style="width: 300px; background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.3); color: #fff; box-shadow: none;">BACK</button>
+                        <button id="btn-standard" class="btn-menu">STANDARD</button>
+                        <button id="btn-back-mode" class="btn-menu btn-secondary">BACK</button>
                     </div>
                 </div>
 
                 <div id="difficulty-select" class="overlay hidden">
-                    <h2 style="font-size: 2.2rem; margin-bottom: 30px;">DIFFICULTY</h2>
+                    <h2 class="menu-title" style="font-size: 2.2rem; margin-bottom: 30px;">DIFFICULTY</h2>
                     <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 12px;">
-                        <button id="btn-easy" class="diff-btn" data-speed="180" style="width: 280px; font-size: 1.1rem; padding: 12px;">EASY</button>
-                        <button id="btn-medium" class="diff-btn" data-speed="120" style="width: 280px; font-size: 1.1rem; padding: 12px;">MEDIUM</button>
-                        <button id="btn-hard" class="diff-btn" data-speed="80" style="width: 280px; font-size: 1.1rem; padding: 12px;">HARD</button>
-                        <button id="btn-insane" class="diff-btn" data-speed="50" style="width: 280px; font-size: 1.1rem; padding: 12px; color: #ff0055; border-color: #ff0055;">INSANE</button>
-                        <button id="btn-back-diff" style="width: 280px; font-size: 1.1rem; padding: 12px; background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.3); color: #fff; margin-top: 10px; box-shadow: none;">BACK</button>
+                        <button id="btn-easy" class="btn-menu diff-btn" data-speed="180">EASY</button>
+                        <button id="btn-medium" class="btn-menu diff-btn" data-speed="120">MEDIUM</button>
+                        <button id="btn-hard" class="btn-menu diff-btn" data-speed="80">HARD</button>
+                        <button id="btn-insane" class="btn-menu diff-btn btn-danger" data-speed="50">INSANE</button>
+                        <button id="btn-back-diff" class="btn-menu btn-secondary">BACK</button>
                     </div>
                 </div>
 
@@ -76,8 +76,8 @@
                     </div>
                     
                     <p class="blink" style="margin-bottom: 10px; font-size: 0.9rem;">PRESS ARROW KEYS TO BROWSE</p>
-                    <button id="btn-select-char" style="width: 280px;">SELECT</button>
-                    <button id="btn-back-char" style="width: 280px; font-size: 1rem; padding: 10px; background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.3); color: #fff; margin-top: 10px; box-shadow: none;">BACK</button>
+                    <button id="btn-select-char" class="btn-menu">SELECT</button>
+                    <button id="btn-back-char" class="btn-menu btn-secondary">BACK</button>
                 </div>
             </div>
 
