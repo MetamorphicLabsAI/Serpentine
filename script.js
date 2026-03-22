@@ -175,6 +175,43 @@ function playDeathSound() {
     osc.stop(audioCtx.currentTime + 1);
 }
 
+function playUnlockSound() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    
+    // Triumphant major arpeggio
+    const notes = [440, 554.37, 659.25, 880]; // A4, C#5, E5, A5
+    notes.forEach((freq, index) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, now + (index * 0.1));
+        gain.gain.linearRampToValueAtTime(0.1, now + (index * 0.1) + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + (index * 0.1) + 0.3);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + (index * 0.1));
+        osc.stop(now + (index * 0.1) + 0.3);
+    });
+
+    // Beautiful sustained major chord
+    const finalTime = now + 0.4;
+    [220, 277.18, 329.63].forEach(freq => { // A3, C#4, E4
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, finalTime);
+        gain.gain.linearRampToValueAtTime(0.05, finalTime + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.01, finalTime + 2.0);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(finalTime);
+        osc.stop(finalTime + 2.0);
+    });
+}
+
 // --- Sequencer Core Data ---
 const SEQUENCER_STEPS = 256; // 38.4 seconds loop at 150ms per step
 let currentStep = 0;
@@ -452,6 +489,13 @@ function updateLogic() {
             localStorage.setItem('serpentineUnlockedSpectrum', 'true');
             const spectrum = snakeProfiles.find(p => p.id === 'spectrum');
             if (spectrum) spectrum.locked = false;
+            
+            playUnlockSound();
+            
+            // Burst thematic full-spectrum celebration particles
+            for(let i=0; i<6; i++) {
+               setTimeout(() => burstParticles(Math.random() * tileCount, Math.random() * tileCount, `hsl(${Math.random()*360},100%,50%)`, 40), i * 150);
+            }
         }
     } else {
         // Pop Tail if we didn't eat
