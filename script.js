@@ -493,7 +493,7 @@ function initGrid() {
         for (let i = 0; i < 9; i++) {
             snake.push({ x: cx, y: cy + i });
         }
-        currentSpeed = 90; // 9193 default speed
+        currentSpeed = 50; // Always Insane speed for 9193
     } else {
         snake = [{ x: cx, y: cy }];
         currentSpeed = currentDifficultySpeed;
@@ -554,12 +554,21 @@ function updateLogic() {
         pendingDirection = null;
     }
 
-    const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+    const profile = snakeProfiles[selectedProfileIndex];
+    let head = { x: snake[0].x + dx, y: snake[0].y + dy };
     
     // 1. Collision Check - Walls
     if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
-        triggerGameOver();
-        return;
+        if (profile.isCheater) {
+            // Portal warp - comes out on the other side
+            if (head.x < 0) head.x = tileCount - 1;
+            else if (head.x >= tileCount) head.x = 0;
+            if (head.y < 0) head.y = tileCount - 1;
+            else if (head.y >= tileCount) head.y = 0;
+        } else {
+            triggerGameOver();
+            return;
+        }
     }
     
     // 2. Collision Check - Self
@@ -1087,12 +1096,6 @@ window.addEventListener('keydown', e => {
         case 'd':
         case 'D':
             if (activeDx !== -1) pendingDirection = { dx: 1, dy: 0 };
-            break;
-        case '9':
-            // 9193 in-game speed toggle: 90ms <-> 900ms
-            if (snakeProfiles[selectedProfileIndex].isCheater) {
-                currentSpeed = (currentSpeed === 90) ? 900 : 90;
-            }
             break;
     }
 });

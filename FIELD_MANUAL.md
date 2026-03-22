@@ -60,7 +60,8 @@ Profiles that require specific milestones to decrypt.
 - **Unique Stats:**
     - **Fixed Starting Length:** 9 segments (Head + 8 body).
     - **Scoring Value:** +90 per food unit.
-    - **Locked Speed:** 90ms (Default) / 900ms (Slow-Mo Toggle).
+    - **Locked Speed:** 50ms (Permanent Insane-level speed).
+    - **Portal Override:** Walls act as portals; 9193 wraps to the opposite side instead of failing.
     - **Growth:** Does not grow past 9 segments.
     - **Leaderboard Signature:** Initials are permanently set to `CTR` (Yellow).
 
