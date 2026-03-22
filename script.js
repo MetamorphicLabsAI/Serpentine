@@ -215,7 +215,6 @@ let currentSpeed = currentDifficultySpeed;
 let pendingDirection = null; // Prevent double-turn death
 let foodEaten = 0; // Track food consumed per round
 let barkCounter = 3; // Track when princess barks
-let princessInDoghouse = false; // Interactive Doghouse state
 let bank = parseInt(localStorage.getItem('serpentineBank')) || 0;
 let bought9193Hint = localStorage.getItem('bought9193Hint') === 'true';
 let boughtMasterHint = localStorage.getItem('boughtMasterHint') === 'true';
@@ -610,7 +609,6 @@ function initGrid() {
     foodEaten = 0;
     scoreElement.textContent = score;
     scoreElement.style.color = colors.snakeBody;
-    princessInDoghouse = false;
     placeFood();
     particles = [];
 }
@@ -619,7 +617,7 @@ function placeFood() {
     let newFoodPosition;
     let foodIsOnSnake = true;
     
-    while (foodIsOnSnake || (snakeProfiles[selectedProfileIndex].id === 'princess' && newFoodPosition?.x === tileCount - 2 && newFoodPosition?.y === 1)) {
+    while (foodIsOnSnake) {
         newFoodPosition = {
             x: Math.floor(Math.random() * tileCount),
             y: Math.floor(Math.random() * tileCount)
@@ -652,8 +650,6 @@ function main(currentTime) {
 }
 
 function updateLogic() {
-    if (princessInDoghouse) return;
-
     // Apply pending direction
     if (pendingDirection) {
         dx = pendingDirection.dx;
@@ -691,13 +687,6 @@ function updateLogic() {
     
     // Move Head Forward
     snake.unshift(head); 
-    
-    // Princess Doghouse Entry Protocol
-    if (profile.id === 'princess' && head.x === tileCount - 2 && head.y === 1) {
-        princessInDoghouse = true;
-        snake.pop(); // Prevent snake from growing artificially
-        return; // Halt logic this tick and all future ticks until awoken
-    }
     
     // 3. Collision Check - Food
     if (head.x === food.x && head.y === food.y) {
@@ -772,51 +761,6 @@ function drawGrid() {
     }
 }
 
-function drawDoghouse() {
-    const dhX = (tileCount - 2) * gridSize + gridSize/2;
-    const dhY = 1 * gridSize + gridSize/2;
-    
-    ctx.save();
-    ctx.translate(dhX, dhY);
-
-    // Back interior (Dark Shadow)
-    ctx.fillStyle = "#220000";
-    ctx.beginPath();
-    ctx.roundRect(-gridSize * 0.9, -gridSize * 0.3, gridSize * 1.8, gridSize * 1.3, 8);
-    ctx.fill();
-    
-    // Roof (Wood Red Triangle)
-    ctx.fillStyle = "#A52A2A"; 
-    ctx.beginPath();
-    ctx.moveTo(-gridSize * 1.5, -gridSize * 0.3);
-    ctx.lineTo(0, -gridSize * 1.8);
-    ctx.lineTo(gridSize * 1.5, -gridSize * 0.3);
-    ctx.fill();
-    // Trim
-    ctx.strokeStyle = "#800000";
-    ctx.lineWidth = 4;
-    ctx.stroke();
-    
-    // Side Walls
-    ctx.fillStyle = "#D2691E"; // Orange Wood
-    ctx.fillRect(-gridSize * 0.9, -gridSize * 0.3, gridSize * 0.5, gridSize * 1.3); // Left wall
-    ctx.fillRect(gridSize * 0.4, -gridSize * 0.3, gridSize * 0.5, gridSize * 1.3);  // Right wall
-    
-    // Archway Header
-    ctx.beginPath();
-    ctx.arc(0, -gridSize*0.3, gridSize*0.9, Math.PI, Math.PI * 2);
-    ctx.fill();
-    
-    // Sleep Zzzs
-    if (princessInDoghouse) {
-        ctx.fillStyle = "white";
-        ctx.font = "italic bold 16px Courier New";
-        ctx.fillText("Zzz", -12, -25);
-    }
-    
-    ctx.restore();
-}
-
 let previewAngle = 0;
 function drawPreviewSnake() {
     const cx = canvas.width / 2;
@@ -872,10 +816,6 @@ function draw() {
     
     drawGrid();
     
-    if (profile.id === 'princess') {
-        drawDoghouse();
-    }
-    
     if (!isPlaying) {
         drawPreviewSnake();
         return; // Don't draw the actual game logic if we are on the menu!
@@ -911,19 +851,36 @@ function draw() {
         // Spin the bone slowly
         ctx.rotate(time / 400);
         
-        // Bone dimensions
-        const bw = 10 + pulse;    // Bone shaft width
-        const bh = 4 + pulse/2;   // Bone shaft height
-        const knob = 3 + pulse/2; // Ear knobs
+        // Realistic bone dimensions and colors
+        ctx.fillStyle = "#FFF8DC"; // Ivory/Cornsilk bone color
+        ctx.shadowColor = "rgba(255, 248, 220, 0.7)"; // Custom bone glow
+        ctx.shadowBlur = 12;
+
+        const bw = 16 + pulse;    // Wider bone shaft
+        const bh = 5 + pulse/2;   // Thicker bone shaft
+        const knob = 4.5 + pulse/2; // Larger ear knobs
         
+        const offsetW = bw/2;
+        const offsetH = bh/2;
+
         ctx.beginPath();
-        ctx.rect(-bw/2, -bh/2, bw, bh);
-        // 4 knobs on the corners
-        ctx.arc(-bw/2, -bh/2, knob, 0, Math.PI * 2);
-        ctx.arc(-bw/2, bh/2, knob, 0, Math.PI * 2);
-        ctx.arc(bw/2, -bh/2, knob, 0, Math.PI * 2);
-        ctx.arc(bw/2, bh/2, knob, 0, Math.PI * 2);
+        // Central shaft
+        ctx.rect(-offsetW, -offsetH, bw, bh);
+        
+        // 4 knobs on the corners for the classic bone look
+        ctx.arc(-offsetW, -offsetH, knob, 0, Math.PI * 2);
+        ctx.arc(-offsetW, offsetH, knob, 0, Math.PI * 2);
+        ctx.arc(offsetW, -offsetH, knob, 0, Math.PI * 2);
+        ctx.arc(offsetW, offsetH, knob, 0, Math.PI * 2);
         ctx.fill();
+        
+        // Dark inner stroke/texture to make it distinct
+        ctx.strokeStyle = "rgba(139, 115, 85, 0.4)"; 
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-offsetW + 3, 0);
+        ctx.lineTo(offsetW - 3, 0);
+        ctx.stroke();
         
         ctx.restore();
     } else {
@@ -1458,15 +1415,6 @@ window.addEventListener('keydown', e => {
     // Use pendingDirection to prevent "U-turn" death on rapid double pressing
     const activeDx = pendingDirection ? pendingDirection.dx : dx;
     const activeDy = pendingDirection ? pendingDirection.dy : dy;
-
-    if (princessInDoghouse) {
-        if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
-            princessInDoghouse = false;
-            playBarkSound();
-            pendingDirection = { dx: 0, dy: 1 };
-        }
-        return; // Ignore all other keys
-    }
 
     switch (e.key) {
         case 'ArrowUp':
