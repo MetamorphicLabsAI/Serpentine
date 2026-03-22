@@ -11,12 +11,15 @@ Serpentine is a modern re-imagining of the classic arcade game built strictly wi
 * 🕹️ **Arcade Mechanics**: Multi-directional logic built for keyboard (WASD/Arrows) and touch screens (fluid swipe gestures on mobile devices).
 * 💾 **Persistent Memory**: Uses browser `localStorage` to permanently save your highest game score on your machine.
 * 🎨 **Hardware Accelerated UI**: Built with scanline CSS overlays, breathing glow elements, game-over screen shake mechanics, and dynamic arcade cabinet color grading that shifts to match your selected snake profile.
+* ⚙️ **Arcade OS Menu System**: A fully integrated main menu UI allowing seamless navigation between game modes, difficulty parameters, and character profiles.
 * 🐍 **Selectable Snake Profiles**: Choose between different retro-cyberpunk characters like Glitch-Wave, Void Walker, or Mecha-Serpent with unique lore and custom, fully color-matched neon aesthetics.
+* 🔓 **Unlockable Mechanics**: Complete in-game milestones (like consuming 20 standard food units) to permanently unlock exclusive profiles (like the brilliantly shifting *Chromatic Punch* algorithm).
+* 🔥 **Dynamic Difficulty Modes**: Scale your challenge precisely across Easy (180ms tick rate), Medium (120ms tick rate), Hard (80ms tick rate), and Insane (50ms tick rate) speeds.
 
 ## Controls
 - **Start/Restart**: `Spacebar`, `Enter`, or click/tap the button.
 - **Move**: `Arrow Keys`, `WASD`, or **Swipe directly on touchscreen displays.**
-- **Main Menu**: Quickly swap between programs by returning to the character select screen after a Game Over.
+- **Main Menu Navigation**: Return to the robust main menu system after a Game Over to freely swap between active game modes and character routines.
 
 ## Getting Started
 1. Clone the repository to your local machine.

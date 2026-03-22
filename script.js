@@ -2,17 +2,23 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d', { alpha: false });
 const scoreElement = document.getElementById('score');
 const highScoreElement = document.getElementById('high-score');
+const mainMenu = document.getElementById('main-menu');
+const modeSelect = document.getElementById('mode-select');
+const diffSelect = document.getElementById('difficulty-select');
+const mainMenu = document.getElementById('main-menu');
+const modeSelect = document.getElementById('mode-select');
+const diffSelect = document.getElementById('difficulty-select');
 const startScreen = document.getElementById('start-screen');
 const gameOverScreen = document.getElementById('game-over');
 const finalScoreElement = document.getElementById('final-score');
-const startBtn = document.getElementById('start-btn');
 const restartBtn = document.getElementById('restart-btn');
 const menuBtn = document.getElementById('menu-btn');
 
 // Game Core Configuration
 const gridSize = 20;
 const tileCount = canvas.width / gridSize;
-const initialSpeed = 120; // MS per frame
+const initialSpeed = 120;
+let currentDifficultySpeed = 120; // Default Medium
 
 // Thematic Colors mapped from CSS
 const colors = {
@@ -27,12 +33,15 @@ const colors = {
 };
 
 /* --- Snake Profiles --- */
+let unlockedSpectrum = localStorage.getItem('serpentineUnlockedSpectrum') === 'true';
+
 const snakeProfiles = [
-    { name: "NEON PROTOCOL", lore: "The original OS baseline. Reliable, bright, and fiercely fast.", head: "#00ffcc", body: "#00ffcc", glow: "rgba(0, 255, 204, 0.5)", food: "#ff0055", foodGlow: "rgba(255, 0, 85, 0.8)", accent: "#b026ff" },
-    { name: "VOID WALKER", lore: "Born in the corrupted null-sectors of the mainframe. Siphons energy from the background.", head: "#8a2be2", body: "#8a2be2", glow: "rgba(138, 43, 226, 0.8)", food: "#00ffff", foodGlow: "rgba(0, 255, 255, 0.8)", accent: "#ff00ff" },
-    { name: "GOLD-FI", lore: "A luxury data-packet miner. Runs hot, blindingly bright, and leaves a trail of pure wealth.", head: "#ffd700", body: "#ffd700", glow: "rgba(255, 215, 0, 0.6)", food: "#ff4500", foodGlow: "rgba(255, 69, 0, 0.8)", accent: "#ffffff" },
-    { name: "GLITCH-WAVE", lore: "An unstable remnant of a deleted game file. It doesn't play by the rules.", head: "#ff0055", body: "#ff0055", glow: "rgba(255, 0, 85, 0.6)", food: "#00ffcc", foodGlow: "rgba(0, 255, 204, 0.8)", accent: "#ffff00" },
-    { name: "MECHA-SERPENT", lore: "Military-grade intrusion software. Designed to violently overwrite hostile firewalls.", head: "#708090", body: "#708090", glow: "rgba(112, 128, 144, 0.5)", food: "#ff0000", foodGlow: "rgba(255, 0, 0, 0.8)", accent: "#ffaa00" }
+    { id: "neon", name: "NEON PROTOCOL", lore: "The original OS baseline. Reliable, bright, and fiercely fast.", head: "#00ffcc", body: "#00ffcc", glow: "rgba(0, 255, 204, 0.5)", food: "#ff0088", foodGlow: "rgba(255, 0, 136, 0.8)", accent: "#0055ff" },
+    { id: "void", name: "VOID WALKER", lore: "Born in the corrupted null-sectors of the mainframe. Siphons energy from the background.", head: "#8a2be2", body: "#8a2be2", glow: "rgba(138, 43, 226, 0.8)", food: "#00ffff", foodGlow: "rgba(0, 255, 255, 0.8)", accent: "#ff00ff" },
+    { id: "gold", name: "GOLD-FI", lore: "A luxury data-packet miner. Runs hot, blindingly bright, and leaves a trail of pure wealth.", head: "#ffd700", body: "#ffd700", glow: "rgba(255, 215, 0, 0.6)", food: "#ff4500", foodGlow: "rgba(255, 69, 0, 0.8)", accent: "#ffffff" },
+    { id: "glitch", name: "GLITCH-WAVE", lore: "An unstable remnant of a deleted game file. It doesn't play by the rules.", head: "#ff0055", body: "#ff0055", glow: "rgba(255, 0, 85, 0.6)", food: "#ff0000", foodGlow: "rgba(255, 0, 0, 0.8)", accent: "#800080" },
+    { id: "mecha", name: "MECHA-SERPENT", lore: "Military-grade intrusion software. Designed to violently overwrite hostile firewalls.", head: "#708090", body: "#708090", glow: "rgba(112, 128, 144, 0.5)", food: "#c0c0c0", foodGlow: "rgba(192, 192, 192, 0.8)", accent: "#ffffff" },
+    { id: "spectrum", name: "CHROMATIC PUNCH", lore: "A multi-colored shifting anomaly unlocked by eating 20 food in a standard run. Smells like fruit punch.", head: "#ff0055", body: "#ff0055", glow: "rgba(255, 0, 85, 0.6)", food: "#00ffcc", foodGlow: "rgba(0, 255, 204, 0.8)", accent: "#ffff00", isShifting: true, locked: !unlockedSpectrum }
 ];
 let selectedProfileIndex = 0;
 
@@ -49,9 +58,27 @@ function updateProfileStyle() {
     document.getElementById('char-name').style.color = profile.body;
     document.getElementById('char-name').style.textShadow = `0 0 10px ${profile.body}`;
     
-    colors.snakeHead = profile.head;
-    colors.snakeBody = profile.body;
-    colors.snakeGlow = profile.glow;
+    const lockText = document.getElementById('char-lock-status');
+    const selectBtn = document.getElementById('btn-select-char');
+    if (lockText && selectBtn) {
+        if (profile.locked) {
+            lockText.classList.remove('hidden');
+            selectBtn.style.opacity = '0.5';
+            selectBtn.style.pointerEvents = 'none';
+            selectBtn.textContent = 'LOCKED';
+        } else {
+            lockText.classList.add('hidden');
+            selectBtn.style.opacity = '1';
+            selectBtn.style.pointerEvents = 'auto';
+            selectBtn.textContent = 'SELECT';
+        }
+    }
+    
+    if (!profile.isShifting) {
+        colors.snakeHead = profile.head;
+        colors.snakeBody = profile.body;
+        colors.snakeGlow = profile.glow;
+    }
     if (profile.food) colors.food = profile.food;
     if (profile.foodGlow) colors.foodGlow = profile.foodGlow;
     if (profile.accent) colors.accent = profile.accent;
@@ -67,7 +94,7 @@ let highScore = localStorage.getItem('serpentineHighScore') || 0;
 let isPlaying = false;
 let lastRenderTime = 0;
 let particles = [];
-let currentSpeed = initialSpeed;
+let currentSpeed = currentDifficultySpeed;
 let pendingDirection = null; // Prevent double-turn death
 
 // Initial DOM Setup
@@ -303,7 +330,7 @@ function initGrid() {
     dy = -1; // Moving up to start
     pendingDirection = { dx, dy };
     score = 0;
-    currentSpeed = initialSpeed;
+    currentSpeed = currentDifficultySpeed;
     scoreElement.textContent = score;
     scoreElement.style.color = colors.snakeBody;
     placeFood();
@@ -391,7 +418,14 @@ function updateLogic() {
         placeFood();
         
         // Slightly increase speed (cap at 60ms)
-        currentSpeed = Math.max(60, initialSpeed - (score * 0.5));
+                currentSpeed = Math.max(currentDifficultySpeed / 2, currentDifficultySpeed - (score * 0.5));
+        
+        // Unlock Spectrum check
+        if (score >= 200 && localStorage.getItem('serpentineUnlockedSpectrum') !== 'true') {
+            localStorage.setItem('serpentineUnlockedSpectrum', 'true');
+            const spectrum = snakeProfiles.find(p => p.id === 'spectrum');
+            if (spectrum) spectrum.locked = false;
+        }
     } else {
         // Pop Tail if we didn't eat
         snake.pop();
@@ -453,13 +487,24 @@ function drawPreviewSnake() {
 
 // Main rendering pass
 function draw() {
+    const profile = snakeProfiles[selectedProfileIndex];
+    if (profile.isShifting) {
+        const time = Date.now() / 15;
+        const shiftHue = time % 360;
+        colors.snakeBody = `hsl(${(shiftHue + 30) % 360}, 100%, 50%)`;
+        colors.snakeHead = `hsl(${shiftHue}, 100%, 60%)`;
+        colors.snakeGlow = `hsla(${shiftHue}, 100%, 50%, 0.6)`;
+        document.documentElement.style.setProperty('--snake-color', colors.snakeBody);
+        document.documentElement.style.setProperty('--snake-glow', `0 0 10px ${colors.snakeBody}, 0 0 20px ${colors.snakeBody}`);
+    }
+
     // Fill Background
     ctx.fillStyle = colors.bg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     drawGrid();
     
-    if (!isPlaying && document.getElementById('start-screen').classList.contains('hidden') === false) {
+    if (!isPlaying) {
         drawPreviewSnake();
         return; // Don't draw the actual game logic if we are on the menu!
     }
@@ -577,6 +622,12 @@ function drawEyes(x, y) {
 function startGame() {
     isPlaying = true;
     if (audioCtx.state === 'suspended') audioCtx.resume();
+    mainMenu.classList.add('hidden');
+    modeSelect.classList.add('hidden');
+    diffSelect.classList.add('hidden');
+        if (mainMenu) mainMenu.classList.add('hidden');
+    if (modeSelect) modeSelect.classList.add('hidden');
+    if (diffSelect) diffSelect.classList.add('hidden');
     startScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
     
@@ -720,15 +771,79 @@ nextBtn.addEventListener('click', () => {
     updateProfileStyle();
 });
 
-// Button Bindings
-startBtn.addEventListener('click', startGame);
-restartBtn.addEventListener('click', startGame);
-menuBtn.addEventListener('click', () => {
+const hideAllMenus = () => {
+    mainMenu.classList.add('hidden');
+    modeSelect.classList.add('hidden');
+    diffSelect.classList.add('hidden');
+    startScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
+};
+
+document.getElementById('btn-play-menu').addEventListener('click', () => {
+    hideAllMenus();
+    modeSelect.classList.remove('hidden');
+});
+
+document.getElementById('btn-char-menu').addEventListener('click', () => {
+    hideAllMenus();
     startScreen.classList.remove('hidden');
 });
 
+document.getElementById('btn-exit-menu').addEventListener('click', () => {
+    mainMenu.innerHTML = "<h2 style='color:#ff0055; text-align:center; font-size:3rem; margin-top:100px;'>SYSTEM OFFLINE</h2>";
+});
+
+document.getElementById('btn-standard').addEventListener('click', () => {
+    hideAllMenus();
+    diffSelect.classList.remove('hidden');
+});
+
+document.getElementById('btn-back-mode').addEventListener('click', () => {
+    hideAllMenus();
+    mainMenu.classList.remove('hidden');
+});
+
+const diffBtns = document.querySelectorAll('.diff-btn');
+diffBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        currentDifficultySpeed = parseInt(e.target.dataset.speed) || 120;
+        startGame();
+    });
+});
+
+document.getElementById('btn-back-diff').addEventListener('click', () => {
+    hideAllMenus();
+    modeSelect.classList.remove('hidden');
+});
+
+document.getElementById('btn-select-char').addEventListener('click', () => {
+    if (!snakeProfiles[selectedProfileIndex].locked) {
+        hideAllMenus();
+        mainMenu.classList.remove('hidden');
+    }
+});
+
+document.getElementById('btn-back-char').addEventListener('click', () => {
+    hideAllMenus();
+    mainMenu.classList.remove('hidden');
+});
+
+// Button Bindings
+restartBtn.addEventListener('click', startGame);
+menuBtn.addEventListener('click', () => {
+    hideAllMenus();
+    mainMenu.classList.remove('hidden');
+});
+
+window.addEventListener('keydown', e => {
+    if (!isPlaying && !mainMenu.classList.contains('hidden') && (e.code === 'Enter' || e.code === 'Space')) {
+        document.getElementById('btn-play-menu').click();
+    }
+});
+
 // Start global animation loop
+hideAllMenus();
+mainMenu.classList.remove('hidden');
 updateProfileStyle(); // Sets Initial snake Profile
 initGrid();
 window.requestAnimationFrame(main);

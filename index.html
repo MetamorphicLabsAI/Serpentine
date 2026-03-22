@@ -32,7 +32,35 @@
                     <button id="restart-btn">REBOOT SYSTEM</button>
                     <button id="menu-btn" style="margin-top: 15px; font-size: 1rem; padding: 10px 30px; background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.3); color: #fff; box-shadow: none;">MAIN MENU</button>
                 </div>
-                <div id="start-screen" class="overlay">
+                <div id="main-menu" class="overlay">
+                    <h2 style="font-size: 3.5rem; margin-bottom: 40px; color: var(--snake-color); text-shadow: var(--snake-glow);">SERPENTINE</h2>
+                    <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 15px;">
+                        <button id="btn-play-menu" style="width: 300px;">GAME MODES</button>
+                        <button id="btn-char-menu" style="width: 300px;">CHARACTER SELECT</button>
+                        <button id="btn-exit-menu" style="width: 300px; background: rgba(255,0,0,0.1); border-color: #ff0055; color: #ff0055; box-shadow: none;">EXIT SYSTEM</button>
+                    </div>
+                </div>
+
+                <div id="mode-select" class="overlay hidden">
+                    <h2 style="font-size: 2.5rem; margin-bottom: 30px;">GAME MODES</h2>
+                    <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 15px;">
+                        <button id="btn-standard" style="width: 300px;">STANDARD</button>
+                        <button id="btn-back-mode" style="width: 300px; background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.3); color: #fff; box-shadow: none;">BACK</button>
+                    </div>
+                </div>
+
+                <div id="difficulty-select" class="overlay hidden">
+                    <h2 style="font-size: 2.2rem; margin-bottom: 30px;">DIFFICULTY</h2>
+                    <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 12px;">
+                        <button id="btn-easy" class="diff-btn" data-speed="180" style="width: 280px; font-size: 1.1rem; padding: 12px;">EASY</button>
+                        <button id="btn-medium" class="diff-btn" data-speed="120" style="width: 280px; font-size: 1.1rem; padding: 12px;">MEDIUM</button>
+                        <button id="btn-hard" class="diff-btn" data-speed="80" style="width: 280px; font-size: 1.1rem; padding: 12px;">HARD</button>
+                        <button id="btn-insane" class="diff-btn" data-speed="50" style="width: 280px; font-size: 1.1rem; padding: 12px; color: #ff0055; border-color: #ff0055;">INSANE</button>
+                        <button id="btn-back-diff" style="width: 280px; font-size: 1.1rem; padding: 12px; background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.3); color: #fff; margin-top: 10px; box-shadow: none;">BACK</button>
+                    </div>
+                </div>
+
+                <div id="start-screen" class="overlay hidden">
                     <h2 style="font-size: 2.2rem; margin-bottom: 5px;">CHOOSE PROGRAM</h2>
                     
                     <div class="character-select">
@@ -41,13 +69,15 @@
                         <div class="character-info">
                             <h3 id="char-name">NEON PROTOCOL</h3>
                             <p id="char-lore">The original OS baseline. Reliable, bright, and fiercely fast.</p>
+                            <p id="char-lock-status" style="color: #ff0055; font-size: 0.8rem; margin-top: 5px; font-weight: bold;" class="hidden">LOCKED</p>
                         </div>
                         
                         <button id="next-btn" class="nav-btn">▶</button>
                     </div>
                     
-                    <p class="blink" style="margin-bottom: 10px; font-size: 0.9rem;">PRESS ARROW KEYS OR SWIPE TO START</p>
-                    <button id="start-btn">INITIALIZE</button>
+                    <p class="blink" style="margin-bottom: 10px; font-size: 0.9rem;">PRESS ARROW KEYS TO BROWSE</p>
+                    <button id="btn-select-char" style="width: 280px;">SELECT</button>
+                    <button id="btn-back-char" style="width: 280px; font-size: 1rem; padding: 10px; background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.3); color: #fff; margin-top: 10px; box-shadow: none;">BACK</button>
                 </div>
             </div>
 
