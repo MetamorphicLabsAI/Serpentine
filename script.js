@@ -809,7 +809,9 @@ function draw() {
     ctx.restore();
     
     // --- Draw Snake ---
-    snake.forEach((segment, index) => {
+    // Reverse loop: Draw tail-to-head so the Head renders ON TOP of the body segments
+    for (let index = snake.length - 1; index >= 0; index--) {
+        const segment = snake[index];
         ctx.save();
         const isHead = index === 0;
         const isTail = index === snake.length - 1;
@@ -849,7 +851,7 @@ function draw() {
         }
         
         ctx.restore();
-    });
+    }
 }
 
 function drawPrincess(seg, i, isHead, isTail) {
@@ -900,13 +902,15 @@ function drawPrincess(seg, i, isHead, isTail) {
         
         ctx.rotate(angle);
         
-        // Draw legs sticking wide out of the body
-        ctx.fillStyle = "#3D1E07"; // Dark paws
+        // Draw legs sticking WIDE out of the body
+        ctx.fillStyle = "#3D1E07"; // Dark brown paws
         ctx.beginPath();
-        ctx.roundRect(-14, -3, 6, 8, 3); // Left Leg
+        // Left Paw (Protruding from -10 body boundary to -18)
+        ctx.roundRect(-18, -4, 8, 8, 4); 
         ctx.fill();
         ctx.beginPath();
-        ctx.roundRect(8, -3, 6, 8, 3);  // Right Leg
+        // Right Paw (Protruding from +10 body boundary to +18)
+        ctx.roundRect(10, -4, 8, 8, 4);  
         ctx.fill();
         ctx.restore();
     }
@@ -915,7 +919,7 @@ function drawPrincess(seg, i, isHead, isTail) {
         ctx.save();
         ctx.translate(cx, cy);
         
-        // Face the correct direction
+        // Face the forward direction
         let angle = 0;
         let cDx = dx, cDy = dy;
         if (cDx === 0 && cDy === 0) { cDy = -1; }
@@ -926,31 +930,40 @@ function drawPrincess(seg, i, isHead, isTail) {
         
         ctx.rotate(angle);
 
-        // A. Extended pointer snout (pushed forward)
-        ctx.fillStyle = "#A0522D"; 
+        // A. Head base (To anchor the snout smoothly)
+        ctx.fillStyle = "#8B4513";
         ctx.beginPath();
-        ctx.arc(0, -6, 7, 0, Math.PI * 2);
+        ctx.arc(0, 0, 9, 0, Math.PI * 2);
         ctx.fill();
 
-        // B. Large Floppy Ears (Dropped on the SIDES, angled back)
+        // B. Extended Wiener Dog Snout (pushed forward significantly)
+        ctx.fillStyle = "#A0522D"; // Lighter snout bridge
+        ctx.beginPath();
+        // Long vertical ellipse for the muzzle
+        ctx.ellipse(0, -9, 5.5, 11, 0, 0, Math.PI * 2); 
+        ctx.fill();
+
+        // C. Large Floppy Dachshund Ears (Dropped to the sides and slightly back)
         ctx.fillStyle = "#4B280A";
         ctx.beginPath();
-        ctx.ellipse(-9, -1, 3.5, 9, -Math.PI/10, 0, Math.PI * 2); // Left ear
+        // Left Ear: Leaning outward and dropping down
+        ctx.ellipse(-8, 3, 4, 11, -Math.PI/6, 0, Math.PI * 2); 
         ctx.fill();
         ctx.beginPath();
-        ctx.ellipse(9, -1, 3.5, 9, Math.PI/10, 0, Math.PI * 2);  // Right ear
+        // Right Ear: Leaning outward and dropping down
+        ctx.ellipse(8, 3, 4, 11, Math.PI/6, 0, Math.PI * 2);  
         ctx.fill();
 
-        // C. Black Nose
+        // D. Big Black Nose (At the very tip of the extended snout)
         ctx.fillStyle = "#000";
         ctx.beginPath();
-        ctx.arc(0, -12, 2.5, 0, Math.PI * 2);
+        ctx.arc(0, -19, 3.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // D. Eyes (Inquisitive dots on the snout base)
+        // E. Eyes (Inquisitive dots on the snout bridge)
         ctx.fillStyle = "#000";
-        ctx.beginPath(); ctx.arc(-3.5, -5, 2, 0, Math.PI*2); ctx.fill(); // Left eye
-        ctx.beginPath(); ctx.arc(3.5, -5, 2, 0, Math.PI*2); ctx.fill(); // Right eye
+        ctx.beginPath(); ctx.arc(-3.5, -6, 2, 0, Math.PI*2); ctx.fill(); // Left eye
+        ctx.beginPath(); ctx.arc(3.5, -6, 2, 0, Math.PI*2); ctx.fill(); // Right eye
 
         ctx.restore();
     }
@@ -975,14 +988,15 @@ function drawPrincess(seg, i, isHead, isTail) {
         ctx.rotate(angle);
 
         // E. Long Doxie Tail (Wagging)
-        const wag = Math.sin(Date.now() / 70) * 8;
-        ctx.strokeStyle = "#8B4513";
-        ctx.lineWidth = 4;
+        const wag = Math.sin(Date.now() / 70) * 10;
+        ctx.strokeStyle = "#4B280A"; // Darker brown tail
+        ctx.lineWidth = 5;
         ctx.lineCap = "round";
         
         ctx.beginPath();
-        ctx.moveTo(0, 5); // Base of tail
-        ctx.quadraticCurveTo(wag, 12, wag * 1.5, 18); // Wags left to right behind her
+        ctx.moveTo(0, 0); // Base of tail in the center
+        // Curve back out behind the dog varying left to right
+        ctx.quadraticCurveTo(wag, 10, wag * 1.5, 20); 
         ctx.stroke();
         
         ctx.restore();
