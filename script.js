@@ -968,8 +968,7 @@ function drawPrincess(seg, i, isHead, isTail) {
     // 3. Stumpy Legs (Front and Back)
     let isLegSegment = false;
     if (i === 1) isLegSegment = true; // Front legs
-    else if (snake.length > 3 && i === snake.length - 2) isLegSegment = true; // Back legs
-    else if (snake.length <= 3 && isTail) isLegSegment = true; // Back legs if snake is very short
+    else if (i > 1 && isTail) isLegSegment = true; // Back legs always at the very tail
 
     if (isLegSegment) {
         ctx.save();
@@ -1027,25 +1026,25 @@ function drawPrincess(seg, i, isHead, isTail) {
         // B. Extended Wiener Dog Snout (pushed forward significantly)
         ctx.fillStyle = "#A0522D"; // Lighter snout bridge
         ctx.beginPath();
-        // Long vertical ellipse for the muzzle
-        ctx.ellipse(0, -9, 5.5, 11, 0, 0, Math.PI * 2); 
+        // Extra Long vertical ellipse for the muzzle to make it undeniably a dachshund
+        ctx.ellipse(0, -11, 5, 14, 0, 0, Math.PI * 2); 
         ctx.fill();
 
         // C. Large Floppy Dachshund Ears (Dropped to the sides and slightly back)
         ctx.fillStyle = "#4B280A";
         ctx.beginPath();
         // Left Ear: Leaning outward and dropping down
-        ctx.ellipse(-8, 3, 4, 11, -Math.PI/6, 0, Math.PI * 2); 
+        ctx.ellipse(-8, 3, 4, 12, -Math.PI/6, 0, Math.PI * 2); 
         ctx.fill();
         ctx.beginPath();
         // Right Ear: Leaning outward and dropping down
-        ctx.ellipse(8, 3, 4, 11, Math.PI/6, 0, Math.PI * 2);  
+        ctx.ellipse(8, 3, 4, 12, Math.PI/6, 0, Math.PI * 2);  
         ctx.fill();
 
         // D. Big Black Nose (At the very tip of the extended snout)
         ctx.fillStyle = "#000";
         ctx.beginPath();
-        ctx.arc(0, -19, 3.5, 0, Math.PI * 2);
+        ctx.arc(0, -25, 3.5, 0, Math.PI * 2);
         ctx.fill();
 
         // E. Eyes (Inquisitive dots on the snout bridge)
