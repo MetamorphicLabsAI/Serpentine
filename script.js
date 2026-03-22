@@ -858,102 +858,134 @@ function drawPrincess(seg, i, isHead, isTail) {
     
     ctx.save();
     
-    // 1. Base Body - Unified "Wiener" shape (overlapping segments to look like one long dog)
+    // 1. Base Body - Unified "Wiener" shape (overlapping segments)
     ctx.fillStyle = "#8B4513"; // Primary Brindle Brown
     ctx.shadowBlur = 0;
-    
     ctx.beginPath();
-    // Slightly larger than grid to close gaps between segments
     ctx.roundRect(seg.x * gridSize - 0.5, seg.y * gridSize - 0.5, gridSize + 1, gridSize + 1, 4);
     ctx.fill();
 
     // 2. Brindle "Striping" Texture
-    ctx.strokeStyle = "rgba(45, 20, 5, 0.4)"; // Darker brindle stripes
+    ctx.strokeStyle = "rgba(45, 20, 5, 0.4)"; 
     ctx.lineWidth = 3;
     ctx.beginPath();
-    // Slanted "fur" stripes
     ctx.moveTo(seg.x * gridSize + 2, seg.y * gridSize + 4);
     ctx.lineTo(seg.x * gridSize + 10, seg.y * gridSize + 16);
     ctx.moveTo(seg.x * gridSize + 10, seg.y * gridSize + 2);
     ctx.lineTo(seg.x * gridSize + 18, seg.y * gridSize + 10);
     ctx.stroke();
 
-    // 3. Stumpy Legs (Only Front and Back)
-    // index 1 is the "Front" (behind head), isTail is "Back"
-    if (i === 1 || isTail) {
-        ctx.fillStyle = "#3D1E07"; // Dark paws
-        const legW = 6, legH = 8;
-        if (dx !== 0) { // Horizontal legs
-             ctx.fillRect(cx - 3, cy - 11, legW, 4); // Top leg
-             ctx.fillRect(cx - 3, cy + 7, legW, 4);  // Bottom leg
-        } else { // Vertical legs
-             ctx.fillRect(cx - 11, cy - 3, 4, legW); // Left leg
-             ctx.fillRect(cx + 7, cy - 3, 4, legW);  // Right leg
+    // 3. Stumpy Legs (Front and Back)
+    let isLegSegment = false;
+    if (i === 1) isLegSegment = true; // Front legs
+    else if (snake.length > 3 && i === snake.length - 2) isLegSegment = true; // Back legs
+    else if (snake.length <= 3 && isTail) isLegSegment = true; // Back legs if snake is very short
+
+    if (isLegSegment) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        
+        let sDx = dx, sDy = dy;
+        if (i > 0) {
+            sDx = Math.sign(snake[i-1].x - seg.x);
+            sDy = Math.sign(snake[i-1].y - seg.y);
         }
+        if (sDx === 0 && sDy === 0) { sDy = -1; }
+        
+        let angle = 0;
+        if (sDx === 1) angle = Math.PI / 2;
+        else if (sDx === -1) angle = -Math.PI / 2;
+        else if (sDy === 1) angle = Math.PI;
+        else if (sDy === -1) angle = 0;
+        
+        ctx.rotate(angle);
+        
+        // Draw legs sticking wide out of the body
+        ctx.fillStyle = "#3D1E07"; // Dark paws
+        ctx.beginPath();
+        ctx.roundRect(-14, -3, 6, 8, 3); // Left Leg
+        ctx.fill();
+        ctx.beginPath();
+        ctx.roundRect(8, -3, 6, 8, 3);  // Right Leg
+        ctx.fill();
+        ctx.restore();
     }
 
     if (isHead) {
-        // A. Extended "Pointer" Snout
-        ctx.fillStyle = "#A0522D"; 
-        let snX = (dx || 0) * 8;
-        let snY = (dy || 0) * 8;
-        // Default forward if not moving
-        if (snX === 0 && snY === 0) snY = -8; 
+        ctx.save();
+        ctx.translate(cx, cy);
+        
+        // Face the correct direction
+        let angle = 0;
+        let cDx = dx, cDy = dy;
+        if (cDx === 0 && cDy === 0) { cDy = -1; }
+        if (cDx === 1) angle = Math.PI / 2;
+        else if (cDx === -1) angle = -Math.PI / 2;
+        else if (cDy === 1) angle = Math.PI;
+        else if (cDy === -1) angle = 0;
+        
+        ctx.rotate(angle);
 
+        // A. Extended pointer snout (pushed forward)
+        ctx.fillStyle = "#A0522D"; 
         ctx.beginPath();
-        ctx.arc(cx + snX/2, cy + snY/2, 7, 0, Math.PI * 2);
+        ctx.arc(0, -6, 7, 0, Math.PI * 2);
         ctx.fill();
 
-        // B. Large Floppy Ears (Hanging down)
+        // B. Large Floppy Ears (Dropped on the SIDES, angled back)
         ctx.fillStyle = "#4B280A";
-        const earW = 6, earH = 13;
-        if (dx !== 0) { // Moving Horizontally
-            ctx.ellipse(cx, cy - 9, earW, earH, 0, 0, Math.PI * 2);
-            ctx.ellipse(cx, cy + 9, earW, earH, 0, 0, Math.PI * 2);
-        } else { // Moving Vertically
-            ctx.ellipse(cx - 11, cy, earW, earH, 0, 0, Math.PI * 2);
-            ctx.ellipse(cx + 11, cy, earW, earH, 0, 0, Math.PI * 2);
-        }
+        ctx.beginPath();
+        ctx.ellipse(-9, -1, 3.5, 9, -Math.PI/10, 0, Math.PI * 2); // Left ear
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(9, -1, 3.5, 9, Math.PI/10, 0, Math.PI * 2);  // Right ear
         ctx.fill();
 
         // C. Black Nose
         ctx.fillStyle = "#000";
         ctx.beginPath();
-        ctx.arc(cx + snX, cy + snY, 3, 0, Math.PI * 2);
+        ctx.arc(0, -12, 2.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // D. Eyes (Small inquisitive dots)
+        // D. Eyes (Inquisitive dots on the snout base)
         ctx.fillStyle = "#000";
-        const eyeD = 2.5, eyeO = 4.5;
-        if (dx !== 0) {
-            ctx.beginPath(); ctx.arc(cx + dx*2, cy - eyeO, eyeD, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(cx + dx*2, cy + eyeO, eyeD, 0, Math.PI*2); ctx.fill();
-        } else {
-            ctx.beginPath(); ctx.arc(cx - eyeO, cy + dy*2, eyeD, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(cx + eyeO, cy + dy*2, eyeD, 0, Math.PI*2); ctx.fill();
-        }
+        ctx.beginPath(); ctx.arc(-3.5, -5, 2, 0, Math.PI*2); ctx.fill(); // Left eye
+        ctx.beginPath(); ctx.arc(3.5, -5, 2, 0, Math.PI*2); ctx.fill(); // Right eye
+
+        ctx.restore();
     }
 
     if (isTail) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        
+        let sDx = dx, sDy = dy;
+        if (snake.length > 1) {
+            sDx = Math.sign(snake[snake.length-2].x - seg.x);
+            sDy = Math.sign(snake[snake.length-2].y - seg.y);
+        }
+        if (sDx === 0 && sDy === 0) { sDy = -1; }
+        
+        let angle = 0;
+        if (sDx === 1) angle = Math.PI / 2;
+        else if (sDx === -1) angle = -Math.PI / 2;
+        else if (sDy === 1) angle = Math.PI;
+        else if (sDy === -1) angle = 0;
+        
+        ctx.rotate(angle);
+
         // E. Long Doxie Tail (Wagging)
-        const wag = Math.sin(Date.now() / 70) * 12;
+        const wag = Math.sin(Date.now() / 70) * 8;
         ctx.strokeStyle = "#8B4513";
         ctx.lineWidth = 4;
         ctx.lineCap = "round";
         
-        let tx = -(dx || 0) * 8;
-        let ty = -(dy || 0) * 8;
-        if (tx === 0 && ty === 0) ty = 8; // Default tail pos
-
         ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.quadraticCurveTo(
-            cx + tx, 
-            cy + ty, 
-            cx + tx * 1.8 + (dx === 0 ? wag : 0), 
-            cy + ty * 1.8 + (dy === 0 ? wag : 0)
-        );
+        ctx.moveTo(0, 5); // Base of tail
+        ctx.quadraticCurveTo(wag, 12, wag * 1.5, 18); // Wags left to right behind her
         ctx.stroke();
+        
+        ctx.restore();
     }
 
     ctx.restore();
