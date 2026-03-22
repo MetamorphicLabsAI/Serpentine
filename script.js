@@ -948,59 +948,71 @@ function drawPrincess(seg, i, isHead, isTail) {
     
     ctx.save();
     
-    // 1. Base Body - Unified "Wiener" shape (overlapping segments)
+    let isLegSegment = false;
+    if (i === 1) isLegSegment = true; // Front legs / shoulders
+    else if (i > 1 && isTail) isLegSegment = true; // Back legs / hips
+
+    // 1. Calculate rotation angle for current segment
+    let sDx = dx, sDy = dy;
+    if (i > 0) {
+        sDx = Math.sign(snake[i-1].x - seg.x);
+        sDy = Math.sign(snake[i-1].y - seg.y);
+    }
+    if (sDx === 0 && sDy === 0) { sDy = -1; }
+    
+    let angle = 0;
+    if (sDx === 1) angle = Math.PI / 2;
+    else if (sDx === -1) angle = -Math.PI / 2;
+    else if (sDy === 1) angle = Math.PI;
+    else if (sDy === -1) angle = 0;
+
+    // 2. Base Body & Shoulders/Hips
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angle);
+
     ctx.fillStyle = "#8B4513"; // Primary Brindle Brown
     ctx.shadowBlur = 0;
+    
     ctx.beginPath();
-    ctx.roundRect(seg.x * gridSize - 0.5, seg.y * gridSize - 0.5, gridSize + 1, gridSize + 1, 4);
+    if (isHead) {
+        // Neck base (standard size)
+        ctx.roundRect(-gridSize/2, -gridSize/2, gridSize, gridSize, 4);
+    } else if (isLegSegment) {
+        // Broad rounded shoulders/hips (slightly wider, heavily rounded)
+        ctx.roundRect(-gridSize/2 - 2, -gridSize/2 - 1, gridSize + 4, gridSize + 2, gridSize/2);
+    } else {
+        // Narrow tubular body (3/4 width)
+        const w = gridSize * 0.75;
+        const h = gridSize + 2; // slightly longer to ensure sections overlap seamlessly
+        ctx.roundRect(-w/2, -h/2, w, h, 6);
+    }
     ctx.fill();
 
-    // 2. Brindle "Striping" Texture
+    // 3. Brindle "Striping" Texture
     ctx.strokeStyle = "rgba(45, 20, 5, 0.4)"; 
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.moveTo(seg.x * gridSize + 2, seg.y * gridSize + 4);
-    ctx.lineTo(seg.x * gridSize + 10, seg.y * gridSize + 16);
-    ctx.moveTo(seg.x * gridSize + 10, seg.y * gridSize + 2);
-    ctx.lineTo(seg.x * gridSize + 18, seg.y * gridSize + 10);
+    const wLimit = isLegSegment ? gridSize/2 : (gridSize * 0.75)/2;
+    ctx.moveTo(-wLimit/1.5, -gridSize/4);
+    ctx.lineTo(wLimit/1.5, gridSize/4);
+    ctx.moveTo(-wLimit/1.5, gridSize/4 - 2);
+    ctx.lineTo(wLimit/1.5, gridSize/4 + 6);
     ctx.stroke();
 
-    // 3. Stumpy Legs (Front and Back)
-    let isLegSegment = false;
-    if (i === 1) isLegSegment = true; // Front legs
-    else if (i > 1 && isTail) isLegSegment = true; // Back legs always at the very tail
-
+    // 4. Stumpy Legs
     if (isLegSegment) {
-        ctx.save();
-        ctx.translate(cx, cy);
-        
-        let sDx = dx, sDy = dy;
-        if (i > 0) {
-            sDx = Math.sign(snake[i-1].x - seg.x);
-            sDy = Math.sign(snake[i-1].y - seg.y);
-        }
-        if (sDx === 0 && sDy === 0) { sDy = -1; }
-        
-        let angle = 0;
-        if (sDx === 1) angle = Math.PI / 2;
-        else if (sDx === -1) angle = -Math.PI / 2;
-        else if (sDy === 1) angle = Math.PI;
-        else if (sDy === -1) angle = 0;
-        
-        ctx.rotate(angle);
-        
-        // Draw legs sticking WIDE out of the body
         ctx.fillStyle = "#3D1E07"; // Dark brown paws
         ctx.beginPath();
-        // Left Paw (Protruding from -10 body boundary to -18)
+        // Left Paw
         ctx.roundRect(-18, -4, 8, 8, 4); 
         ctx.fill();
         ctx.beginPath();
-        // Right Paw (Protruding from +10 body boundary to +18)
+        // Right Paw
         ctx.roundRect(10, -4, 8, 8, 4);  
         ctx.fill();
-        ctx.restore();
     }
+    ctx.restore();
 
     if (isHead) {
         ctx.save();
