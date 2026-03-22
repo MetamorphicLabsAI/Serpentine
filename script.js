@@ -7,6 +7,7 @@ const gameOverScreen = document.getElementById('game-over');
 const finalScoreElement = document.getElementById('final-score');
 const startBtn = document.getElementById('start-btn');
 const restartBtn = document.getElementById('restart-btn');
+const menuBtn = document.getElementById('menu-btn');
 
 // Game Core Configuration
 const gridSize = 20;
@@ -27,11 +28,11 @@ const colors = {
 
 /* --- Snake Profiles --- */
 const snakeProfiles = [
-    { name: "NEON PROTOCOL", lore: "The original OS baseline. Reliable, bright, and fiercely fast.", head: "#00ffcc", body: "#00ffcc", glow: "rgba(0, 255, 204, 0.5)" },
-    { name: "VOID WALKER", lore: "Born in the corrupted null-sectors of the mainframe. Siphons energy from the background.", head: "#8a2be2", body: "#8a2be2", glow: "rgba(138, 43, 226, 0.8)" },
-    { name: "GOLD-FI", lore: "A luxury data-packet miner. Runs hot, blindingly bright, and leaves a trail of pure wealth.", head: "#ffd700", body: "#ffd700", glow: "rgba(255, 215, 0, 0.6)" },
-    { name: "GLITCH-WAVE", lore: "An unstable remnant of a deleted game file. It doesn't play by the rules.", head: "#ff0055", body: "#ff0055", glow: "rgba(255, 0, 85, 0.6)" },
-    { name: "MECHA-SERPENT", lore: "Military-grade intrusion software. Designed to violently overwrite hostile firewalls.", head: "#708090", body: "#708090", glow: "rgba(112, 128, 144, 0.5)" }
+    { name: "NEON PROTOCOL", lore: "The original OS baseline. Reliable, bright, and fiercely fast.", head: "#00ffcc", body: "#00ffcc", glow: "rgba(0, 255, 204, 0.5)", food: "#ff0055", foodGlow: "rgba(255, 0, 85, 0.8)", accent: "#b026ff" },
+    { name: "VOID WALKER", lore: "Born in the corrupted null-sectors of the mainframe. Siphons energy from the background.", head: "#8a2be2", body: "#8a2be2", glow: "rgba(138, 43, 226, 0.8)", food: "#00ffff", foodGlow: "rgba(0, 255, 255, 0.8)", accent: "#ff00ff" },
+    { name: "GOLD-FI", lore: "A luxury data-packet miner. Runs hot, blindingly bright, and leaves a trail of pure wealth.", head: "#ffd700", body: "#ffd700", glow: "rgba(255, 215, 0, 0.6)", food: "#ff4500", foodGlow: "rgba(255, 69, 0, 0.8)", accent: "#ffffff" },
+    { name: "GLITCH-WAVE", lore: "An unstable remnant of a deleted game file. It doesn't play by the rules.", head: "#ff0055", body: "#ff0055", glow: "rgba(255, 0, 85, 0.6)", food: "#00ffcc", foodGlow: "rgba(0, 255, 204, 0.8)", accent: "#ffff00" },
+    { name: "MECHA-SERPENT", lore: "Military-grade intrusion software. Designed to violently overwrite hostile firewalls.", head: "#708090", body: "#708090", glow: "rgba(112, 128, 144, 0.5)", food: "#ff0000", foodGlow: "rgba(255, 0, 0, 0.8)", accent: "#ffaa00" }
 ];
 let selectedProfileIndex = 0;
 
@@ -39,6 +40,10 @@ function updateProfileStyle() {
     const profile = snakeProfiles[selectedProfileIndex];
     document.documentElement.style.setProperty('--snake-color', profile.body);
     document.documentElement.style.setProperty('--snake-glow', `0 0 10px ${profile.body}, 0 0 20px ${profile.body}`);
+    
+    if (profile.food) document.documentElement.style.setProperty('--food-color', profile.food);
+    if (profile.accent) document.documentElement.style.setProperty('--accent-color', profile.accent);
+    
     document.getElementById('char-name').textContent = profile.name;
     document.getElementById('char-lore').textContent = profile.lore;
     document.getElementById('char-name').style.color = profile.body;
@@ -47,6 +52,9 @@ function updateProfileStyle() {
     colors.snakeHead = profile.head;
     colors.snakeBody = profile.body;
     colors.snakeGlow = profile.glow;
+    if (profile.food) colors.food = profile.food;
+    if (profile.foodGlow) colors.foodGlow = profile.foodGlow;
+    if (profile.accent) colors.accent = profile.accent;
 }
 
 // State Variables
@@ -55,7 +63,7 @@ let food = { x: 0, y: 0 };
 let dx = 0;
 let dy = 0;
 let score = 0;
-let highScore = localStorage.getItem('neonSnakeHighScore') || 0;
+let highScore = localStorage.getItem('serpentineHighScore') || 0;
 let isPlaying = false;
 let lastRenderTime = 0;
 let particles = [];
@@ -602,7 +610,7 @@ function triggerGameOver() {
     
     if (score > highScore) {
         highScore = score;
-        localStorage.setItem('neonSnakeHighScore', highScore);
+        localStorage.setItem('serpentineHighScore', highScore);
         highScoreElement.textContent = highScore;
         scoreElement.style.color = colors.accent; // highlight new best
         
@@ -715,6 +723,10 @@ nextBtn.addEventListener('click', () => {
 // Button Bindings
 startBtn.addEventListener('click', startGame);
 restartBtn.addEventListener('click', startGame);
+menuBtn.addEventListener('click', () => {
+    gameOverScreen.classList.add('hidden');
+    startScreen.classList.remove('hidden');
+});
 
 // Start global animation loop
 updateProfileStyle(); // Sets Initial snake Profile

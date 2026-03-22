@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Snake Arcade</title>
+    <title>Serpentine</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
@@ -17,7 +17,7 @@
                     <div class="score-label">SCORE</div>
                     <div id="score" class="score-value">0</div>
                 </div>
-                <div class="title">NEON SNAKE</div>
+                <div class="title">SERPENTINE</div>
                 <div class="score-board">
                     <div class="score-label">BEST</div>
                     <div id="high-score" class="score-value">0</div>
@@ -30,10 +30,23 @@
                     <h2>SYSTEM FAILURE</h2>
                     <p>FINAL SCORE: <span id="final-score" class="highlight">0</span></p>
                     <button id="restart-btn">REBOOT SYSTEM</button>
+                    <button id="menu-btn" style="margin-top: 15px; font-size: 1rem; padding: 10px 30px; background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.3); color: #fff; box-shadow: none;">MAIN MENU</button>
                 </div>
                 <div id="start-screen" class="overlay">
-                    <h2>READY?</h2>
-                    <p>USE ARROW KEYS OR SWIPE TO MOVE</p>
+                    <h2 style="font-size: 2.2rem; margin-bottom: 5px;">CHOOSE PROGRAM</h2>
+                    
+                    <div class="character-select">
+                        <button id="prev-btn" class="nav-btn">◀</button>
+                        
+                        <div class="character-info">
+                            <h3 id="char-name">NEON PROTOCOL</h3>
+                            <p id="char-lore">The original OS baseline. Reliable, bright, and fiercely fast.</p>
+                        </div>
+                        
+                        <button id="next-btn" class="nav-btn">▶</button>
+                    </div>
+                    
+                    <p class="blink" style="margin-bottom: 10px; font-size: 0.9rem;">PRESS ARROW KEYS OR SWIPE TO START</p>
                     <button id="start-btn">INITIALIZE</button>
                 </div>
             </div>
