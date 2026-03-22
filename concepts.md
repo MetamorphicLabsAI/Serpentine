@@ -217,7 +217,9 @@ These modes take inspiration from legendary arcade mechanics but transform them 
 *A tactical, high-stakes combat and navigation mode where your body is your weapon and your shield.*
 
 - **THE HOOK:** Engage in digital jousting in a maze-like sub-grid. Collect the **Decryption Key** and escape while fighting off specialized **Sentinel AI** programs.
-- **STARTING CONFIG:** You and all Sentinels start at **Head + 4 segments**.
+- **STARTING CONFIG (Fixed Health):** You and all Sentinels start at exactly **Head + 4 segments**. 
+- **NO GROWTH:** Consuming data segments does **not** increase your length in this mode. Your body is your "Health Bar."
+- **ATTRITION SURVIVAL:** If a Sentinel bites your middle, your tail is severed. You can be reduced to just a **Vulnerable Head** (H+0) and still survive, but you are one hit away from a **Critical System Failure**.
 
 #### 🛡️ THE GEAR ENGINE (Tactical Inventory)
 Players and elite Sentinels can pick up and equip hardware modules:
@@ -231,17 +233,48 @@ Players and elite Sentinels can pick up and equip hardware modules:
     -   `Scavenging Armor:` If you sever a tail that has armor, you must consume the tail from the *severed point down to the tip* to "Integrate" (steal) the armor for yourself.
 -   **🟢 CLOAK (Stealth Module):** Rare pickup. Provides 3 seconds of invisibility and total phase-shifting (invulnerability).
 
-#### ✂️ THE SEVERING ENGINE (Segment Destruction)
--   **SEVERING:** Biting any middle segment of an enemy snake detaches their entire tail from that point down. The enemy head survives but is now a "Short Program."
--   **SCAVENGING:** The severed tail segments remain on the grid as stationary "data blocks" you can eat for massive points. 
+#### ✂️ THE SEVERING ENGINE (Combat Logic)
+-   **SEVERING:** Biting any middle segment of an enemy snake detaches their entire tail from that point down. The enemy head survives but is now "Damaged."
+-   **SCAVENGING:** The severed tail segments remain on the grid as stationary "data blocks." Eating them rewards **Bank Points** but does **not** increase your length. 
 -   **HEAD-SHOT (Sneak Attack):** Biting the head from the **rear or side** instantly deletes the program.
--   **ULTIMATE SYNC:** Consuming an entire snake from **Tail to Head** in one continuous movement grants an **EXTRA LIFE**.
+-   **ULTIMATE SYNC:** Consuming an entire snake from **Tail to Head** in one continuous movement rewards a **Health Reset (H+4)** and grants an **EXTRA LIFE**.
 
 #### 👾 BOSS ENCOUNTERS (The Master Programs)
 Standard high-score runs are interrupted by "The Guardians":
--   **HYDRA.DLL (Fragmentation Boss):** A multi-colored boss. When severed, the detached tail **instantly compiles a new head**, creating two smaller, aggressive snakes. You must delete every head to clear the breach.
+-   **HYDRA.DLL (Procedural Boss Matrix v2.0):** Not a single encounter, but a **Procedural Blueprint** that generates hundreds of unique "System Guardians." The Hydra appears as a boss every 5-10 levels, with its loadout, AI, and architecture scaling with the sector difficulty.
+    -   **Core Architecture:** A massive, lethal static body occupying the bottom 1/3rd of the screen. This acts as the "source code" for the 3 (or more) independent **Necks** that penetrate the playable 2/3rds of the maze arena.
+    
+    #### 🧬 HEAD AI PROFILES (Per-Node Logic)
+    Each of the three heads is assigned a random or scripted behavioral profile:
+    -   **🔴 AGGRESSOR:** Directly hunts the player with high speed.
+    -   **🔵 DEFENDER:** Circles the "Key" or "Gateway," acting as a sentient gatekeeper.
+    -   **🟠 PYRO-BREATHER:** Leaves a trail of lethal "Fire Pixels" (temporary obstacles) in its wake.
+    -   **🟡 SHADOW-DARE:** Ghost-shifts (phases) frequently, making it hard to predict its next movement.
+
+    #### 🛡️ PROCEDURAL HARDWARE LOADOUT
+    Each neck node is equipped with a randomized armor/helmet configuration:
+    -   **HELMET VARIANCE:** Some heads have Helms (requiring forced collisions to break), others are vulnerable to rear attacks from the start. 
+    -   **NECK ARMOR PLATING:**
+        -   **LIGHT PLATE:** Breaks upon the first neck-to-neck collision or environment "bump."
+        -   **MEDIUM PLATE:** Requires two impacts to expose the "data-flesh" underneath.
+        -   **HEAVY PLATE:** Unbreakable. Acts as a permanent, moving hazard that forces the player to rethink their navigation path entirely.
+    
+    #### 🧠 TACTICAL DEFEAT STRATEGY (The Puzzle)
+    Winning requires "debugging" the Hydra's specific loadout:
+    1.  **IDENTIFY:** Check which heads have helms/heavy armor.
+    2.  **BAIT:** Force neck-on-neck collisions to shed the Hydra's defenses.
+    3.  **SEVER:** Move into the exposed data-flesh or rear-head points once armor is gone.
+    4.  **COMPLETE:** Once all 3 Heads are deleted, the Sector Gateway opens.
+
+    #### 🔄 SCALING & ROTATION
+    Early levels (5, 10) feature Hydra variations with no armor and basic AI. Deep-system levels (50+) feature Heavy-Plated, triple-Aggressor Hydras that coordinate to pin the player into lethal corners.
 -   **VOID COIL (Phase Boss):** A snake whose segments shift in and out of existence. It cannot be bitten while "Ghosted." It only solidifies for 3 seconds after eating one of your food units.
 -   **THE ARCHIVE (Cluster Boss):** A massive $3 \times 3$ block of data that moves like a tank. You must "chip away" at its outer segments to reveal its central core (the Head).
+
+#### ⚡ LEVEL TRANSITIONS (The Reset Protocol)
+To ensure every sector is a fresh tactical challenge:
+- **HEALTH RESTORATION:** Upon entering a new level (Gateway reached), your length is automatically restored to **H+4**.
+- **GEAR DE-COUPLE:** All equipped hardware (Helmets, Tail Armor, Cloaks) is **removed** upon transition. You must scavenge new gear in the next sector.
 
 #### 🛒 Shop Unlock: `15,000,000 PTS`
 *(Note: This is the flagship mode of the Serpentine OS.)*

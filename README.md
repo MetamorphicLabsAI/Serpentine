@@ -20,6 +20,16 @@ Serpentine is a modern re-imagining of the classic arcade game built strictly wi
 * 🔥 **Dynamic Difficulty Modes**: Scale your challenge precisely across Easy (180ms tick rate), Medium (120ms tick rate), Hard (80ms tick rate), and Insane (50ms tick rate) speeds.
 * 🏆 **Per-Difficulty Leaderboards**: Top 10 local high score boards tracked independently for each standard difficulty. Players enter 3-character initials (first, middle, last — blanks allowed) using arcade-style arrow key scrolling after qualifying.
 * 🤫 **Hidden Entities**: Rumors persist of an exploit left behind by the original developer. Those who know the right sequence of numbers might find something that doesn't play by the rules... and if you go deep enough, you might just unlock *everything*.
+* 🏦 **System Shop & Point Bank**: Every point earned across all game sessions is saved to your persistent browser-based Point Bank. Spend your fortune in the System Shop to decrypt classified entities, hints, and new game modes.
+
+## 📂 Documentation Matrix
+For deep-dives into the game's architecture, legal standing, and future roadmap, refer to the following:
+
+- 🐍 **[Field Manual](FIELD_MANUAL.md)**: Full character lore, unlock guides, and secret system protocols.
+- 🧪 **[Concepts Lab](concepts.md)**: Detailed mechanics for advanced modes like Sentinel Breach (v2.0) and Neural Fit.
+- 📈 **[Pricing strategy](PRICING_STRATEGY.md)**: Market analysis and commercial expansion roadmap ($5–$15 tier).
+- ⚖️ **[Legal Audit](LEGAL_OBSERVATIONS.md)**: Full IP review of the "Zero-Asset" procedural architecture.
+- 📜 **[Commercial License](LICENSE.md)**: The Five Dollar Games (FDG) proprietary license agreement.
 
 ## Controls
 ### Menu Navigation
