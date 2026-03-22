@@ -188,7 +188,15 @@
                     
                     <p class="blink" style="margin-bottom: 10px; font-size: 0.9rem;">PRESS ARROW KEYS TO BROWSE</p>
                     <button id="btn-select-char" class="btn-menu">SELECT</button>
+                    <button id="btn-char-options" class="btn-menu btn-secondary hidden" style="font-size: 0.8rem; padding: 8px 20px;">OPTIONS</button>
                     <button id="btn-back-char" class="btn-menu btn-secondary">BACK</button>
+                </div>
+
+                <div id="char-options-screen" class="overlay hidden">
+                    <h2 class="menu-title" style="font-size: 2rem; margin-bottom: 10px;">CHARACTER OPTIONS</h2>
+                    <p id="char-options-name" style="color: var(--snake-color); font-weight: bold; font-size: 1.1rem; margin-bottom: 20px;"></p>
+                    <div id="char-options-list" class="menu-buttons" style="display: flex; flex-direction: column; gap: 12px; width: 340px;"></div>
+                    <button id="btn-back-char-options" class="btn-menu btn-secondary" style="margin-top: 20px;">BACK</button>
                 </div>
             </div>
 

@@ -43,9 +43,29 @@ const snakeProfiles = [
     { id: "mecha", name: "MECHA-SERPENT", lore: "Military-grade intrusion software. Designed to violently overwrite hostile firewalls.", head: "#708090", body: "#708090", glow: "rgba(112, 128, 144, 0.5)", food: "#ff0000", foodGlow: "rgba(255, 0, 0, 0.8)", accent: "#ffaa00" },
     { id: "spectrum", name: "CHROMATIC PUNCH", lore: "A multi-colored shifting anomaly unlocked by eating 20 food in a standard run. Smells like fruit punch.", head: "#ff0055", body: "#ff0055", glow: "rgba(255, 0, 85, 0.6)", food: "#00ffcc", foodGlow: "rgba(0, 255, 204, 0.8)", accent: "#ffff00", isShifting: true, locked: !unlockedSpectrum, unlockCondition: "Survive and ingest 20 food units in a single standard attempt." },
     { id: "9193", name: "9193", lore: "ERROR: Entity 9193 is not a snake. It is an exploit. A backdoor left open by the original developer. 9 length. 90 per byte. No rules.", head: "#ffd700", body: "#ffd700", glow: "rgba(255, 215, 0, 0.6)", food: "#ffd700", foodGlow: "rgba(255, 215, 0, 0.8)", accent: "#ffd700", locked: !unlocked9193, unlockCondition: "???", isCheater: true },
-    { id: "princess", name: "PRINCESS", lore: "A brindle dachshund protocol. Short legs, long body, infinite loyalty. Features floppy ears and a wagging tail.", head: "#8B4513", body: "#5D2E0B", glow: "rgba(139, 69, 19, 0.8)", food: "#A0522D", foodGlow: "rgba(160, 82, 45, 0.8)", accent: "#8B4513", locked: !unlockedPrincess, unlockCondition: "DECRYPT IN SYSTEM SHOP (50,000 PTS)" }
+    { id: "princess", name: "PRINCESS", lore: "A brindle dachshund protocol. Short legs, long body, infinite loyalty. Features floppy ears and a wagging tail.", head: "#8B4513", body: "#5D2E0B", glow: "rgba(139, 69, 19, 0.8)", food: "#A0522D", foodGlow: "rgba(160, 82, 45, 0.8)", accent: "#8B4513", locked: !unlockedPrincess, unlockCondition: "DECRYPT IN SYSTEM SHOP (50,000 PTS)",
+        characterOptions: [
+            { key: 'playStyle', label: 'PLAY STYLE', values: ['SERPENTINE', 'REALISTIC'], defaultValue: 'SERPENTINE' }
+        ]
+    }
 ];
 let selectedProfileIndex = 0;
+
+/* --- Character Options Framework --- */
+function getCharOption(profileId, key) {
+    const stored = localStorage.getItem(`serpentineOpt_${profileId}_${key}`);
+    if (stored !== null) return stored;
+    const profile = snakeProfiles.find(p => p.id === profileId);
+    if (profile && profile.characterOptions) {
+        const opt = profile.characterOptions.find(o => o.key === key);
+        if (opt) return opt.defaultValue;
+    }
+    return null;
+}
+
+function setCharOption(profileId, key, value) {
+    localStorage.setItem(`serpentineOpt_${profileId}_${key}`, value);
+}
 
 /* --- 9193 Cheat Code Listener --- */
 const CHEAT_SEQUENCE = ['1','2','3','4','5','6','7','8','0'];
@@ -196,6 +216,17 @@ function updateProfileStyle() {
             selectBtn.style.opacity = '1';
             selectBtn.style.pointerEvents = 'auto';
             selectBtn.textContent = 'SELECT';
+        }
+    }
+    
+    // Show/hide OPTIONS button
+    const optionsBtn = document.getElementById('btn-char-options');
+    if (optionsBtn) {
+        const hasOptions = !isLocked && profile.characterOptions && profile.characterOptions.length > 0;
+        if (hasOptions) {
+            optionsBtn.classList.remove('hidden');
+        } else {
+            optionsBtn.classList.add('hidden');
         }
     }
 }
@@ -720,6 +751,12 @@ function updateLogic() {
         score += pointsPerFood;
         foodEaten++;
         scoreElement.textContent = score;
+        
+        // Growth cap check (e.g., Princess in Realistic mode = max 5 segments)
+        const maxLen = getMaxSnakeLength(profile);
+        if (maxLen && snake.length > maxLen) {
+            snake.pop(); // Pop the tail to maintain the cap
+        }
         
         // UI Juice: Pop the score element
         scoreElement.style.transform = 'scale(1.4)';
@@ -1544,6 +1581,7 @@ const hideAllMenus = () => {
     shopOther.classList.add('hidden');
     pauseScreen.classList.add('hidden');
     document.getElementById('init-screen').classList.add('hidden');
+    document.getElementById('char-options-screen').classList.add('hidden');
 };
 
 const togglePause = () => {
@@ -1730,6 +1768,65 @@ document.getElementById('btn-back-char').addEventListener('click', () => {
     mainMenu.classList.remove('hidden');
     document.getElementById('btn-char-menu').focus();
 });
+
+document.getElementById('btn-char-options').addEventListener('click', () => {
+    hideAllMenus();
+    renderCharOptionsScreen();
+    document.getElementById('char-options-screen').classList.remove('hidden');
+    document.getElementById('btn-back-char-options').focus();
+});
+
+document.getElementById('btn-back-char-options').addEventListener('click', () => {
+    hideAllMenus();
+    startScreen.classList.remove('hidden');
+    document.getElementById('btn-char-options').focus();
+});
+
+function renderCharOptionsScreen() {
+    const profile = snakeProfiles[selectedProfileIndex];
+    document.getElementById('char-options-name').textContent = profile.name;
+    const list = document.getElementById('char-options-list');
+    list.innerHTML = '';
+    
+    if (!profile.characterOptions) return;
+    
+    profile.characterOptions.forEach(opt => {
+        const currentVal = getCharOption(profile.id, opt.key);
+
+        const row = document.createElement('div');
+        row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px;';
+
+        const label = document.createElement('div');
+        label.style.cssText = 'color: #aaa; font-size: 0.85rem; letter-spacing: 1px;';
+        label.textContent = opt.label;
+
+        const btn = document.createElement('button');
+        btn.className = 'btn-menu';
+        btn.style.cssText = 'width: auto; padding: 5px 15px; font-size: 0.8rem;';
+        btn.textContent = currentVal;
+
+        btn.addEventListener('click', () => {
+            const idx = opt.values.indexOf(currentVal);
+            const nextIdx = (idx + 1) % opt.values.length;
+            const newVal = opt.values[nextIdx];
+            setCharOption(profile.id, opt.key, newVal);
+            playMenuSelectSound();
+            renderCharOptionsScreen(); // Re-render to reflect change
+        });
+
+        row.appendChild(label);
+        row.appendChild(btn);
+        list.appendChild(row);
+    });
+}
+
+function getMaxSnakeLength(profile) {
+    if (profile.id === 'princess' && getCharOption('princess', 'playStyle') === 'REALISTIC') {
+        return 5; // Head + 4 body segments
+    }
+    if (profile.isCheater) return 9;
+    return null; // No limit
+}
 
 document.getElementById('btn-submit-initials').addEventListener('click', submitInitials);
 
