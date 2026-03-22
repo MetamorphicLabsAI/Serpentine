@@ -56,7 +56,7 @@ const snakeProfiles = [
             { key: 'skin', label: 'SKIN', values: ['VENOMOUS', 'INFERNO', 'PHANTOM'], defaultValue: 'VENOMOUS' }
         ]
     },
-    { id: "dragon", name: "INFERNAL WYRM", lore: "A primordial fire-dragon protocol. Scales of obsidian, breath of molten data. The apex predator of the grid.", head: "#FF4500", body: "#228B22", glow: "rgba(255, 69, 0, 0.7)", food: "#FFD700", foodGlow: "rgba(255, 215, 0, 0.8)", accent: "#FF6347", locked: !unlockedDragon, unlockCondition: "DECRYPT IN SYSTEM SHOP (100,000 PTS)" }
+    { id: "dragon", name: "KITE DRAGON", lore: "A legendary articulated festival-kite protocol. Constructed from living pixel-silk and crystalline spikes, it glides through the grid with geometric grace.", head: "#FF4500", body: "#228B22", glow: "rgba(255, 69, 0, 0.7)", food: "#FFD700", foodGlow: "rgba(255, 215, 0, 0.8)", accent: "#FF6347", locked: !unlockedDragon, unlockCondition: "DECRYPT IN SYSTEM SHOP (100,000 PTS)" }
 ];
 let selectedProfileIndex = 0;
 

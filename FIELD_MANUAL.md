@@ -84,11 +84,11 @@ Profiles that require specific milestones to decrypt.
 - **Character Options:**
     - **SKIN:** Toggle between `VENOMOUS` (Green), `INFERNO` (Fire), and `PHANTOM` (Ghostly Purple).
 
-### [INFERNAL WYRM]
+### [KITE DRAGON]
 - **ID:** `dragon`
-- **Lore:** A primordial fire-dragon protocol. Scales of obsidian, breath of molten data. The apex predator of the grid.
+- **Lore:** A legendary articulated festival-kite protocol. Constructed from living pixel-silk and crystalline spikes, it glides through the grid with geometric grace.
 - **Unlock Condition:** Decrypt via the **System Shop** for `100,000 PTS`.
-- **Aesthetics:** Dark emerald scales, golden belly, **flapping wings**, and glowing fire breath.
+- **Aesthetics:** Crystalline star-head, overlapping triangular spikes, and articulated crawling limbs.
 - **Special Effect:** Emits flickering ember particles from the head during movement.
 
 ---
@@ -146,7 +146,7 @@ Points earned across all game sessions are accumulated into a global **Point Ban
 ### [SHOP SUB-SECTORS]
 | Sector | Inventory |
 | :--- | :--- |
-| **SNAKES** | Includes `PRINCESS`, `ARTHROPOD`, and `INFERNAL WYRM`. |
+| **SNAKES** | Includes `PRINCESS`, `ARTHROPOD`, and `KITE DRAGON`. |
 | **MODES** | [EMPTY] - Future decryption available. |
 | **OTHER** | Contains classified system hints/codes. |
 
