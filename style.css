@@ -178,6 +178,10 @@ canvas {
     transition: opacity 0.4s ease, visibility 0.4s ease;
 }
 
+.hidden:not(.overlay) {
+    display: none !important;
+}
+
 .overlay.hidden {
     opacity: 0;
     pointer-events: none;
