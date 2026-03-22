@@ -1337,7 +1337,7 @@ function drawArthropod(seg, i, isHead, isTail) {
     ctx.restore();
 }
 
-/* --- DRAGON RENDERER --- */
+/* --- INFERNAL WYRM RENDERER (ELITE) --- */
 function drawDragon(seg, i, isHead, isTail) {
     const cx = seg.x * gridSize + gridSize / 2;
     const cy = seg.y * gridSize + gridSize / 2;
@@ -1356,153 +1356,187 @@ function drawDragon(seg, i, isHead, isTail) {
     ctx.translate(cx, cy);
     ctx.rotate(angle);
 
-    // Scale body
-    ctx.fillStyle = '#1A472A'; // Dark emerald
-    ctx.shadowBlur = 5;
-    ctx.shadowColor = 'rgba(255, 69, 0, 0.4)';
+    // Dynamic Pulsing Logic
+    const glowPulse = Math.sin(time / 300) * 0.2 + 0.8;
+    const bodyWiggle = Math.sin(time / 150 + i * 0.5) * 2;
+
+    // 1. BASE BODY & SCALES
+    ctx.fillStyle = '#0B2B15'; // Darker base for depth
+    ctx.shadowBlur = isHead ? 15 : 8;
+    ctx.shadowColor = 'rgba(255, 69, 0, 0.5)';
+    
+    // Main Segment Body (Tapering)
+    const segW = isTail ? 12 : 18;
+    const segH = 20;
     ctx.beginPath();
-    ctx.roundRect(-9, -10, 18, 20, 5);
+    ctx.roundRect(-segW/2 + bodyWiggle, -10, segW, segH, 6);
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // Belly plate (golden underside)
-    ctx.fillStyle = '#DAA520';
+    // Underbelly (Golden Plating)
+    ctx.fillStyle = '#B8860B';
     ctx.beginPath();
-    ctx.roundRect(-5, -4, 10, 14, 3);
+    ctx.roundRect(-4 + bodyWiggle, -6, 8, 16, 2);
+    ctx.fill();
+    // Segmented belly lines
+    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+    ctx.lineWidth = 1;
+    for (let by = -4; by <= 8; by += 4) {
+        ctx.beginPath(); ctx.moveTo(-4 + bodyWiggle, by); ctx.lineTo(4 + bodyWiggle, by); ctx.stroke();
+    }
+
+    // Overlapping Scale Highlights
+    ctx.fillStyle = '#1A472A';
+    for (let sy = -8; sy <= 4; sy += 6) {
+        ctx.beginPath();
+        ctx.arc(-4 + bodyWiggle, sy, 4, 0, Math.PI);
+        ctx.arc(4 + bodyWiggle, sy, 4, 0, Math.PI);
+        ctx.fill();
+    }
+
+    // 2. DORSAL SPINES (Animated)
+    const spineHeight = 6 + Math.sin(time/200 + i) * 3;
+    ctx.fillStyle = '#FF4500';
+    ctx.beginPath();
+    ctx.moveTo(bodyWiggle, -10);
+    ctx.lineTo(bodyWiggle - 3, -10 - spineHeight);
+    ctx.lineTo(bodyWiggle + 3, -10 - spineHeight);
+    ctx.closePath();
     ctx.fill();
 
-    // Scale texture
-    ctx.strokeStyle = 'rgba(0,80,0,0.5)';
-    ctx.lineWidth = 1;
-    for (let s = -6; s <= 6; s += 4) {
-        ctx.beginPath();
-        ctx.arc(s, -3, 3, Math.PI * 0.8, Math.PI * 0.2);
-        ctx.stroke();
-    }
-
-    // Dorsal spines on every body segment
-    if (!isHead && !isTail) {
-        ctx.fillStyle = '#FF4500';
-        for (let s = -1; s <= 1; s++) {
-            ctx.beginPath();
-            ctx.moveTo(s * 3 - 2, -10);
-            ctx.lineTo(s * 3, -15);
-            ctx.lineTo(s * 3 + 2, -10);
-            ctx.fill();
-        }
-    }
-
-    // WINGS on segment 1 (shoulders)
+    // 3. SHOULDER WINGS (High Detail)
     if (i === 1) {
-        const wingFlap = Math.sin(time / 120) * 8;
-        ctx.fillStyle = 'rgba(139, 0, 0, 0.6)'; // Dark red membrane
-        ctx.strokeStyle = '#8B0000';
-        ctx.lineWidth = 1.5;
-        // Left wing
-        ctx.beginPath();
-        ctx.moveTo(-8, -4);
-        ctx.quadraticCurveTo(-24, -12 + wingFlap, -20, 4 + wingFlap);
-        ctx.lineTo(-8, 4);
-        ctx.fill(); ctx.stroke();
-        // Wing bones
-        ctx.strokeStyle = '#4A0000';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(-8, -3);
-        ctx.lineTo(-20, -6 + wingFlap);
-        ctx.moveTo(-8, 0);
-        ctx.lineTo(-18, 0 + wingFlap);
-        ctx.stroke();
-        // Right wing
-        ctx.fillStyle = 'rgba(139, 0, 0, 0.6)';
-        ctx.strokeStyle = '#8B0000';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(8, -4);
-        ctx.quadraticCurveTo(24, -12 - wingFlap, 20, 4 - wingFlap);
-        ctx.lineTo(8, 4);
-        ctx.fill(); ctx.stroke();
-        ctx.strokeStyle = '#4A0000';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(8, -3);
-        ctx.lineTo(20, -6 - wingFlap);
-        ctx.moveTo(8, 0);
-        ctx.lineTo(18, 0 - wingFlap);
-        ctx.stroke();
+        const wingFlap = Math.sin(time / 140) * 12;
+        const wingStretch = 28;
+        
+        // Draw both wings
+        [-1, 1].forEach(side => {
+            ctx.save();
+            ctx.scale(side, 1);
+            
+            // Wing Membrane (Semi-transparent Gradient)
+            const grad = ctx.createRadialGradient(8, 0, 2, 25, 5, 25);
+            grad.addColorStop(0, 'rgba(180, 0, 0, 0.3)');
+            grad.addColorStop(1, 'rgba(40, 0, 0, 0.7)');
+            ctx.fillStyle = grad;
+            
+            ctx.beginPath();
+            ctx.moveTo(8, -2);
+            ctx.bezierCurveTo(15, -15 + wingFlap, 30, -10 + wingFlap, wingStretch, 10 + wingFlap);
+            ctx.lineTo(8, 6);
+            ctx.fill();
+
+            // Wing Claws & Structural Bones
+            ctx.strokeStyle = '#220000';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            // Main spar
+            ctx.moveTo(8, -2);
+            ctx.lineTo(wingStretch, -5 + wingFlap);
+            // Secondary fingers
+            ctx.moveTo(8, 1);
+            ctx.lineTo(wingStretch - 4, 5 + wingFlap);
+            ctx.moveTo(8, 4);
+            ctx.lineTo(wingStretch - 10, 12 + wingFlap);
+            ctx.stroke();
+            
+            // Claw tip
+            ctx.fillStyle = '#DAA520';
+            ctx.beginPath();
+            ctx.arc(wingStretch, -5 + wingFlap, 2, 0, Math.PI*2);
+            ctx.fill();
+            
+            ctx.restore();
+        });
     }
 
+    // 4. THE SKULL (Elite Detail)
     if (isHead) {
-        // Dragon skull (broader)
+        // Skull Base
         ctx.fillStyle = '#1A472A';
         ctx.beginPath();
-        ctx.ellipse(0, -4, 9, 10, 0, 0, Math.PI * 2);
+        ctx.moveTo(-9, 4);
+        ctx.quadraticCurveTo(-11, -8, 0, -12); // Broad forehead
+        ctx.quadraticCurveTo(11, -8, 9, 4);
         ctx.fill();
-        // Snout ridge
+
+        // Snout
         ctx.fillStyle = '#0D3318';
         ctx.beginPath();
-        ctx.ellipse(0, -12, 5, 7, 0, 0, Math.PI * 2);
+        ctx.roundRect(-5, -20, 10, 12, 3);
         ctx.fill();
+        
+        // Nostrils (Flaring)
+        const flare = Math.sin(time/200) * 0.5 + 1;
+        ctx.fillStyle = '#FF0000';
+        ctx.beginPath(); ctx.arc(-2.5, -18, 1.2 * flare, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(2.5, -18, 1.2 * flare, 0, Math.PI*2); ctx.fill();
 
-        // Horns
-        ctx.fillStyle = '#8B8000';
+        // Massive Ancient Horns
+        ctx.strokeStyle = '#DAA520';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        // Left
         ctx.beginPath();
-        ctx.moveTo(-7, -6);
-        ctx.quadraticCurveTo(-14, -16, -8, -22);
-        ctx.lineTo(-5, -8);
-        ctx.fill();
+        ctx.moveTo(-7, -8);
+        ctx.quadraticCurveTo(-18, -20, -12, -30);
+        ctx.stroke();
+        // Right
         ctx.beginPath();
-        ctx.moveTo(7, -6);
-        ctx.quadraticCurveTo(14, -16, 8, -22);
-        ctx.lineTo(5, -8);
-        ctx.fill();
+        ctx.moveTo(7, -8);
+        ctx.quadraticCurveTo(18, -20, 12, -30);
+        ctx.stroke();
 
-        // Nostrils
-        ctx.fillStyle = '#FF4500';
-        ctx.beginPath(); ctx.arc(-2, -16, 1.5, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(2, -16, 1.5, 0, Math.PI * 2); ctx.fill();
-
-        // Eyes (glowing amber slits)
-        ctx.fillStyle = '#FFD700';
-        ctx.shadowBlur = 6;
+        // Glowing Eyes (Pulse)
+        ctx.fillStyle = `rgba(255, 215, 0, ${glowPulse})`;
+        ctx.shadowBlur = 10 * glowPulse;
         ctx.shadowColor = '#FFD700';
-        ctx.beginPath(); ctx.ellipse(-5, -7, 2.5, 1.5, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.ellipse(5, -7, 2.5, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(-5, -6, 3, 2, 0.2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(5, -6, 3, 2, -0.2, 0, Math.PI*2); ctx.fill();
         ctx.shadowBlur = 0;
-        // Slit pupils
+        
+        // Pupils
         ctx.fillStyle = '#000';
-        ctx.beginPath(); ctx.ellipse(-5, -7, 0.8, 1.5, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.ellipse(5, -7, 0.8, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.rect(-5.5, -7, 1, 3); ctx.fill();
+        ctx.beginPath(); ctx.rect(4.5, -7, 1, 3); ctx.fill();
 
-        // Fire breath particles (small flickering embers from nostrils)
-        ctx.globalAlpha = 0.7;
-        for (let f = 0; f < 3; f++) {
-            const fx = (Math.random() - 0.5) * 6;
-            const fy = -18 - Math.random() * 8;
-            const fr = 1 + Math.random() * 1.5;
-            ctx.fillStyle = Math.random() > 0.5 ? '#FF4500' : '#FFD700';
-            ctx.beginPath(); ctx.arc(fx, fy, fr, 0, Math.PI * 2); ctx.fill();
+        // Particle FX (Nostril Smoke/Fire)
+        for (let p=0; p<5; p++) {
+            const px = (Math.random()-0.5) * 8;
+            const py = -20 - (Math.random() * 10);
+            const size = Math.random() * 2 + 1;
+            ctx.fillStyle = Math.random() > 0.4 ? '#FF4500' : '#888';
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath(); ctx.arc(px, py, size, 0, Math.PI*2); ctx.fill();
         }
         ctx.globalAlpha = 1;
     }
 
+    // 5. THE SPIKED TAIL
     if (isTail) {
-        // Spiked tail
+        const tSwing = Math.sin(time/120) * 10;
         ctx.fillStyle = '#1A472A';
-        const tailSwing = Math.sin(time / 90) * 6;
-        // Tail extension
         ctx.beginPath();
-        ctx.moveTo(-4, 8);
-        ctx.quadraticCurveTo(tailSwing, 16, tailSwing * 0.8, 22);
-        ctx.quadraticCurveTo(tailSwing * 0.3, 16, 4, 8);
+        ctx.moveTo(-5, 0);
+        ctx.quadraticCurveTo(tSwing, 15, tSwing*1.5, 25);
+        ctx.lineTo(tSwing*1.5 - 2, 25);
+        ctx.quadraticCurveTo(tSwing, 10, 5, 0);
         ctx.fill();
-        // Tail spade
+
+        // Fire Spade / Spikes
         ctx.fillStyle = '#FF4500';
         ctx.beginPath();
-        ctx.moveTo(tailSwing * 0.8 - 4, 20);
-        ctx.lineTo(tailSwing * 0.8, 28);
-        ctx.lineTo(tailSwing * 0.8 + 4, 20);
+        ctx.moveTo(tSwing*1.5, 22);
+        ctx.lineTo(tSwing*1.5 - 8, 35);
+        ctx.lineTo(tSwing*1.5, 45);
+        ctx.lineTo(tSwing*1.5 + 8, 35);
+        ctx.closePath();
         ctx.fill();
+        
+        // Ember trail from tail
+        if (Math.random() > 0.5) {
+             burstParticles(seg.x, seg.y, '#FFD700', 1);
+        }
     }
 
     ctx.restore();
