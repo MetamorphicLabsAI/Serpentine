@@ -1189,8 +1189,8 @@ const togglePause = () => {
         if (musicGain) musicGain.gain.setTargetAtTime(0.04, audioCtx.currentTime, 0.1);
     } else {
         hideAllMenus();
-        // Restore music volume
-        if (musicGain) musicGain.gain.setTargetAtTime(0.1, audioCtx.currentTime, 0.1);
+        // Restore music volume to its original 0.4
+        if (musicGain) musicGain.gain.setTargetAtTime(0.4, audioCtx.currentTime, 0.1);
     }
 };
 
@@ -1372,6 +1372,7 @@ document.getElementById('btn-pause-controls').addEventListener('click', () => {
 });
 document.getElementById('btn-pause-quit').addEventListener('click', () => {
     isPaused = false; // Reset pause state
+    hideAllMenus(); // MUST hide the pause screen to see the Game Over sequence
     triggerGameOver(); // Ends the game and triggers high score/bank logic
 });
 
