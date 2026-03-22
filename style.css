@@ -92,7 +92,7 @@ body {
     background: linear-gradient(to right, var(--accent-color), var(--food-color), var(--snake-color));
     -webkit-background-clip: text;
     background-clip: text;
-    text-shadow: 0 0 20px var(--accent-color), 0 0 30px var(--snake-color);
+    filter: drop-shadow(0 0 10px var(--snake-color));
     text-align: center;
 }
 
@@ -227,7 +227,7 @@ button {
 
 button:hover {
     color: #050505;
-    background: linear-gradient(135deg, var(--accent-color), var(--food-color), var(--snake-color));
+    background: var(--snake-color);
     box-shadow: 0 0 20px var(--snake-color), inset 0 0 10px rgba(255,255,255,0.5);
     text-shadow: none;
     transform: translateY(-3px) scale(1.05);
