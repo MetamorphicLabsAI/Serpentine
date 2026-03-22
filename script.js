@@ -214,6 +214,7 @@ let foodEaten = 0; // Track food consumed per round
 let bank = parseInt(localStorage.getItem('serpentineBank')) || 0;
 let bought9193Hint = localStorage.getItem('bought9193Hint') === 'true';
 let boughtMasterHint = localStorage.getItem('boughtMasterHint') === 'true';
+let isPaused = false;
 
 // Initial DOM Setup
 highScoreElement.textContent = highScore;
@@ -223,6 +224,7 @@ const shopMenu = document.getElementById('shop-menu');
 const shopSnakes = document.getElementById('shop-snakes');
 const shopModes = document.getElementById('shop-modes');
 const shopOther = document.getElementById('shop-other');
+const pauseScreen = document.getElementById('pause-screen');
 
 // --- Audio Engine (Synthesizer) ---
 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -535,7 +537,7 @@ function main(currentTime) {
     // Draw elements that require smooth framerates (Particles, Glow pulses)
     draw();
     
-    if (!isPlaying) return;
+    if (!isPlaying || isPaused) return;
     
     const secondsSinceLastLogic = (currentTime - lastRenderTime) / 1000;
     
@@ -833,6 +835,7 @@ function startGame() {
 
 function triggerGameOver() {
     isPlaying = false;
+    isPaused = false;
     stopMusic();
     playDeathSound();
     
@@ -984,6 +987,11 @@ window.addEventListener('keydown', e => {
         return;
     }
     
+    if (e.key === 'Escape' && isPlaying && !isEnteringInitials) {
+        togglePause();
+        return;
+    }
+
     if (!isPlaying) {
         // --- 9193 Cheat Code Detection (main menu only) ---
         const activeOverlay = Array.from(document.querySelectorAll('.overlay')).find(o => !o.classList.contains('hidden'));
@@ -1166,6 +1174,24 @@ const hideAllMenus = () => {
     shopSnakes.classList.add('hidden');
     shopModes.classList.add('hidden');
     shopOther.classList.add('hidden');
+    pauseScreen.classList.add('hidden');
+};
+
+const togglePause = () => {
+    if (!isPlaying || isEnteringInitials) return;
+    
+    isPaused = !isPaused;
+    if (isPaused) {
+        hideAllMenus();
+        pauseScreen.classList.remove('hidden');
+        document.getElementById('btn-resume').focus();
+        // Lower music volume while paused
+        if (musicGain) musicGain.gain.setTargetAtTime(0.04, audioCtx.currentTime, 0.1);
+    } else {
+        hideAllMenus();
+        // Restore music volume
+        if (musicGain) musicGain.gain.setTargetAtTime(0.1, audioCtx.currentTime, 0.1);
+    }
 };
 
 document.getElementById('btn-play-menu').addEventListener('click', () => {
@@ -1271,8 +1297,13 @@ document.getElementById('btn-controls-menu').addEventListener('click', () => {
 
 document.getElementById('btn-back-controls').addEventListener('click', () => {
     hideAllMenus();
-    mainMenu.classList.remove('hidden');
-    document.getElementById('btn-controls-menu').focus();
+    if (isPlaying) {
+        pauseScreen.classList.remove('hidden');
+        document.getElementById('btn-pause-controls').focus();
+    } else {
+        mainMenu.classList.remove('hidden');
+        document.getElementById('btn-controls-menu').focus();
+    }
 });
 
 document.getElementById('btn-exit-menu').addEventListener('click', () => {
@@ -1331,6 +1362,20 @@ menuBtn.addEventListener('click', () => {
     mainMenu.classList.remove('hidden');
     document.getElementById('btn-play-menu').focus();
 });
+
+// Pause Menu Buttons
+document.getElementById('btn-resume').addEventListener('click', togglePause);
+document.getElementById('btn-pause-controls').addEventListener('click', () => {
+    hideAllMenus();
+    controlsScreen.classList.remove('hidden');
+    document.getElementById('btn-back-controls').focus();
+});
+document.getElementById('btn-pause-quit').addEventListener('click', () => {
+    isPaused = false; // Reset pause state
+    triggerGameOver(); // Ends the game and triggers high score/bank logic
+});
+
+
 
 // Start global animation loop
 hideAllMenus();
