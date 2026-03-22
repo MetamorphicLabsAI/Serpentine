@@ -1,0 +1,285 @@
+:root {
+    --bg-color: #050505;
+    --grid-color: #1a1a2e;
+    --snake-color: #00ffcc;
+    --snake-glow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
+    --food-color: #ff0055;
+    --food-glow: 0 0 10px #ff0055, 0 0 20px #ff0055, 0 0 30px #ff0055;
+    --text-color: #ffffff;
+    --accent-color: #b026ff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Orbitron', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+    background-image: 
+        linear-gradient(rgba(26, 26, 46, 0.5) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(26, 26, 46, 0.5) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: panBackground 20s linear infinite;
+}
+
+@keyframes panBackground {
+    0% { background-position: 0 0; }
+    100% { background-position: 40px 40px; }
+}
+
+.arcade-machine {
+    padding: 4px;
+    background: linear-gradient(135deg, var(--accent-color), var(--food-color), var(--snake-color));
+    border-radius: 24px;
+    box-shadow: 0 0 30px rgba(176, 38, 255, 0.3), 0 0 60px rgba(0, 255, 204, 0.1);
+    animation: borderGlow 4s ease-in-out infinite;
+}
+
+@keyframes borderGlow {
+    0%, 100% { filter: hue-rotate(0deg); }
+    50% { filter: hue-rotate(30deg); }
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 30px;
+    background: rgba(10, 10, 15, 0.95);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 10px;
+}
+
+.title {
+    font-size: 2.2rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--accent-color);
+    text-shadow: 0 0 10px rgba(176, 38, 255, 0.5);
+    background: linear-gradient(to right, #b026ff, #ff0055, #00ffcc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: pulseTitle 2s infinite alternate;
+    margin: 0 15px;
+    text-align: center;
+}
+
+@keyframes pulseTitle {
+    0% { text-shadow: 0 0 10px rgba(176, 38, 255, 0.5), 0 0 20px rgba(176, 38, 255, 0.3); }
+    100% { text-shadow: 0 0 20px rgba(176, 38, 255, 0.8), 0 0 30px rgba(0, 255, 204, 0.5); }
+}
+
+.score-board {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 255, 204, 0.3);
+    box-shadow: inset 0 0 15px rgba(0, 255, 204, 0.1);
+    min-width: 90px;
+}
+
+.score-label {
+    font-size: 0.8rem;
+    color: #aaa;
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+}
+
+.score-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--snake-color);
+    text-shadow: 0 0 15px var(--snake-color);
+    transition: transform 0.1s ease-out;
+}
+
+.canvas-wrapper {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.9),
+                0 0 20px rgba(176, 38, 255, 0.2);
+    border: 3px solid rgba(26, 26, 46, 0.8);
+    background-color: #0a0a0f;
+}
+
+/* scanlines effect over the game */
+.canvas-wrapper::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(18, 16, 16, 0) 50%,
+        rgba(0, 0, 0, 0.25) 50%
+    );
+    background-size: 100% 4px;
+    z-index: 5;
+    pointer-events: none;
+}
+
+canvas {
+    display: block;
+    image-rendering: pixelated;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(5, 5, 5, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    transition: opacity 0.4s ease;
+}
+
+.overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.overlay h2 {
+    font-size: 3.5rem;
+    margin-bottom: 10px;
+    color: var(--food-color);
+    text-shadow: var(--food-glow);
+    letter-spacing: 6px;
+    text-align: center;
+}
+
+.overlay p {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    color: #ddd;
+    letter-spacing: 2px;
+}
+
+.highlight {
+    color: var(--snake-color);
+    font-size: 1.5rem;
+    text-shadow: 0 0 10px var(--snake-color);
+    font-weight: bold;
+}
+
+button {
+    background: rgba(0, 255, 204, 0.1);
+    color: var(--snake-color);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    padding: 15px 45px;
+    border: 2px solid var(--snake-color);
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.2), inset 0 0 15px rgba(0, 255, 204, 0.2);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: var(--snake-color);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+    z-index: -1;
+}
+
+button:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+button:hover {
+    color: #000;
+    box-shadow: 0 0 30px var(--snake-color);
+    transform: translateY(-3px) scale(1.05);
+}
+
+.controls-hint {
+    display: flex;
+    gap: 15px;
+    margin-top: 5px;
+}
+
+.controls-hint span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    font-size: 1.5rem;
+    color: #aaa;
+    box-shadow: inset 0 4px 6px rgba(255, 255, 255, 0.05), 0 4px 6px rgba(0,0,0,0.3);
+    transition: transform 0.1s;
+}
+
+/* media queries */
+@media (max-width: 768px) {
+    canvas {
+        width: 100%;
+        height: auto;
+        max-width: 400px;
+    }
+    .title { font-size: 2rem; }
+    .overlay h2 { font-size: 2.5rem; }
+}
+
+/* Death Animation Shake */
+@keyframes screenShake {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-5px, -5px) rotate(-1deg); }
+    20% { transform: translate(5px, 5px) rotate(1deg); }
+    30% { transform: translate(-5px, 5px) rotate(0deg); }
+    40% { transform: translate(5px, -5px) rotate(1deg); }
+    50% { transform: translate(-2px, 0) rotate(-1deg); }
+    60% { transform: translate(2px, 0) rotate(0deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.shake {
+    animation: screenShake 0.5s ease-in-out;
+}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Snake Arcade</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="arcade-machine">
+        <div class="game-container">
+            <div class="header">
+                <div class="score-board">
+                    <div class="score-label">SCORE</div>
+                    <div id="score" class="score-value">0</div>
+                </div>
+                <div class="title">NEON SNAKE</div>
+                <div class="score-board">
+                    <div class="score-label">BEST</div>
+                    <div id="high-score" class="score-value">0</div>
+                </div>
+            </div>
+
+            <div class="canvas-wrapper">
+                <canvas id="gameCanvas" width="600" height="600"></canvas>
+                <div id="game-over" class="overlay hidden">
+                    <h2>SYSTEM FAILURE</h2>
+                    <p>FINAL SCORE: <span id="final-score" class="highlight">0</span></p>
+                    <button id="restart-btn">REBOOT SYSTEM</button>
+                </div>
+                <div id="start-screen" class="overlay">
+                    <h2>READY?</h2>
+                    <p>USE ARROW KEYS OR SWIPE TO MOVE</p>
+                    <button id="start-btn">INITIALIZE</button>
+                </div>
+            </div>
+
+            <div class="controls-hint">
+                <span>&uarr;</span>
+                <span>&larr;</span>
+                <span>&darr;</span>
+                <span>&rarr;</span>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
