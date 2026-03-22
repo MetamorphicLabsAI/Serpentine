@@ -6,6 +6,7 @@ const mainMenu = document.getElementById('main-menu');
 const modeSelect = document.getElementById('mode-select');
 const diffSelect = document.getElementById('difficulty-select');
 const startScreen = document.getElementById('start-screen');
+const controlsScreen = document.getElementById('controls-screen');
 const gameOverScreen = document.getElementById('game-over');
 const finalScoreElement = document.getElementById('final-score');
 const restartBtn = document.getElementById('restart-btn');
@@ -709,12 +710,48 @@ window.addEventListener('keydown', e => {
         e.preventDefault();
     }
     
-    if ((e.code === 'Space' || e.code === 'Enter') && !isPlaying) {
-        startGame();
+    if (!isPlaying) {
+        const activeOverlay = Array.from(document.querySelectorAll('.overlay')).find(o => !o.classList.contains('hidden'));
+        if (activeOverlay) {
+            const buttons = Array.from(activeOverlay.querySelectorAll('button:not([style*="pointer-events: none"])'));
+            let currentIndex = buttons.indexOf(document.activeElement);
+            if (currentIndex === -1) currentIndex = 0;
+            
+            if (e.code === 'Escape') {
+                const backBtn = buttons.find(b => b.textContent === 'BACK' || b.textContent === 'MAIN MENU');
+                if (backBtn) backBtn.click();
+                return;
+            }
+            
+            if (activeOverlay.id === 'start-screen') {
+                if (e.code === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                    document.getElementById('prev-btn').click();
+                    return;
+                } else if (e.code === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                    document.getElementById('next-btn').click();
+                    return;
+                }
+            }
+
+            if (buttons.length > 0) {
+                if (e.code === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+                    const nextIndex = (currentIndex + 1) % buttons.length;
+                    buttons[nextIndex].focus();
+                } else if (e.code === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+                    const prevIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+                    buttons[prevIndex].focus();
+                } else if (e.code === 'Space' || e.code === 'Enter') {
+                    if (document.activeElement && document.activeElement.tagName === 'BUTTON') {
+                        document.activeElement.click();
+                    } else {
+                        buttons[currentIndex].focus();
+                        buttons[currentIndex].click();
+                    }
+                }
+            }
+        }
         return;
     }
-    
-    if (!isPlaying) return;
     
     // Use pendingDirection to prevent "U-turn" death on rapid double pressing
     const activeDx = pendingDirection ? pendingDirection.dx : dx;
@@ -798,6 +835,7 @@ const hideAllMenus = () => {
     mainMenu.classList.add('hidden');
     modeSelect.classList.add('hidden');
     diffSelect.classList.add('hidden');
+    controlsScreen.classList.add('hidden');
     startScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
 };
@@ -805,11 +843,25 @@ const hideAllMenus = () => {
 document.getElementById('btn-play-menu').addEventListener('click', () => {
     hideAllMenus();
     modeSelect.classList.remove('hidden');
+    document.getElementById('btn-standard').focus();
 });
 
 document.getElementById('btn-char-menu').addEventListener('click', () => {
     hideAllMenus();
     startScreen.classList.remove('hidden');
+    document.getElementById('btn-select-char').focus();
+});
+
+document.getElementById('btn-controls-menu').addEventListener('click', () => {
+    hideAllMenus();
+    controlsScreen.classList.remove('hidden');
+    document.getElementById('btn-back-controls').focus();
+});
+
+document.getElementById('btn-back-controls').addEventListener('click', () => {
+    hideAllMenus();
+    mainMenu.classList.remove('hidden');
+    document.getElementById('btn-controls-menu').focus();
 });
 
 document.getElementById('btn-exit-menu').addEventListener('click', () => {
@@ -819,11 +871,13 @@ document.getElementById('btn-exit-menu').addEventListener('click', () => {
 document.getElementById('btn-standard').addEventListener('click', () => {
     hideAllMenus();
     diffSelect.classList.remove('hidden');
+    document.getElementById('btn-medium').focus();
 });
 
 document.getElementById('btn-back-mode').addEventListener('click', () => {
     hideAllMenus();
     mainMenu.classList.remove('hidden');
+    document.getElementById('btn-play-menu').focus();
 });
 
 const diffBtns = document.querySelectorAll('.diff-btn');
@@ -837,18 +891,21 @@ diffBtns.forEach(btn => {
 document.getElementById('btn-back-diff').addEventListener('click', () => {
     hideAllMenus();
     modeSelect.classList.remove('hidden');
+    document.getElementById('btn-standard').focus();
 });
 
 document.getElementById('btn-select-char').addEventListener('click', () => {
     if (!snakeProfiles[selectedProfileIndex].locked) {
         hideAllMenus();
         mainMenu.classList.remove('hidden');
+        document.getElementById('btn-char-menu').focus();
     }
 });
 
 document.getElementById('btn-back-char').addEventListener('click', () => {
     hideAllMenus();
     mainMenu.classList.remove('hidden');
+    document.getElementById('btn-char-menu').focus();
 });
 
 // Button Bindings
@@ -856,17 +913,13 @@ restartBtn.addEventListener('click', startGame);
 menuBtn.addEventListener('click', () => {
     hideAllMenus();
     mainMenu.classList.remove('hidden');
-});
-
-window.addEventListener('keydown', e => {
-    if (!isPlaying && !mainMenu.classList.contains('hidden') && (e.code === 'Enter' || e.code === 'Space')) {
-        document.getElementById('btn-play-menu').click();
-    }
+    document.getElementById('btn-play-menu').focus();
 });
 
 // Start global animation loop
 hideAllMenus();
 mainMenu.classList.remove('hidden');
+document.getElementById('btn-play-menu').focus();
 updateProfileStyle(); // Sets Initial snake Profile
 initGrid();
 window.requestAnimationFrame(main);

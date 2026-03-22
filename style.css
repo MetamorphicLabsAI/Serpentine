@@ -227,12 +227,13 @@ button {
     text-transform: uppercase;
 }
 
-button:hover {
+button:hover, button:focus {
     color: #050505;
     background: var(--snake-color);
     box-shadow: 0 0 20px var(--snake-color), inset 0 0 10px rgba(255,255,255,0.5);
     text-shadow: none;
     transform: translateY(-3px) scale(1.05);
+    outline: none;
 }
 
 .btn-menu {
@@ -249,11 +250,12 @@ button:hover {
     text-shadow: none;
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover, .btn-secondary:focus {
     color: #050505;
     background: #fff;
     border-color: #fff;
     box-shadow: 0 0 15px #fff;
+    outline: none;
 }
 
 .btn-danger {
@@ -264,12 +266,13 @@ button:hover {
     text-shadow: 0 0 8px currentColor;
 }
 
-.btn-danger:hover {
+.btn-danger:hover, .btn-danger:focus {
     color: #050505;
     background: #ff0055;
     border-color: #ff0055;
     box-shadow: 0 0 15px #ff0055;
     text-shadow: none;
+    outline: none;
 }
 
 .controls-hint {
@@ -373,11 +376,12 @@ button:hover {
 }
 
 .nav-btn::before { display: none; }
-.nav-btn:hover {
+.nav-btn:hover, .nav-btn:focus {
     background: transparent;
     color: var(--snake-color);
     transform: scale(1.2);
     box-shadow: none;
+    outline: none;
 }
 
 .blink {
