@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serpentine</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="arcade-machine">
+        <div class="game-container">
+            <div class="header">
+                <div class="score-board">
+                    <div class="score-label">SCORE</div>
+                    <div id="score" class="score-value">0</div>
+                </div>
+                <div class="title">SERPENTINE</div>
+                <div class="score-board">
+                    <div class="score-label">BEST</div>
+                    <div id="high-score" class="score-value">0</div>
+                </div>
+            </div>
+
+            <div class="canvas-wrapper">
+                <canvas id="gameCanvas" width="600" height="600"></canvas>
+                <div id="game-over" class="overlay hidden">
+                    <h2 class="menu-title">SYSTEM FAILURE</h2>
+                    <p>FINAL SCORE: <span id="final-score" class="highlight">0</span></p>
+                    <button id="restart-btn" class="btn-menu">REBOOT SYSTEM</button>
+                    <button id="menu-btn" class="btn-menu btn-secondary">MAIN MENU</button>
+                </div>
+
+                <div id="initials-screen" class="overlay hidden">
+                    <h2 class="menu-title" style="font-size: 2.2rem; margin-bottom: 10px;">NEW HIGH SCORE!</h2>
+                    <p style="margin-bottom: 15px;">SCORE: <span id="initials-score" class="highlight">0</span></p>
+                    <p style="font-size: 0.9rem; margin-bottom: 15px; color: #aaa;">ENTER YOUR INITIALS</p>
+                    <div id="initials-entry" style="display: flex; gap: 15px; margin-bottom: 25px;">
+                        <div class="initial-slot active" data-index="0"><span>_</span></div>
+                        <div class="initial-slot" data-index="1"><span>_</span></div>
+                        <div class="initial-slot" data-index="2"><span>_</span></div>
+                    </div>
+                    <button id="btn-submit-initials" class="btn-menu">SUBMIT</button>
+                </div>
+
+                <div id="leaderboard-screen" class="overlay hidden">
+                    <h2 class="menu-title" style="font-size: 2.2rem; margin-bottom: 15px;">HIGH SCORES</h2>
+                    <div id="leaderboard-difficulty-tabs" style="display: flex; gap: 8px; margin-bottom: 15px;">
+                        <button class="btn-lb-tab active" data-diff="easy">EASY</button>
+                        <button class="btn-lb-tab" data-diff="medium">MED</button>
+                        <button class="btn-lb-tab" data-diff="hard">HARD</button>
+                        <button class="btn-lb-tab" data-diff="insane">INS</button>
+                    </div>
+                    <div id="leaderboard-list" style="width: 320px;"></div>
+                    <button id="btn-back-leaderboard" class="btn-menu btn-secondary" style="margin-top: 15px;">BACK</button>
+                </div>
+                <div id="init-screen" class="overlay">
+                    <h1 class="menu-title" style="font-size: 4rem; margin-bottom: 20px;">SERPENTINE</h1>
+                    <p class="blink" style="margin-bottom: 40px; color: var(--snake-color); font-weight: bold; letter-spacing: 2px;">SYSTEM STANDBY</p>
+                    <button id="btn-initialize" class="btn-menu" style="font-size: 1.5rem; padding: 20px 60px;">INITIALIZE</button>
+                </div>
+
+                <div id="main-menu" class="overlay hidden">
+                    <h2 class="menu-title" style="font-size: 3.5rem; margin-bottom: 40px;">SERPENTINE</h2>
+                    <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 15px;">
+                        <button id="btn-play-menu" class="btn-menu">GAME MODES</button>
+                        <button id="btn-char-menu" class="btn-menu">CHARACTER SELECT</button>
+                        <button id="btn-scores-menu" class="btn-menu">HIGH SCORES</button>
+                        <button id="btn-shop-menu" class="btn-menu">SYSTEM SHOP</button>
+                        <button id="btn-controls-menu" class="btn-menu">CONTROLS</button>
+                        <button id="btn-exit-menu" class="btn-menu btn-danger">EXIT SYSTEM</button>
+                    </div>
+                </div>
+
+                <div id="mode-select" class="overlay hidden">
+                    <h2 class="menu-title" style="font-size: 2.5rem; margin-bottom: 30px;">GAME MODES</h2>
+                    <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 15px;">
+                        <button id="btn-standard" class="btn-menu">STANDARD</button>
+                        <button id="btn-back-mode" class="btn-menu btn-secondary">BACK</button>
+                    </div>
+                </div>
+
+                <div id="difficulty-select" class="overlay hidden">
+                    <h2 class="menu-title" style="font-size: 2.2rem; margin-bottom: 30px;">DIFFICULTY</h2>
+                    <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 12px;">
+                        <button id="btn-easy" class="btn-menu diff-btn" data-speed="180">EASY</button>
+                        <button id="btn-medium" class="btn-menu diff-btn" data-speed="120">MEDIUM</button>
+                        <button id="btn-hard" class="btn-menu diff-btn" data-speed="80">HARD</button>
+                        <button id="btn-insane" class="btn-menu diff-btn btn-danger" data-speed="50">INSANE</button>
+                        <button id="btn-back-diff" class="btn-menu btn-secondary">BACK</button>
+                    </div>
+                </div>
+
+                <div id="shop-menu" class="overlay hidden">
+                    <h2 class="menu-title" style="font-size: 2.5rem; margin-bottom: 20px;">SYSTEM SHOP</h2>
+                    <p style="color: #aaa; margin-bottom: 20px;">BANK: <span id="shop-bank-main" class="highlight">0</span></p>
+                    <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 12px;">
+                        <button id="btn-shop-snakes" class="btn-menu">SNAKES</button>
+                        <button id="btn-shop-modes" class="btn-menu">MODES</button>
+                        <button id="btn-shop-other" class="btn-menu">OTHER</button>
+                        <button id="btn-back-shop" class="btn-menu btn-secondary">BACK</button>
+                    </div>
+                </div>
+
+                <div id="shop-snakes" class="overlay hidden">
+                    <h2 class="menu-title" style="font-size: 2rem; margin-bottom: 20px;">SNAKE SHOP</h2>
+                    <p style="color: #aaa; margin-bottom: 20px;">BANK: <span id="shop-bank-snakes" class="highlight">0</span></p>
+                    <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 12px;">
+                        <div id="shop-item-princess" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px;">
+                            <div style="text-align: left;">
+                                <div id="label-princess" style="color: #fff; font-size: 0.9rem;">PRINCESS</div>
+                                <div style="color: var(--snake-color); font-size: 0.8rem; font-weight: bold;">50,000 PTS</div>
+                            </div>
+                            <button id="btn-buy-princess" class="btn-menu" style="width: auto; padding: 5px 15px; font-size: 0.8rem;">BUY</button>
+                        </div>
+                        <div id="shop-item-arthropod" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px;">
+                            <div style="text-align: left;">
+                                <div id="label-arthropod" style="color: #fff; font-size: 0.9rem;">ARTHROPOD</div>
+                                <div style="color: var(--snake-color); font-size: 0.8rem; font-weight: bold;">75,000 PTS</div>
+                            </div>
+                            <button id="btn-buy-arthropod" class="btn-menu" style="width: auto; padding: 5px 15px; font-size: 0.8rem;">BUY</button>
+                        </div>
+                        <div id="shop-item-dragon" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px;">
+                            <div style="text-align: left;">
+                                <div id="label-dragon" style="color: #fff; font-size: 0.9rem;">KITE DRAGON</div>
+                                <div style="color: var(--snake-color); font-size: 0.8rem; font-weight: bold;">100,000 PTS</div>
+                            </div>
+                            <button id="btn-buy-dragon" class="btn-menu" style="width: auto; padding: 5px 15px; font-size: 0.8rem;">BUY</button>
+                        </div>
+                        <button id="btn-back-shop-snakes" class="btn-menu btn-secondary">BACK</button>
+                    </div>
+                </div>
+
+                <div id="shop-modes" class="overlay hidden">
+                    <h2 class="menu-title" style="font-size: 2rem; margin-bottom: 20px;">MODE SHOP</h2>
+                    <p style="color: #aaa; margin-bottom: 20px;">BANK: <span id="shop-bank-modes" class="highlight">0</span></p>
+                    <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="color: #555; padding: 20px;">NO STOCK AVAILABLE</div>
+                        <button id="btn-back-shop-modes" class="btn-menu btn-secondary">BACK</button>
+                    </div>
+                </div>
+
+                <div id="shop-other" class="overlay hidden">
+                    <h2 class="menu-title" style="font-size: 2rem; margin-bottom: 20px;">OTHER DECRYPTIONS</h2>
+                    <p style="color: #aaa; margin-bottom: 10px;">BANK: <span id="shop-bank-other" class="highlight">0</span></p>
+                    <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 12px; width: 340px;">
+                        <div id="shop-item-9193" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px;">
+                            <div style="text-align: left;">
+                                <div id="label-9193" style="color: #fff; font-size: 0.9rem;">???</div>
+                                <div style="color: var(--snake-color); font-size: 0.8rem; font-weight: bold;">900,000 PTS</div>
+                            </div>
+                            <button id="btn-buy-9193" class="btn-menu" style="width: auto; padding: 5px 15px; font-size: 0.8rem;">BUY</button>
+                        </div>
+                        <div id="shop-item-master" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px;">
+                            <div style="text-align: left;">
+                                <div id="label-master" style="color: #fff; font-size: 0.9rem;">???</div>
+                                <div style="color: var(--snake-color); font-size: 0.8rem; font-weight: bold;">9,000,000 PTS</div>
+                            </div>
+                            <button id="btn-buy-master" class="btn-menu" style="width: auto; padding: 5px 15px; font-size: 0.8rem;">BUY</button>
+                        </div>
+                        <button id="btn-back-shop-other" class="btn-menu btn-secondary">BACK</button>
+                    </div>
+                </div>
+
+                <div id="pause-screen" class="overlay hidden">
+                    <h2 class="menu-title" style="font-size: 3rem; margin-bottom: 30px;">PAUSED</h2>
+                    <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 15px;">
+                        <button id="btn-resume" class="btn-menu">RESUME</button>
+                        <button id="btn-pause-controls" class="btn-menu">CONTROLS</button>
+                        <button id="btn-pause-quit" class="btn-menu btn-danger">QUIT</button>
+                    </div>
+                </div>
+
+                <div id="controls-screen" class="overlay hidden">
+                    <h2 class="menu-title" style="font-size: 2.5rem; margin-bottom: 30px;">SYSTEM CONTROLS</h2>
+                    <div style="color: #fff; font-size: 1.1rem; line-height: 2; text-align: left; margin-bottom: 30px; letter-spacing: 1px;">
+                        <p><strong style="color: var(--snake-color);">NAVIGATE:</strong> WASD / Arrows</p>
+                        <p><strong style="color: var(--snake-color);">SELECT/PLAY:</strong> Spacebar / Enter</p>
+                        <p><strong style="color: var(--snake-color);">GO BACK:</strong> Escape / Backspace</p>
+                        <p style="margin-top: 15px;"><strong style="color: var(--food-color);">SNAKE DIR:</strong> WASD / Arrows</p>
+                        <p><strong style="color: var(--food-color);">TOUCH DEVS:</strong> Screen Swipe</p>
+                    </div>
+                    <button id="btn-back-controls" class="btn-menu btn-secondary">BACK</button>
+                    <button id="btn-reset-data" class="btn-menu btn-danger" style="margin-top: 20px;">RESET PROGRESS</button>
+                </div>
+
+                <div id="start-screen" class="overlay hidden">
+                    <h2 class="menu-title" style="font-size: 2.2rem; margin-bottom: 5px;">CHOOSE PROGRAM</h2>
+                    
+                    <div class="character-select">
+                        <button id="prev-btn" class="nav-btn">◀</button>
+                        
+                        <div class="character-info">
+                            <h3 id="char-name">NEON PROTOCOL</h3>
+                            <p id="char-lore">The original OS baseline. Reliable, bright, and fiercely fast.</p>
+                            <p id="char-lock-status" style="color: #ff0055; font-size: 0.8rem; margin-top: 5px; font-weight: bold;" class="hidden">LOCKED</p>
+                        </div>
+                        
+                        <button id="next-btn" class="nav-btn">▶</button>
+                    </div>
+                    
+                    <p class="blink" style="margin-bottom: 10px; font-size: 0.9rem;">PRESS ARROW KEYS TO BROWSE</p>
+                    <button id="btn-select-char" class="btn-menu">SELECT</button>
+                    <button id="btn-char-options" class="btn-menu btn-secondary hidden" style="font-size: 0.8rem; padding: 8px 20px;">OPTIONS</button>
+                    <button id="btn-back-char" class="btn-menu btn-secondary">BACK</button>
+                </div>
+
+                <div id="char-options-screen" class="overlay hidden">
+                    <h2 class="menu-title" style="font-size: 2rem; margin-bottom: 10px;">CHARACTER OPTIONS</h2>
+                    <p id="char-options-name" style="color: var(--snake-color); font-weight: bold; font-size: 1.1rem; margin-bottom: 20px;"></p>
+                    <div id="char-options-list" class="menu-buttons" style="display: flex; flex-direction: column; gap: 12px; width: 340px;"></div>
+                    <button id="btn-back-char-options" class="btn-menu btn-secondary" style="margin-top: 20px;">BACK</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
