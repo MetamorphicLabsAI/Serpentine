@@ -64,6 +64,16 @@
 
                 <div id="main-menu" class="overlay hidden">
                     <h2 class="menu-title" style="font-size: 3.5rem; margin-bottom: 40px;">SERPENTINE</h2>
+                    <div id="main-menu-stats" style="display: flex; gap: 30px; margin-bottom: 30px; justify-content: center;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.7rem; color: #aaa; letter-spacing: 2px; margin-bottom: 4px;">BEST SCORE</div>
+                            <div id="menu-best-score" style="font-size: 1.6rem; font-weight: 900; color: var(--snake-color); text-shadow: 0 0 10px var(--snake-color);">0</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.7rem; color: #aaa; letter-spacing: 2px; margin-bottom: 4px;">BANK</div>
+                            <div id="menu-bank" style="font-size: 1.6rem; font-weight: 900; color: var(--accent-color); text-shadow: 0 0 10px var(--accent-color);">0</div>
+                        </div>
+                    </div>
                     <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 15px;">
                         <button id="btn-play-menu" class="btn-menu">GAME MODES</button>
                         <button id="btn-char-menu" class="btn-menu">CHARACTER SELECT</button>
@@ -137,7 +147,41 @@
                     <h2 class="menu-title" style="font-size: 2rem; margin-bottom: 20px;">MODE SHOP</h2>
                     <p style="color: #aaa; margin-bottom: 20px;">BANK: <span id="shop-bank-modes" class="highlight">0</span></p>
                     <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 12px;">
-                        <div style="color: #555; padding: 20px;">NO STOCK AVAILABLE</div>
+                        <div class="mode-item" data-mode="chrono" style="display: flex; flex-direction: column; background: rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="color: var(--snake-color); font-size: 0.9rem; font-weight: bold;">CHRONOSHIFT</div>
+                                <span class="mode-badge" style="background: rgba(0,255,255,0.15); color: #00ffff; font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px;">AVAILABLE</span>
+                            </div>
+                            <div style="color: #888; font-size: 0.75rem; margin-top: 4px;">Time manipulation survival — slow-mo, rewind, chrono-meter</div>
+                        </div>
+                        <div class="mode-item" data-mode="breach" style="display: flex; flex-direction: column; background: rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="color: var(--snake-color); font-size: 0.9rem; font-weight: bold;">FIREWALL BREACH</div>
+                                <span class="mode-badge" style="background: rgba(255,255,255,0.15); color: #aaa; font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px;">AVAILABLE</span>
+                            </div>
+                            <div style="color: #888; font-size: 0.75rem; margin-top: 4px;">Survive the encroaching firewall — eat to push it back</div>
+                        </div>
+                        <div class="mode-item" data-mode="sentinel" style="display: flex; flex-direction: column; background: rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="color: var(--snake-color); font-size: 0.9rem; font-weight: bold;">SENTINEL BREACH</div>
+                                <span class="mode-badge" style="background: rgba(255,255,255,0.15); color: #aaa; font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px;">AVAILABLE</span>
+                            </div>
+                            <div style="color: #888; font-size: 0.75rem; margin-top: 4px;">Tactical combat — gear, severing, Hydra.DLL bosses</div>
+                        </div>
+                        <div class="mode-item" data-mode="grid" style="display: flex; flex-direction: column; background: rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="color: var(--snake-color); font-size: 0.9rem; font-weight: bold;">GRID WARFARE</div>
+                                <span class="mode-badge" style="background: rgba(255,255,255,0.15); color: #aaa; font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px;">AVAILABLE</span>
+                            </div>
+                            <div style="color: #888; font-size: 0.75rem; margin-top: 4px;">Battle arena — maze race, CTF, deathmatch</div>
+                        </div>
+                        <div class="mode-item" data-mode="neural" style="display: flex; flex-direction: column; background: rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="color: var(--snake-color); font-size: 0.9rem; font-weight: bold;">NEURAL FIT</div>
+                                <span class="mode-badge" style="background: rgba(255,255,255,0.15); color: #aaa; font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px;">AVAILABLE</span>
+                            </div>
+                            <div style="color: #888; font-size: 0.75rem; margin-top: 4px;">Shape-matching reflex puzzle — match the falling archetype</div>
+                        </div>
                         <button id="btn-back-shop-modes" class="btn-menu btn-secondary">BACK</button>
                     </div>
                 </div>
@@ -174,14 +218,8 @@
                 </div>
 
                 <div id="controls-screen" class="overlay hidden">
-                    <h2 class="menu-title" style="font-size: 2.5rem; margin-bottom: 30px;">SYSTEM CONTROLS</h2>
-                    <div style="color: #fff; font-size: 1.1rem; line-height: 2; text-align: left; margin-bottom: 30px; letter-spacing: 1px;">
-                        <p><strong style="color: var(--snake-color);">NAVIGATE:</strong> WASD / Arrows</p>
-                        <p><strong style="color: var(--snake-color);">SELECT/PLAY:</strong> Spacebar / Enter</p>
-                        <p><strong style="color: var(--snake-color);">GO BACK:</strong> Escape / Backspace</p>
-                        <p style="margin-top: 15px;"><strong style="color: var(--food-color);">SNAKE DIR:</strong> WASD / Arrows</p>
-                        <p><strong style="color: var(--food-color);">TOUCH DEVS:</strong> Screen Swipe</p>
-                    </div>
+                    <h2 class="menu-title" style="font-size: 2.5rem; margin-bottom: 20px;">SYSTEM CONTROLS</h2>
+                    <div id="controls-keyboard" style="margin-bottom: 30px;"></div>
                     <button id="btn-back-controls" class="btn-menu btn-secondary">BACK</button>
                     <button id="btn-reset-data" class="btn-menu btn-danger" style="margin-top: 20px;">RESET PROGRESS</button>
                 </div>

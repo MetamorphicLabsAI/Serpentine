@@ -136,6 +136,8 @@ let pendingHighScoreValue = 0;
 /* --- 9193 Master Unlock Ritual --- */
 let masterUnlockHoldStart = null; // timestamp when 9 was first pressed
 let masterUnlockTimer = null;
+let ritualToneOsc = null;
+let ritualToneGain = null;
 
 function unlockEverything() {
     // Unlock all snakes
@@ -170,6 +172,30 @@ function resetMasterUnlock() {
     masterUnlockHoldStart = null;
     if (masterUnlockTimer) { clearTimeout(masterUnlockTimer); masterUnlockTimer = null; }
     document.querySelector('.arcade-machine').classList.remove('ritual-active');
+    stopRitualTone();
+}
+
+function startRitualTone() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    ritualToneGain = audioCtx.createGain();
+    ritualToneGain.gain.value = 0;
+    ritualToneGain.connect(audioCtx.destination);
+    ritualToneOsc = audioCtx.createOscillator();
+    ritualToneOsc.type = 'sine';
+    ritualToneOsc.frequency.value = 432;
+    ritualToneOsc.connect(ritualToneGain);
+    ritualToneOsc.start();
+    // Fade in over 0.5s
+    ritualToneGain.gain.setTargetAtTime(0.08, audioCtx.currentTime, 0.3);
+}
+
+function stopRitualTone() {
+    if (!ritualToneGain) return;
+    ritualToneGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.3);
+    setTimeout(() => {
+        if (ritualToneOsc) { ritualToneOsc.stop(); ritualToneOsc = null; }
+        if (ritualToneGain) { ritualToneGain.disconnect(); ritualToneGain = null; }
+    }, 500);
 }
 
 function updateProfileStyle() {
@@ -186,7 +212,7 @@ function updateProfileStyle() {
         
         const loreElement = document.getElementById('char-lore');
         loreElement.textContent = profile.unlockCondition || 'CLASSIFIED';
-        loreElement.style.color = '#ffd700'; // Yellow
+        loreElement.className = 'char-lore-locked';
         
         document.getElementById('char-name').style.color = '#555555';
         document.getElementById('char-name').style.textShadow = `0 0 10px #555555`;
@@ -223,7 +249,7 @@ function updateProfileStyle() {
         
         const loreElement = document.getElementById('char-lore');
         loreElement.textContent = profile.lore;
-        loreElement.style.color = ''; // clear overriding color
+        loreElement.className = '';
         
         document.getElementById('char-name').style.color = bodyColor;
         document.getElementById('char-name').style.textShadow = `0 0 10px ${bodyColor}`;
@@ -243,15 +269,36 @@ function updateProfileStyle() {
     if (lockText && selectBtn) {
         if (isLocked) {
             lockText.classList.remove('hidden');
+            lockText.style.animation = 'lockPulse 1s ease-in-out infinite';
             selectBtn.style.opacity = '0.5';
             selectBtn.style.pointerEvents = 'none';
             selectBtn.textContent = 'LOCKED';
         } else {
             lockText.classList.add('hidden');
+            lockText.style.animation = '';
             selectBtn.style.opacity = '1';
             selectBtn.style.pointerEvents = 'auto';
             selectBtn.textContent = 'SELECT';
         }
+    }
+
+    // Inject lock pulse animation once
+    if (!document.getElementById('lock-pulse-style')) {
+        const s = document.createElement('style');
+        s.id = 'lock-pulse-style';
+        s.textContent = `
+            @keyframes lockPulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.3; }
+            }
+            .char-lore-locked {
+                animation: lockPulse 1.2s ease-in-out infinite;
+                color: #ffd700 !important;
+                font-weight: bold !important;
+                letter-spacing: 1px !important;
+            }
+        `;
+        document.head.appendChild(s);
     }
     
     // Show/hide OPTIONS button
@@ -467,7 +514,55 @@ function playUnlockSound() {
     });
 }
 
-// --- Sequencer Core Data ---
+let unlockPopupTimeout = null;
+function showUnlockPopup(text, color) {
+    let popup = document.getElementById('unlock-popup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.id = 'unlock-popup';
+        popup.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-align: center;
+            text-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
+            opacity: 0;
+            background: rgba(5, 5, 5, 0.85);
+            padding: 20px 40px;
+            border-radius: 12px;
+            border: 2px solid currentColor;
+            box-shadow: 0 0 30px currentColor;
+        `;
+        document.body.appendChild(popup);
+    }
+
+    popup.textContent = text;
+    popup.style.color = color || '#ffd700';
+    popup.style.borderColor = color || '#ffd700';
+    popup.style.textShadow = `0 0 20px ${color || '#ffd700'}, 0 0 40px ${color || '#ffd700'}`;
+    popup.style.boxShadow = `0 0 30px ${color || '#ffd700'}`;
+
+    // Kill any pending hide
+    if (unlockPopupTimeout) clearTimeout(unlockPopupTimeout);
+
+    requestAnimationFrame(() => {
+        popup.style.transform = 'translate(-50%, -50%) scale(1)';
+        popup.style.opacity = '1';
+    });
+
+    unlockPopupTimeout = setTimeout(() => {
+        popup.style.transform = 'translate(-50%, -50%) scale(0)';
+        popup.style.opacity = '0';
+    }, 3000);
+}
 const SEQUENCER_STEPS = 256; // 38.4 seconds loop at 150ms per step
 let currentStep = 0;
 
@@ -822,11 +917,31 @@ function updateLogic() {
             localStorage.setItem('serpentineUnlockedSpectrum', 'true');
             const spectrum = snakeProfiles.find(p => p.id === 'spectrum');
             if (spectrum) spectrum.locked = false;
-            
+
             playUnlockSound();
-            for(let i=0; i<6; i++) {
-               setTimeout(() => burstParticles(Math.random() * tileCount, Math.random() * tileCount, `hsl(${Math.random()*360},100%,50%)`, 40), i * 150);
+
+            // Rainbow screen flash — full-spectrum radial burst from center
+            const flashOsc = audioCtx.createOscillator();
+            const flashGain = audioCtx.createGain();
+            flashOsc.type = 'sawtooth';
+            flashOsc.frequency.value = 20;
+            flashGain.gain.value = 0.4;
+            flashOsc.connect(flashGain);
+            flashGain.connect(audioCtx.destination);
+            flashOsc.start();
+            flashGain.gain.setTargetAtTime(0, audioCtx.currentTime + 0.8, 0.3);
+            flashOsc.stop(audioCtx.currentTime + 1.2);
+
+            // Dense rainbow particle storm
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    burstParticles(Math.random() * tileCount, Math.random() * tileCount, `hsl(${Math.random() * 360}, 100%, 60%)`, 60);
+                    burstParticles(Math.random() * tileCount, Math.random() * tileCount, `hsl(${Math.random() * 360}, 100%, 50%)`, 40);
+                }, i * 80);
             }
+
+            // Message popup
+            showUnlockPopup('CHROMATIC PUNCH UNLOCKED', '#ff0055');
         }
     } else {
         // Pop Tail if we didn't eat
@@ -1816,10 +1931,12 @@ window.addEventListener('keydown', e => {
                     if (!masterUnlockHoldStart) {
                         masterUnlockHoldStart = Date.now();
                         document.querySelector('.arcade-machine').classList.add('ritual-active');
+                        startRitualTone();
                         masterUnlockTimer = setTimeout(() => {
                             unlockEverything();
                             masterUnlockHoldStart = null;
                             masterUnlockTimer = null;
+                            stopRitualTone();
                             document.querySelector('.arcade-machine').classList.remove('ritual-active');
                         }, 9000);
                     }
@@ -1962,6 +2079,7 @@ nextBtn.addEventListener('click', () => {
 
 const hideAllMenus = () => {
     mainMenu.classList.add('hidden');
+    refreshMainMenuStats();
     modeSelect.classList.add('hidden');
     diffSelect.classList.add('hidden');
     controlsScreen.classList.add('hidden');
@@ -1977,6 +2095,13 @@ const hideAllMenus = () => {
     document.getElementById('init-screen').classList.add('hidden');
     document.getElementById('char-options-screen').classList.add('hidden');
 };
+
+function refreshMainMenuStats() {
+    const bestScoreEl = document.getElementById('menu-best-score');
+    const bankEl = document.getElementById('menu-bank');
+    if (bestScoreEl) bestScoreEl.textContent = highScore.toLocaleString();
+    if (bankEl) bankEl.textContent = bank.toLocaleString();
+}
 
 const togglePause = () => {
     if (!isPlaying || isEnteringInitials) return;
@@ -2119,9 +2244,128 @@ document.querySelectorAll('.btn-lb-tab').forEach(tab => {
 
 document.getElementById('btn-controls-menu').addEventListener('click', () => {
     hideAllMenus();
+    renderControlsKeyboard();
     controlsScreen.classList.remove('hidden');
     document.getElementById('btn-back-controls').focus();
 });
+
+function renderControlsKeyboard() {
+    const container = document.getElementById('controls-keyboard');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const sections = [
+        {
+            label: 'MENU NAVIGATION',
+            rows: [
+                [
+                    { label: 'W', cls: 'key-wide', hint: 'UP' },
+                    { label: 'A', cls: 'key-wide', hint: 'LEFT' },
+                    { label: 'S', cls: 'key-wide', hint: 'DOWN' },
+                    { label: 'D', cls: 'key-wide', hint: 'RIGHT' },
+                ],
+                [
+                    { label: '↑', cls: 'key-wide', hint: 'UP' },
+                    { label: '←', cls: 'key-wide', hint: 'LEFT' },
+                    { label: '↓', cls: 'key-wide', hint: 'DOWN' },
+                    { label: '→', cls: 'key-wide', hint: 'RIGHT' },
+                ],
+                [
+                    { label: 'SPACE', cls: 'key-xl', hint: 'SELECT' },
+                    { label: 'ESC', cls: 'key-wide', hint: 'BACK' },
+                ],
+            ]
+        },
+        {
+            label: 'IN-GAME',
+            rows: [
+                [
+                    { label: 'W', cls: 'key-wide', hint: 'UP' },
+                    { label: 'A', cls: 'key-wide', hint: 'LEFT' },
+                    { label: 'S', cls: 'key-wide', hint: 'DOWN' },
+                    { label: 'D', cls: 'key-wide', hint: 'RIGHT' },
+                ],
+                [
+                    { label: '↑', cls: 'key-wide', hint: 'UP' },
+                    { label: '←', cls: 'key-wide', hint: 'LEFT' },
+                    { label: '↓', cls: 'key-wide', hint: 'DOWN' },
+                    { label: '→', cls: 'key-wide', hint: 'RIGHT' },
+                ],
+                [
+                    { label: '9', cls: 'key-wide', hint: 'RITUAL' },
+                    { label: 'ESC', cls: 'key-wide', hint: 'PAUSE' },
+                ],
+            ]
+        },
+        {
+            label: 'INITIALS ENTRY',
+            rows: [
+                [
+                    { label: '↑', cls: 'key-wide', hint: 'SCROLL UP' },
+                    { label: '↓', cls: 'key-wide', hint: 'SCROLL DOWN' },
+                ],
+                [
+                    { label: '←', cls: 'key-wide', hint: 'PREV SLOT' },
+                    { label: '→', cls: 'key-wide', hint: 'NEXT SLOT' },
+                ],
+                [
+                    { label: 'SPACE', cls: 'key-xl', hint: 'SUBMIT' },
+                ],
+            ]
+        }
+    ];
+
+    const style = document.createElement('style');
+    style.textContent = `
+        .kbd-section { margin-bottom: 18px; }
+        .kbd-section-label {
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            color: #888;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .kbd-row { display: flex; gap: 6px; justify-content: center; margin-bottom: 6px; }
+        .kbd-key {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.05), 0 2px 4px rgba(0,0,0,0.4);
+        }
+        .kbd-key .lbl { font-size: 0.9rem; font-weight: 700; }
+        .kbd-key .hint { font-size: 0.45rem; color: #888; letter-spacing: 1px; margin-top: 2px; }
+        .key-wide { width: 42px; height: 42px; }
+        .key-wide .lbl { font-size: 0.9rem; }
+        .key-xl { width: 90px; height: 42px; }
+        .key-xl .lbl { font-size: 0.75rem; }
+        .key-tall { height: 52px; }
+    `;
+    if (!document.querySelector('style[data-kbd]')) {
+        style.setAttribute('data-kbd', 'true');
+        document.head.appendChild(style);
+    }
+
+    sections.forEach(section => {
+        const sec = document.createElement('div');
+        sec.className = 'kbd-section';
+        sec.innerHTML = `<div class="kbd-section-label">${section.label}</div>`;
+        section.rows.forEach(row => {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'kbd-row';
+            row.forEach(k => {
+                const key = document.createElement('div');
+                key.className = `kbd-key ${k.cls}`;
+                key.innerHTML = `<span class="lbl">${k.label}</span><span class="hint">${k.hint}</span>`;
+                rowEl.appendChild(key);
+            });
+            sec.appendChild(rowEl);
+        });
+        container.appendChild(sec);
+    });
+}
 
 document.getElementById('btn-back-controls').addEventListener('click', () => {
     hideAllMenus();
