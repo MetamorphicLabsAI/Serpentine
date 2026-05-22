@@ -155,6 +155,85 @@ Points earned across all game sessions are accumulated into a global **Point Ban
 
 ---
 
+## ⚡ Power-Up System
+
+Power-ups spawn as glowing orbs on the grid alongside regular food. When collected, they grant a timed enhancement to the snake's capabilities. Only **one power-up can be active at a time** — collecting a new one replaces the current.
+
+### [POWER-UP TYPES]
+
+| Type | Color | Duration | Effect |
+| :--- | :--- | :--- | :--- |
+| **SHIELD** | Blue `#4488ff` | 10 seconds | Own-body collision disabled — snake can safely pass through its own segments |
+| **SPEED BOOST** | Yellow `#ffdd00` | 8 seconds | Tick rate multiplied by ×1.5 — snake moves significantly faster |
+| **GHOST** | White `#ffffff` | 5 seconds | Snake rendered at 45% opacity and can pass through its own segments and walls |
+| **MAGNET** | Purple `#aa44ff` | 8 seconds | Food is gravitationally attracted to the snake's head within a 5-cell radius, easing collection |
+| **DOUBLE EAT** | Green `#44ff88` | 10 seconds | Eating food awards double score points and double segment growth per food consumed |
+
+### [SPAWN RULES]
+- Power-ups spawn with a **~15% probability** each time food is placed.
+- Only **one power-up item** can exist on the grid at any time.
+- Power-up items are drawn as **pulsing glowing orbs** with a distinct color per type and a bright white inner core.
+- Power-ups **do not affect** the Chrono-Meter or any other temporal systems.
+
+### [ACTIVE POWER-UP HUD]
+When a power-up is collected, the header displays:
+- A **POWER-UP** label showing the active power-up's name in its color
+- A **countdown bar** that depletes in real-time, colored to match the active power-up type
+
+### [PICKUP EFFECTS]
+- **Sound:** Ascending sine wave sweep (440Hz → 1320Hz, 200ms)
+- **Particles:** 25-particle burst in the power-up's color
+- **Popup:** Power-up name + "ACTIVATED" displayed as a centered scale-in/scale-out notification
+
+### [INTERACTION WITH OTHER SYSTEMS]
+- **SHIELD** and **GHOST** both disable own-body collision, stacking no additional effect when combined.
+- **DOUBLE EAT** applies before the growth cap check (e.g., Princess in Realistic mode), meaning two segments are added then the cap is enforced.
+- **SPEED BOOST** interacts with the per-food acceleration curve — both the base speed and the boost multiplier apply simultaneously, making late-game SPEED BOOST extremely fast.
+- Power-up state **persists through mercy** — if you use mercy, the active power-up is cleared and must be re-collected.
+
+---
+
+## ⚖️ Mercy System
+
+The Mercy System provides a single second chance per run when the snake dies, allowing the player to continue rather than ending the run immediately.
+
+### [CONTINUE BUTTON]
+- On **SYSTEM FAILURE** (game over), if `score > 0`, a "CONTINUE (½ SCORE)" button appears on the overlay.
+- If score is `0`, the button is hidden — no mercy available for zero-score runs.
+
+### [ON ACTIVATION — WHAT RESETS]
+When "CONTINUE" is pressed:
+
+| Attribute | After Mercy |
+| :--- | :--- |
+| **Score** | Halved (rounded down) — `score = Math.floor(score / 2)` |
+| **Snake** | Reset to 3 segments — head stays at current position, 2 body segments placed ahead in current direction |
+| **Speed** | Reset to base difficulty tick rate |
+| **Power-up** | Cleared — `deactivatePowerUp()` called, HUD indicator hidden |
+| **Mercy flag** | `mercyAvailable = false` — cannot be used again this run |
+
+### [ON ACTIVATION — WHAT PERSISTS]
+| Attribute | Unchanged |
+| :--- | :--- |
+| **Chrono-Meter** | Carries over at current value (CHRONOSHIFT only) |
+| **High Score** | Already saved at point of death |
+| **Bank** | Already accumulated at point of death |
+| **Unlocked characters** | Full state preserved |
+
+### [RUN RESET]
+When a new game starts (`startGame()` called):
+- `mercyAvailable` is set to `false`
+- `activePowerUp` and `powerUpFood` are cleared
+- `deactivatePowerUp()` hides the HUD indicator
+
+### [STRATEGIC NOTES]
+- Mercy is designed to feel **fair but costly** — halving score is a real consequence, not a free pass.
+- The reset to 3 segments means the player must rebuild their defensive length.
+- Speed resets remove the late-game velocity that may have contributed to the death.
+- Mercy carrying the Chrono-Meter forward (CHRONOSHIFT) makes the mercy choice more interesting — a player with a full chrono buffer has real strategic reason to use mercy over a clean restart.
+
+---
+
 ## 💾 Classified Data (Master Ritual)
 
 ### [THE 9x9 RITUAL]
