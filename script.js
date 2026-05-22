@@ -10,6 +10,7 @@ const controlsScreen = document.getElementById('controls-screen');
 const gameOverScreen = document.getElementById('game-over');
 const finalScoreElement = document.getElementById('final-score');
 const restartBtn = document.getElementById('restart-btn');
+const continueBtn = document.getElementById('btn-continue');
 const menuBtn = document.getElementById('menu-btn');
 
 // Game Core Configuration
@@ -333,6 +334,19 @@ let bought9193Hint = localStorage.getItem('bought9193Hint') === 'true';
 let boughtMasterHint = localStorage.getItem('boughtMasterHint') === 'true';
 let isPaused = false;
 
+// --- Power-Up System ---
+const POWERUP_TYPES = [
+    { id: 'shield',   name: 'SHIELD',      color: '#4488ff', glow: 'rgba(68,136,255,0.8)',  duration: 10000 },
+    { id: 'speed',    name: 'SPEED BOOST', color: '#ffdd00', glow: 'rgba(255,221,0,0.8)',    duration: 8000  },
+    { id: 'ghost',    name: 'GHOST',       color: '#ffffff', glow: 'rgba(255,255,255,0.6)',  duration: 5000  },
+    { id: 'magnet',   name: 'MAGNET',      color: '#aa44ff', glow: 'rgba(170,68,255,0.8)',   duration: 8000  },
+    { id: 'double',   name: 'DOUBLE EAT', color: '#44ff88', glow: 'rgba(68,255,136,0.8)',   duration: 10000 }
+];
+let activePowerUp = null;
+let powerUpEndTime = 0;
+let powerUpFood = null; // { x, y, type } - the power-up item on the grid
+let mercyAvailable = false;
+
 // Initial DOM Setup
 highScoreElement.textContent = highScore;
 const initialsScreen = document.getElementById('initials-screen');
@@ -512,6 +526,53 @@ function playUnlockSound() {
         osc.start(finalTime);
         osc.stop(finalTime + 2.0);
     });
+}
+
+function activatePowerUp(type) {
+    if (activePowerUp) deactivatePowerUp();
+    activePowerUp = type;
+    powerUpEndTime = Date.now() + type.duration;
+    showUnlockPopup(type.name + ' ACTIVATED', type.color);
+
+    // Show HUD indicator
+    const indicator = document.getElementById('powerup-indicator');
+    const label = document.getElementById('powerup-label');
+    if (indicator && label) {
+        indicator.style.visibility = 'visible';
+        label.textContent = type.name;
+        label.style.color = type.color;
+    }
+}
+
+function deactivatePowerUp() {
+    activePowerUp = null;
+    const indicator = document.getElementById('powerup-indicator');
+    if (indicator) indicator.style.visibility = 'hidden';
+}
+
+function playPowerUpSound() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, now);
+    osc.frequency.exponentialRampToValueAtTime(1320, now + 0.15);
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.2);
+}
+
+function drawPowerUpIndicator() {
+    if (!activePowerUp) return;
+    const bar = document.getElementById('powerup-bar');
+    if (!bar) return;
+    const remaining = Math.max(0, powerUpEndTime - Date.now());
+    const pct = (remaining / activePowerUp.duration) * 100;
+    bar.style.width = pct + '%';
 }
 
 let unlockPopupTimeout = null;
@@ -795,6 +856,10 @@ function initGrid() {
     foodEaten = 0;
     scoreElement.textContent = score;
     scoreElement.style.color = colors.snakeBody;
+    activePowerUp = null;
+    powerUpFood = null;
+    mercyAvailable = false;
+    deactivatePowerUp(); // Hide power-up HUD
     placeFood();
     particles = [];
 }
@@ -815,6 +880,27 @@ function placeFood() {
         );
     }
     food = newFoodPosition;
+
+    // 15% chance to spawn a power-up instead of food
+    powerUpFood = null;
+    if (Math.random() < 0.15) {
+        let puPos;
+        let puOnSnake = true;
+        let attempts = 0;
+        while (puOnSnake && attempts < 30) {
+            puPos = {
+                x: Math.floor(Math.random() * tileCount),
+                y: Math.floor(Math.random() * tileCount)
+            };
+            puOnSnake = snake.some(s => s.x === puPos.x && s.y === puPos.y) ||
+                        (puPos.x === food.x && puPos.y === food.y);
+            attempts++;
+        }
+        if (!puOnSnake && puPos) {
+            const type = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
+            powerUpFood = { x: puPos.x, y: puPos.y, type };
+        }
+    }
 }
 
 // Loop controlled via requestAnimationFrame for smooth drawing
@@ -827,9 +913,15 @@ function main(currentTime) {
     if (!isPlaying || isPaused) return;
     
     const secondsSinceLastLogic = (currentTime - lastRenderTime) / 1000;
-    
+
+    // Apply speed boost power-up (×1.5 speed = shorter interval)
+    let effectiveSpeed = currentSpeed;
+    if (activePowerUp && activePowerUp.id === 'speed') {
+        effectiveSpeed = currentSpeed / 1.5;
+    }
+
     // Logic updates happen at dynamic intervals (game speed)
-    if (secondsSinceLastLogic >= currentSpeed / 1000) {
+    if (secondsSinceLastLogic >= effectiveSpeed / 1000) {
         lastRenderTime = currentTime;
         updateLogic();
     }
@@ -862,7 +954,9 @@ function updateLogic() {
     
     // 2. Collision Check - Self
     // 9193 (isCheater) can safely pass through its own segments
-    if (!profile.isCheater && (dx !== 0 || dy !== 0)) {
+    // SHIELD and GHOST power-ups also disable self-collision
+    const selfCollisionDisabled = profile.isCheater || (activePowerUp && (activePowerUp.id === 'shield' || activePowerUp.id === 'ghost'));
+    if (!selfCollisionDisabled && (dx !== 0 || dy !== 0)) {
         for (let i = 0; i < snake.length; i++) {
             if (head.x === snake[i].x && head.y === snake[i].y) {
                 triggerGameOver();
@@ -877,9 +971,15 @@ function updateLogic() {
     // 3. Collision Check - Food
     if (head.x === food.x && head.y === food.y) {
         const pointsPerFood = profile.isCheater ? 90 : 10;
-        score += pointsPerFood;
+        const multiplier = (activePowerUp && activePowerUp.id === 'double') ? 2 : 1;
+        score += pointsPerFood * multiplier;
         foodEaten++;
         scoreElement.textContent = score;
+
+        // Double Eat power-up: grow by 2 segments
+        if (activePowerUp && activePowerUp.id === 'double') {
+            snake.unshift({ ...head }); // second segment at same spot (safe — head just moved here)
+        }
         
         // Growth cap check (e.g., Princess in Realistic mode = max 5 segments)
         const maxLen = getMaxSnakeLength(profile);
@@ -943,16 +1043,27 @@ function updateLogic() {
             // Message popup
             showUnlockPopup('CHROMATIC PUNCH UNLOCKED', '#ff0055');
         }
-    } else {
+    }
+
+    // Power-Up collision check
+    if (powerUpFood && head.x === powerUpFood.x && head.y === powerUpFood.y) {
+        activatePowerUp(powerUpFood.type);
+        playPowerUpSound();
+        burstParticles(powerUpFood.x, powerUpFood.y, powerUpFood.type.color, 25);
+        powerUpFood = null;
+    }
+
+    // Expire power-up if time is up
+    if (activePowerUp && Date.now() > powerUpEndTime) {
+        deactivatePowerUp();
+    }
         // Pop Tail if we didn't eat
         // 9193 never grows past 9
-        const profile = snakeProfiles[selectedProfileIndex];
         if (profile.isCheater && snake.length > 9) {
             snake.pop();
         } else if (!profile.isCheater) {
             snake.pop();
         }
-    }
 }
 
 // Draw the static grid
@@ -1038,7 +1149,8 @@ function draw() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     drawGrid();
-    
+    drawPowerUpIndicator();
+
     if (!isPlaying) {
         drawPreviewSnake();
         return; // Don't draw the actual game logic if we are on the menu!
@@ -1118,7 +1230,29 @@ function draw() {
         ctx.fill();
     }
     ctx.restore();
-    
+
+    // --- Draw Power-Up Food ---
+    if (powerUpFood) {
+        const pu = powerUpFood;
+        const pulse = Math.sin(Date.now() / 120) * 2;
+        const size = gridSize - 4 + pulse;
+        ctx.save();
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = pu.type.glow;
+        ctx.fillStyle = pu.type.color;
+        ctx.globalAlpha = 0.9;
+        ctx.beginPath();
+        ctx.arc(pu.x * gridSize + gridSize / 2, pu.y * gridSize + gridSize / 2, size / 2, 0, Math.PI * 2);
+        ctx.fill();
+        // Inner bright core
+        ctx.fillStyle = '#ffffff';
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.arc(pu.x * gridSize + gridSize / 2, pu.y * gridSize + gridSize / 2, size / 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
     // --- Draw Snake ---
     // Reverse loop: Draw tail-to-head so the Head renders ON TOP of the body segments
     const profileForDraw = snakeProfiles[selectedProfileIndex];
@@ -1135,6 +1269,9 @@ function draw() {
         } else if (profileForDraw.id === 'dragon') {
             drawDragon(segment, index, isHead, isTail);
         } else {
+            if (activePowerUp && activePowerUp.id === 'ghost') {
+                ctx.globalAlpha = 0.45;
+            }
             if (isHead) {
                 ctx.fillStyle = colors.snakeHead;
                 ctx.shadowBlur = 15;
@@ -1749,7 +1886,11 @@ function triggerGameOver() {
     }
 
     finalScoreElement.textContent = score;
-    
+
+    // Mercy system: show continue button if score > 0
+    mercyAvailable = score > 0;
+    continueBtn.style.display = mercyAvailable ? 'block' : 'none';
+
     // Accumulate into the Bank
     bank += score;
     localStorage.setItem('serpentineBank', bank);
@@ -1778,6 +1919,37 @@ function triggerGameOver() {
             gameOverScreen.classList.remove('hidden');
         }
     }, 1500);
+}
+
+function useMercy() {
+    if (!mercyAvailable) return;
+    // Halve the score
+    score = Math.floor(score / 2);
+    scoreElement.textContent = score;
+    mercyAvailable = false;
+    continueBtn.style.display = 'none';
+
+    // Deactivate any active power-up
+    deactivatePowerUp();
+
+    // Reset snake to starting length (3 segments), keep head position
+    const headX = snake[0].x;
+    const headY = snake[0].y;
+    snake = [{ x: headX, y: headY }];
+    // Re-add 2 body segments ahead in the current direction
+    for (let i = 0; i < 2; i++) {
+        snake.push({ x: headX - dx * (i + 1), y: headY - dy * (i + 1) });
+    }
+
+    // Reset speed to base difficulty
+    currentSpeed = currentDifficultySpeed;
+
+    // Resume gameplay
+    hideAllMenus();
+    isPlaying = true;
+    isPaused = false;
+    lastRenderTime = performance.now();
+    startMusic();
 }
 
 function updateInitialsDisplay() {
@@ -2508,6 +2680,7 @@ document.getElementById('btn-submit-initials').addEventListener('click', submitI
 
 // Button Bindings
 restartBtn.addEventListener('click', startGame);
+continueBtn.addEventListener('click', useMercy);
 menuBtn.addEventListener('click', () => {
     hideAllMenus();
     mainMenu.classList.remove('hidden');
