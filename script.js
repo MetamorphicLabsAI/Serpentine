@@ -347,7 +347,9 @@ let powerUpEndTime = 0;
 let powerUpFood = null; // { x, y, type } - the power-up item on the grid
 let mercyAvailable = false;
 
-// Initial DOM Setup
+// --- Shop Demo Mode ---
+let demoState = null; // { mode, startTime, snake, food, chronoOrbs, particles, tick, phase }
+let demoAnimFrame = null;
 highScoreElement.textContent = highScore;
 const initialsScreen = document.getElementById('initials-screen');
 const leaderboardScreen = document.getElementById('leaderboard-screen');
@@ -548,6 +550,797 @@ function deactivatePowerUp() {
     activePowerUp = null;
     const indicator = document.getElementById('powerup-indicator');
     if (indicator) indicator.style.visibility = 'hidden';
+}
+
+// ─────────────────────────────────────────────
+// SHOP DEMO MODE
+// ─────────────────────────────────────────────
+
+const DEMO_DURATION = 15000; // 15 seconds
+const DEMO_TILE = 20; // grid cell size in demo canvas (30px cells, 20 cells = 600px)
+const DEMO_GRID = 30; // canvas pixels per cell
+
+function startDemo(mode) {
+    hideAllMenus();
+
+    // Show demo overlay
+    let demoOverlay = document.getElementById('demo-overlay');
+    if (!demoOverlay) {
+        demoOverlay = document.createElement('div');
+        demoOverlay.id = 'demo-overlay';
+        demoOverlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5,5,5,0.9); z-index: 100;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+        `;
+        document.body.appendChild(demoOverlay);
+    }
+
+    // Canvas for demo
+    let demoCanvas = document.getElementById('demo-canvas');
+    if (!demoCanvas) {
+        demoCanvas = document.createElement('canvas');
+        demoCanvas.id = 'demo-canvas';
+        demoCanvas.width = 600;
+        demoCanvas.height = 600;
+        demoCanvas.style.cssText = 'border: 2px solid #b026ff; border-radius: 8px;';
+        demoOverlay.appendChild(demoCanvas);
+    }
+    demoCanvas.style.display = 'block';
+
+    // Title
+    let demoTitle = document.getElementById('demo-title');
+    if (!demoTitle) {
+        demoTitle = document.createElement('div');
+        demoTitle.id = 'demo-title';
+        demoOverlay.appendChild(demoTitle);
+    }
+    demoTitle.style.cssText = `
+        font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 900;
+        color: #00ffcc; letter-spacing: 4px; margin-bottom: 15px;
+        text-shadow: 0 0 15px #00ffcc;
+    `;
+
+    // Progress bar
+    let demoBar = document.getElementById('demo-bar');
+    if (!demoBar) {
+        demoBar = document.createElement('div');
+        demoBar.id = 'demo-bar';
+        demoBar.style.cssText = `
+            width: 400px; height: 6px; background: rgba(255,255,255,0.1);
+            border-radius: 3px; margin-bottom: 15px; overflow: hidden;
+        `;
+        demoOverlay.appendChild(demoBar);
+    }
+    let demoBarFill = document.getElementById('demo-bar-fill');
+    if (!demoBarFill) {
+        demoBarFill = document.createElement('div');
+        demoBarFill.id = 'demo-bar-fill';
+        demoBarFill.style.cssText = `
+            height: 100%; background: linear-gradient(90deg, #00ffcc, #b026ff);
+            width: 0%; transition: width 0.1s linear;
+        `;
+        demoBar.appendChild(demoBarFill);
+    }
+
+    // Skip button
+    let demoSkip = document.getElementById('demo-skip');
+    if (!demoSkip) {
+        demoSkip = document.createElement('button');
+        demoSkip.id = 'demo-skip';
+        demoSkip.textContent = 'SKIP';
+        demoSkip.style.cssText = `
+            font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 2px;
+            padding: 6px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
+            color: #aaa; border-radius: 4px; cursor: pointer; margin-top: 10px;
+        `;
+        demoSkip.addEventListener('click', stopDemo);
+        demoOverlay.appendChild(demoSkip);
+    }
+    demoSkip.style.display = 'block';
+
+    // Initialize demo state
+    const cx = Math.floor(DEMO_TILE / 2);
+    const cy = Math.floor(DEMO_TILE / 2);
+
+    demoState = {
+        mode,
+        startTime: performance.now(),
+        snake: [{ x: cx, y: cy }, { x: cx, y: cy + 1 }, { x: cx, y: cy + 2 }],
+        dx: 0,
+        dy: -1,
+        food: { x: cx + 5, y: cy },
+        powerUpFood: null,
+        particles: [],
+        tickAccum: 0,
+        phase: 'intro', // intro → action → rewind → outro
+        introDone: false,
+        rewindFlash: 0,
+        rewindGhost: null,
+        chronoMeter: 0,
+        slowMoActive: false,
+        slowMoRemaining: 0,
+        ffActive: false,
+        ffRemaining: 0
+    };
+
+    if (demoAnimFrame) cancelAnimationFrame(demoAnimFrame);
+    demoAnimFrame = requestAnimationFrame(runDemo);
+}
+
+function runDemo(currentTime) {
+    if (!demoState) return;
+
+    const elapsed = currentTime - demoState.startTime;
+    const progress = Math.min(elapsed / DEMO_DURATION, 1);
+
+    // Update progress bar
+    const barFill = document.getElementById('demo-bar-fill');
+    if (barFill) barFill.style.width = (progress * 100) + '%';
+
+    const canvas = document.getElementById('demo-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    // Background
+    ctx.fillStyle = '#0a0a0f';
+    ctx.fillRect(0, 0, 600, 600);
+
+    // Grid
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= DEMO_TILE; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * DEMO_GRID, 0);
+        ctx.lineTo(i * DEMO_GRID, 600);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, i * DEMO_GRID);
+        ctx.lineTo(600, i * DEMO_GRID);
+        ctx.stroke();
+    }
+
+    // Update demo based on mode and time
+    const t = elapsed / 1000; // seconds
+
+    if (demoState.mode === 'chrono') {
+        runChronoDemo(ctx, t, elapsed);
+    } else if (demoState.mode === 'sentinel') {
+        runSentinelDemo(ctx, t, elapsed);
+    } else if (demoState.mode === 'grid') {
+        runGridWarfareDemo(ctx, t, elapsed);
+    } else if (demoState.mode === 'neural') {
+        runNeuralFitDemo(ctx, t, elapsed);
+    } else if (demoState.mode === 'breach') {
+        runBreachDemo(ctx, t, elapsed);
+    }
+
+    // Particles
+    demoState.particles = demoState.particles.filter(p => {
+        p.life -= 0.016;
+        if (p.life <= 0) return false;
+        p.x += p.vx;
+        p.y += p.vy;
+        return true;
+    });
+    demoState.particles.forEach(p => {
+        ctx.save();
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    });
+
+    // Intro overlay
+    if (!demoState.introDone) {
+        const titleEl = document.getElementById('demo-title');
+        if (titleEl) {
+            if (t < 2) {
+                titleEl.textContent = t < 0.5 ? 'CHRONOSHIFT' : '';
+                titleEl.style.opacity = t < 0.5 ? Math.min(t * 2, 1) : Math.max(1 - (t - 0.5) * 2, 0);
+            }
+            if (t >= 0.5 && t < 1.5) {
+                titleEl.textContent = 'TIME IS YOUR WEAPON';
+                titleEl.style.opacity = Math.min((t - 0.5) * 2, 1);
+            }
+            if (t >= 1.5) {
+                titleEl.style.opacity = Math.max(1 - (t - 1.5) * 2, 0);
+                if (t >= 2) demoState.introDone = true;
+            }
+        }
+    }
+
+    // Check end
+    if (elapsed >= DEMO_DURATION) {
+        stopDemo();
+        return;
+    }
+
+    demoAnimFrame = requestAnimationFrame(runDemo);
+}
+
+// ─── CHRONOSHIFT DEMO ───
+function runChronoDemo(ctx, t, elapsed) {
+    const state = demoState;
+
+    // Chrono meter charges over time
+    if (t > 1 && state.chronoMeter < 600) {
+        state.chronoMeter = Math.min(600, (t - 1) * 150);
+    }
+
+    // Snake auto-moves (every 200ms)
+    state.tickAccum += 16;
+    const tickRate = state.slowMoActive ? 320 : (state.ffActive ? 100 : 200);
+
+    if (state.tickAccum >= tickRate) {
+        state.tickAccum = 0;
+
+        // Record history
+        if (!state.history) state.history = [];
+        state.history.push({
+            snake: state.snake.map(s => ({...s})),
+            food: {...state.food},
+            powerUpFood: state.powerUpFood ? {...state.powerUpFood} : null
+        });
+        if (state.history.length > 15) state.history.shift();
+
+        // Move
+        if (!state.rewindGhost) {
+            const head = { x: state.snake[0].x + state.dx, y: state.snake[0].y + state.dy };
+            // Wall wrap
+            if (head.x < 0) head.x = DEMO_TILE - 1;
+            if (head.x >= DEMO_TILE) head.x = 0;
+            if (head.y < 0) head.y = DEMO_TILE - 1;
+            if (head.y >= DEMO_TILE) head.y = 0;
+            state.snake.unshift(head);
+            // Auto-steer to avoid walls
+            if (head.x === 0 || head.x === DEMO_TILE - 1 || head.y === 0 || head.y === DEMO_TILE - 1) {
+                state.dx = Math.random() > 0.5 ? 1 : -1; state.dy = 0;
+            }
+            state.snake.pop();
+        }
+
+        // Rewind ghost: animate back
+        if (state.rewindGhost) {
+            state.rewindGhost.t = Math.max(0, state.rewindGhost.t - 1);
+            if (state.rewindGhost.t <= 0) state.rewindGhost = null;
+        }
+    }
+
+    // SLOW-MO trigger at ~5s
+    if (t > 5 && t < 6 && state.chronoMeter >= 200 && !state.slowMoActive && !state.ffActive) {
+        state.slowMoActive = true;
+        state.slowMoRemaining = 3000;
+        state.chronoMeter -= 200;
+        showDemoPopup('SLOW-MO');
+        // Burst
+        for (let i = 0; i < 20; i++) {
+            demoState.particles.push({
+                x: state.snake[0].x * DEMO_GRID + DEMO_GRID/2,
+                y: state.snake[0].y * DEMO_GRID + DEMO_GRID/2,
+                vx: (Math.random() - 0.5) * 4,
+                vy: (Math.random() - 0.5) * 4,
+                size: 3 + Math.random() * 3,
+                color: '#4488ff',
+                life: 0.8
+            });
+        }
+    }
+    if (state.slowMoActive) {
+        state.slowMoRemaining -= 16;
+        if (state.slowMoRemaining <= 0) state.slowMoActive = false;
+    }
+
+    // REWIND trigger at ~10s
+    if (t > 10 && state.chronoMeter >= 500 && !state.rewindGhost && state.history && state.history.length > 0 && !state.slowMoActive) {
+        // Flash and rewind
+        state.rewindGhost = { snake: state.history[0].snake.map(s => ({...s})), food: {...state.history[0].food}, t: 8 };
+        state.snake = state.history[0].snake.map(s => ({...s}));
+        state.food = {...state.history[0].food};
+        state.history = [];
+        state.chronoMeter -= 500;
+        state.rewindFlash = 5;
+        showDemoPopup('REWIND!');
+    }
+    if (state.rewindFlash > 0) state.rewindFlash--;
+
+    // Draw snake
+    const drawSnake = (snake, alpha, tint) => {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        snake.forEach((seg, i) => {
+            ctx.fillStyle = i === 0 ? (tint || '#00ffcc') : '#00cc99';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = i === 0 ? '#ffffff' : '#00ffcc';
+            ctx.beginPath();
+            ctx.roundRect(seg.x * DEMO_GRID + 1, seg.y * DEMO_GRID + 1, DEMO_GRID - 2, DEMO_GRID - 2, 3);
+            ctx.fill();
+        });
+        ctx.restore();
+    };
+
+    // Rewind ghost
+    if (state.rewindGhost) {
+        drawSnake(state.rewindGhost.snake, 0.15 + state.rewindGhost.t * 0.05, '#aaaaaa');
+    }
+
+    drawSnake(state.snake, state.slowMoActive ? 0.6 : 1, null);
+
+    // SLOW-MO halo
+    if (state.slowMoActive) {
+        ctx.save();
+        ctx.strokeStyle = '#4488ff';
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#4488ff';
+        ctx.beginPath();
+        const hx = state.snake[0].x * DEMO_GRID + DEMO_GRID/2;
+        const hy = state.snake[0].y * DEMO_GRID + DEMO_GRID/2;
+        ctx.arc(hx, hy, DEMO_GRID, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    // Rewind flash
+    if (state.rewindFlash > 0) {
+        ctx.save();
+        ctx.fillStyle = `rgba(255,255,255,${state.rewindFlash * 0.15})`;
+        ctx.fillRect(0, 0, 600, 600);
+        ctx.restore();
+    }
+
+    // Food
+    ctx.save();
+    ctx.fillStyle = '#ff0055';
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#ff0055';
+    ctx.beginPath();
+    ctx.roundRect(state.food.x * DEMO_GRID + 3, state.food.y * DEMO_GRID + 3, DEMO_GRID - 6, DEMO_GRID - 6, 4);
+    ctx.fill();
+    ctx.restore();
+
+    // Chrono orb
+    if (state.chronoMeter > 200) {
+        const orbPulse = Math.sin(t * 4) * 2;
+        ctx.save();
+        ctx.fillStyle = '#ffd700';
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = '#ffd700';
+        ctx.beginPath();
+        ctx.arc(5 * DEMO_GRID + DEMO_GRID/2, 5 * DEMO_GRID + DEMO_GRID/2, DEMO_GRID/2 - 2 + orbPulse, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    // HUD
+    ctx.fillStyle = '#aaa';
+    ctx.font = '12px Orbitron';
+    ctx.fillText('CHRONO', 10, 25);
+    ctx.fillStyle = '#ffd700';
+    ctx.fillRect(10, 30, (state.chronoMeter / 600) * 120, 6);
+    ctx.fillStyle = '#fff';
+    ctx.font = '10px Orbitron';
+    ctx.fillText(`${Math.floor(state.chronoMeter)}/600`, 10, 50);
+
+    if (state.slowMoActive) {
+        ctx.fillStyle = '#4488ff';
+        ctx.font = 'bold 14px Orbitron';
+        ctx.fillText('SLOW-MO', 460, 30);
+        ctx.fillRect(460, 38, 120 * (state.slowMoRemaining / 3000), 6);
+    }
+}
+
+// ─── SENTINEL BREACH DEMO ───
+function runSentinelDemo(ctx, t, elapsed) {
+    const state = demoState;
+    if (!state.sentinels) {
+        state.sentinels = [];
+        state.tickAccum = 0;
+        state.waveAnnounce = 0;
+        state.score = 0;
+    }
+
+    state.tickAccum += 16;
+    if (state.tickAccum >= 250) {
+        state.tickAccum = 0;
+        // Move sentinels toward center
+        const cx = DEMO_TILE / 2;
+        const cy = DEMO_TILE / 2;
+        state.sentinels.forEach(s => {
+            const dx = Math.sign(cx - s.x);
+            const dy = Math.sign(cy - s.y);
+            if (Math.random() > 0.3) s.x += dx;
+            else s.y += dy;
+        });
+    }
+
+    // Spawn sentinels
+    if (state.sentinels.length < 5 && Math.random() < 0.02) {
+        const edge = Math.floor(Math.random() * 4);
+        let x, y;
+        if (edge === 0) { x = Math.floor(Math.random() * DEMO_TILE); y = 0; }
+        else if (edge === 1) { x = DEMO_TILE - 1; y = Math.floor(Math.random() * DEMO_TILE); }
+        else if (edge === 2) { x = Math.floor(Math.random() * DEMO_TILE); y = DEMO_TILE - 1; }
+        else { x = 0; y = Math.floor(Math.random() * DEMO_TILE); }
+        state.sentinels.push({ x, y, segs: [{x, y:y}, {x, y:y+1}, {x, y:y+2}] });
+    }
+
+    // Auto-move player snake
+    state.tickAccum += 16;
+    if (state.tickAccum >= 200) {
+        state.tickAccum = 0;
+        const h = { x: state.snake[0].x + state.dx, y: state.snake[0].y + state.dy };
+        if (h.x < 0 || h.x >= DEMO_TILE || h.y < 0 || h.y >= DEMO_TILE) {
+            state.dx = state.dx === 0 ? (Math.random() > 0.5 ? 1 : -1) : 0;
+            state.dy = state.dx !== 0 ? 0 : (Math.random() > 0.5 ? 1 : -1);
+        }
+        h.x = state.snake[0].x + state.dx;
+        h.y = state.snake[0].y + state.dy;
+        state.snake.unshift(h);
+        state.snake.pop();
+    }
+
+    // Draw nexus at center
+    const cx = DEMO_TILE / 2;
+    const cy = DEMO_TILE / 2;
+    ctx.save();
+    ctx.fillStyle = '#ffd700';
+    ctx.shadowBlur = 20 + Math.sin(t * 3) * 5;
+    ctx.shadowColor = '#ffd700';
+    ctx.beginPath();
+    ctx.arc(cx * DEMO_GRID + DEMO_GRID/2, cy * DEMO_GRID + DEMO_GRID/2, DEMO_GRID, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Draw sentinels
+    const colors = ['#4488ff', '#ff00aa', '#ff2200'];
+    state.sentinels.forEach((s, i) => {
+        ctx.save();
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = ctx.fillStyle;
+        s.segments.forEach((seg, j) => {
+            ctx.globalAlpha = j === 0 ? 1 : 0.7;
+            ctx.beginPath();
+            ctx.roundRect(seg.x * DEMO_GRID + 1, seg.y * DEMO_GRID + 1, DEMO_GRID - 2, DEMO_GRID - 2, 2);
+            ctx.fill();
+        });
+        ctx.restore();
+    });
+
+    // Draw player snake
+    ctx.save();
+    state.snake.forEach((seg, i) => {
+        ctx.fillStyle = i === 0 ? '#00ffcc' : '#00cc99';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#00ffcc';
+        ctx.globalAlpha = i === 0 ? 1 : Math.max(0.4, 1 - (i / state.snake.length) * 0.6);
+        ctx.beginPath();
+        ctx.roundRect(seg.x * DEMO_GRID + 1, seg.y * DEMO_GRID + 1, DEMO_GRID - 2, DEMO_GRID - 2, 3);
+        ctx.fill();
+    });
+    ctx.restore();
+
+    // Food
+    ctx.save();
+    ctx.fillStyle = '#ff0055';
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = '#ff0055';
+    ctx.beginPath();
+    ctx.roundRect(state.food.x * DEMO_GRID + 3, state.food.y * DEMO_GRID + 3, DEMO_GRID - 6, DEMO_GRID - 6, 4);
+    ctx.fill();
+    ctx.restore();
+
+    // HUD
+    ctx.fillStyle = '#aaa';
+    ctx.font = '12px Orbitron';
+    ctx.fillText('WAVE 1', 10, 25);
+    ctx.fillText('SENTINELS: ' + state.sentinels.length, 10, 45);
+}
+
+// ─── GRID WARFARE DEMO ───
+function runGridWarfareDemo(ctx, t, elapsed) {
+    const state = demoState;
+    if (!state.player2) {
+        state.player2 = [
+            { x: 16, y: 10 }, { x: 17, y: 10 }, { x: 18, y: 10 }
+        ];
+        state.p2dx = -1; state.p2dy = 0;
+        state.tickAccum = 0;
+    }
+
+    state.tickAccum += 16;
+    if (state.tickAccum >= 200) {
+        state.tickAccum = 0;
+
+        // Move both snakes
+        const move = (snake, dx, dy) => {
+            const h = { x: snake[0].x + dx, y: snake[0].y + dy };
+            snake.unshift(h);
+            snake.pop();
+        };
+
+        // Auto-steer both
+        const steerToFood = (snake, dx, dy) => {
+            if (Math.random() < 0.3) {
+                const fx = state.food.x - snake[0].x;
+                const fy = state.food.y - snake[0].y;
+                if (Math.abs(fx) > Math.abs(fy)) { return { dx: Math.sign(fx), dy: 0 }; }
+                else { return { dx: 0, dy: Math.sign(fy) }; }
+            }
+            return { dx, dy };
+        };
+
+        const p1 = steerToFood(state.snake, state.dx, state.dy);
+        state.dx = p1.dx; state.dy = p1.dy;
+        move(state.snake, state.dx, state.dy);
+
+        const p2 = steerToFood(state.player2, state.p2dx, state.p2dy);
+        state.p2dx = p2.dx; state.p2dy = p2.dy;
+        move(state.player2, state.p2dx, state.p2dy);
+    }
+
+    // Draw arena border
+    ctx.save();
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = DEMO_GRID;
+    ctx.strokeRect(DEMO_GRID/2, DEMO_GRID/2, 600 - DEMO_GRID, 600 - DEMO_GRID);
+    ctx.restore();
+
+    // Draw center line
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.setLineDash([8, 8]);
+    ctx.beginPath();
+    ctx.moveTo(300, 0);
+    ctx.lineTo(300, 600);
+    ctx.stroke();
+    ctx.restore();
+
+    // Player 1 (cyan)
+    ctx.save();
+    state.snake.forEach((seg, i) => {
+        ctx.fillStyle = i === 0 ? '#00ffcc' : '#00cc99';
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#00ffcc';
+        ctx.globalAlpha = i === 0 ? 1 : Math.max(0.4, 1 - (i / state.snake.length) * 0.6);
+        ctx.beginPath();
+        ctx.roundRect(seg.x * DEMO_GRID + 1, seg.y * DEMO_GRID + 1, DEMO_GRID - 2, DEMO_GRID - 2, 3);
+        ctx.fill();
+    });
+    ctx.restore();
+
+    // Player 2 (magenta)
+    ctx.save();
+    state.player2.forEach((seg, i) => {
+        ctx.fillStyle = i === 0 ? '#ff0055' : '#cc0044';
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#ff0055';
+        ctx.globalAlpha = i === 0 ? 1 : Math.max(0.4, 1 - (i / state.player2.length) * 0.6);
+        ctx.beginPath();
+        ctx.roundRect(seg.x * DEMO_GRID + 1, seg.y * DEMO_GRID + 1, DEMO_GRID - 2, DEMO_GRID - 2, 3);
+        ctx.fill();
+    });
+    ctx.restore();
+
+    // Food
+    ctx.save();
+    ctx.fillStyle = '#ffd700';
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#ffd700';
+    ctx.beginPath();
+    ctx.arc(state.food.x * DEMO_GRID + DEMO_GRID/2, state.food.y * DEMO_GRID + DEMO_GRID/2, DEMO_GRID/2 - 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // HUD
+    ctx.fillStyle = '#00ffcc';
+    ctx.font = 'bold 12px Orbitron';
+    ctx.fillText('P1', 10, 25);
+    ctx.fillStyle = '#aaa';
+    ctx.fillText('ROUNDS: 0/5', 10, 45);
+    ctx.fillStyle = '#ff0055';
+    ctx.fillText('P2 (AI)', 490, 25);
+}
+
+// ─── NEURAL FIT DEMO ───
+function runNeuralFitDemo(ctx, t, elapsed) {
+    const state = demoState;
+    if (!state.drillPath) {
+        // Build a figure-8 drill path
+        state.drillPath = [];
+        // Start center, move right and up in a figure-8
+        const cx = DEMO_TILE / 2;
+        const cy = DEMO_TILE / 2;
+        for (let i = 0; i < 8; i++) state.drillPath.push({ x: cx + i - 4, y: cy });
+        for (let i = 0; i < 6; i++) state.drillPath.push({ x: cx + 4, y: cy - i });
+        for (let i = 0; i < 8; i++) state.drillPath.push({ x: cx + 4 - i, y: cy - 6 });
+        for (let i = 0; i < 6; i++) state.drillPath.push({ x: cx - 4, y: cy - 6 + i });
+        state.drillPathIdx = 0;
+        state.tickAccum = 0;
+        state.accuracy = 100;
+        state.combo = 0;
+    }
+
+    state.tickAccum += 16;
+    if (state.tickAccum >= 200) {
+        state.tickAccum = 0;
+        // Move drill target
+        state.drillPathIdx = (state.drillPathIdx + 1) % state.drillPath.length;
+    }
+
+    const targetCell = state.drillPath[state.drillPathIdx];
+
+    // Auto-move player toward target
+    state.tickAccum += 16;
+    if (state.tickAccum >= 200) {
+        state.tickAccum = 0;
+        const tx = Math.sign(targetCell.x - state.snake[0].x);
+        const ty = Math.sign(targetCell.y - state.snake[0].y);
+        if (tx !== 0 || ty !== 0) {
+            state.snake.unshift({ x: state.snake[0].x + tx, y: state.snake[0].y + ty });
+            state.snake.pop();
+        }
+    }
+
+    // Draw ghost trail (target path)
+    ctx.save();
+    state.drillPath.forEach((cell, i) => {
+        const alpha = i === state.drillPathIdx ? 0.8 : 0.3;
+        ctx.fillStyle = `rgba(74, 74, 106, ${alpha})`;
+        ctx.beginPath();
+        ctx.roundRect(cell.x * DEMO_GRID + 2, cell.y * DEMO_GRID + 2, DEMO_GRID - 4, DEMO_GRID - 4, 3);
+        ctx.fill();
+    });
+    ctx.restore();
+
+    // Active target ring
+    ctx.save();
+    const pulse = Math.sin(t * 5) * 2;
+    ctx.strokeStyle = '#8888ff';
+    ctx.lineWidth = 2;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = '#8888ff';
+    ctx.beginPath();
+    ctx.arc(targetCell.x * DEMO_GRID + DEMO_GRID/2, targetCell.y * DEMO_GRID + DEMO_GRID/2, DEMO_GRID/2 + pulse, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+
+    // Player snake
+    ctx.save();
+    state.snake.forEach((seg, i) => {
+        ctx.fillStyle = i === 0 ? '#00ffcc' : '#00cc99';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#00ffcc';
+        ctx.globalAlpha = 0.8;
+        ctx.beginPath();
+        ctx.roundRect(seg.x * DEMO_GRID + 1, seg.y * DEMO_GRID + 1, DEMO_GRID - 2, DEMO_GRID - 2, 3);
+        ctx.fill();
+    });
+    ctx.restore();
+
+    // HUD
+    ctx.fillStyle = '#6677ff';
+    ctx.font = 'bold 12px Orbitron';
+    ctx.fillText('FIGURE-8 SWEEP', 10, 25);
+    ctx.fillStyle = '#aaa';
+    ctx.fillText('ACCURACY: 94.2%', 10, 45);
+    ctx.fillText('COMBO: 23 (2.3x)', 10, 65);
+    ctx.fillStyle = '#6677ff';
+    ctx.fillText('HARD', 490, 25);
+}
+
+// ─── FIREWALL BREACH DEMO ───
+function runBreachDemo(ctx, t, elapsed) {
+    const state = demoState;
+    if (!state.firewallY) {
+        state.firewallY = DEMO_TILE - 1;
+        state.firewallDirection = -1;
+        state.tickAccum = 0;
+        state.score = 0;
+    }
+
+    state.tickAccum += 16;
+    if (state.tickAccum >= 400) {
+        state.tickAccum = 0;
+        // Firewall moves up/down
+        state.firewallY += state.firewallDirection * 0.3;
+        if (state.firewallY <= 10 || state.firewallY >= DEMO_TILE - 1) {
+            state.firewallDirection *= -1;
+        }
+    }
+
+    // Auto-move snake
+    state.tickAccum += 16;
+    if (state.tickAccum >= 200) {
+        state.tickAccum = 0;
+        // Steer away from firewall
+        if (state.snake[0].y > state.firewallY + 2) state.dy = -1, state.dx = 0;
+        else if (state.snake[0].y < 3) state.dy = 1, state.dx = 0;
+        const h = { x: state.snake[0].x + state.dx, y: state.snake[0].y + state.dy };
+        state.snake.unshift(h);
+        state.snake.pop();
+    }
+
+    // Draw firewall
+    const fwY = Math.floor(state.firewallY);
+    ctx.save();
+    const grad = ctx.createLinearGradient(0, fwY * DEMO_GRID, 0, (fwY + 1) * DEMO_GRID);
+    grad.addColorStop(0, '#ff4500');
+    grad.addColorStop(1, '#ff0000');
+    ctx.fillStyle = grad;
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = '#ff4500';
+    ctx.fillRect(0, fwY * DEMO_GRID, 600, DEMO_GRID);
+    // Breach pattern
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    for (let x = 0; x < DEMO_TILE; x++) {
+        if ((x + Math.floor(t * 2)) % 3 === 0) {
+            ctx.fillRect(x * DEMO_GRID, fwY * DEMO_GRID, DEMO_GRID, DEMO_GRID);
+        }
+    }
+    ctx.restore();
+
+    // Player snake
+    ctx.save();
+    state.snake.forEach((seg, i) => {
+        ctx.fillStyle = i === 0 ? '#00ffcc' : '#00cc99';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#00ffcc';
+        ctx.globalAlpha = i === 0 ? 1 : Math.max(0.4, 1 - (i / state.snake.length) * 0.6);
+        ctx.beginPath();
+        ctx.roundRect(seg.x * DEMO_GRID + 1, seg.y * DEMO_GRID + 1, DEMO_GRID - 2, DEMO_GRID - 2, 3);
+        ctx.fill();
+    });
+    ctx.restore();
+
+    // Food
+    ctx.save();
+    ctx.fillStyle = '#ff0055';
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = '#ff0055';
+    ctx.beginPath();
+    ctx.roundRect(state.food.x * DEMO_GRID + 3, state.food.y * DEMO_GRID + 3, DEMO_GRID - 6, DEMO_GRID - 6, 4);
+    ctx.fill();
+    ctx.restore();
+
+    // HUD
+    ctx.fillStyle = '#ff4500';
+    ctx.font = 'bold 12px Orbitron';
+    ctx.fillText('FIREWALL BREACH', 10, 25);
+    ctx.fillStyle = '#aaa';
+    ctx.fillText('PUSH BACK: ██████░░░░', 10, 45);
+}
+
+function showDemoPopup(text) {
+    let popup = document.getElementById('demo-popup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.id = 'demo-popup';
+        popup.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            font-family: 'Orbitron', sans-serif; font-size: 2rem; font-weight: 900;
+            color: #ffd700; text-shadow: 0 0 20px #ffd700; letter-spacing: 4px;
+            pointer-events: none; z-index: 200;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        `;
+        document.body.appendChild(popup);
+    }
+    popup.textContent = text;
+    popup.style.transform = 'translate(-50%, -50%) scale(1.2)';
+    setTimeout(() => { popup.style.transform = 'translate(-50%, -50%) scale(0)'; }, 1000);
+}
+
+function stopDemo() {
+    if (demoAnimFrame) cancelAnimationFrame(demoAnimFrame);
+    demoState = null;
+    const overlay = document.getElementById('demo-overlay');
+    if (overlay) overlay.style.display = 'none';
+    const popup = document.getElementById('demo-popup');
+    if (popup) popup.remove();
 }
 
 function playPowerUpSound() {
@@ -2571,6 +3364,15 @@ document.getElementById('btn-reset-data').addEventListener('click', () => {
 
 document.getElementById('btn-exit-menu').addEventListener('click', () => {
     mainMenu.innerHTML = "<h2 style='color:#ff0055; text-align:center; font-size:3rem; margin-top:100px;'>SYSTEM OFFLINE</h2>";
+});
+
+// Demo Mode buttons
+document.querySelectorAll('.btn-demo-mode').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const mode = btn.dataset.mode;
+        if (demoState) return; // already running
+        startDemo(mode);
+    });
 });
 
 document.getElementById('btn-standard').addEventListener('click', () => {
