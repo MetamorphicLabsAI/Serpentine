@@ -1,5 +1,5 @@
-# 📂 Serpentine: Field Manual (v1.0)
-> **STATUS:** [FULLY UPDATED]  
+# 📂 Serpentine: Field Manual (v1.1)
+> **STATUS:** [FULLY UPDATED — Power-Ups, Mercy System, Shop Demo Mode]
 > **CLASSIFICATION:** LEVEL 9 ACCESS
 
 This manual serves as the definitive reference for the Serpentine OS, documenting all active characters, system secrets, and operational protocols.
@@ -146,8 +146,19 @@ Points earned across all game sessions are accumulated into a global **Point Ban
 | Sector | Inventory |
 | :--- | :--- |
 | **SNAKES** | Includes `PRINCESS`, `ARTHROPOD`, and `KITE DRAGON`. |
-| **MODES** | [EMPTY] - Future decryption available. |
+| **MODES** | Includes `CHRONOSHIFT`, `FIREWALL BREACH`, `SENTINEL BREACH`, `GRID WARFARE`, `NEURAL FIT`. All currently in testing/available status. |
 | **OTHER** | Contains classified system hints/codes. |
+
+### [SHOP DEMO MODE]
+Each mode in the MODES shop has a **DEMO** button that plays a 15-second automated showcase of that mode's core mechanics. Demos run on a canvas overlay with a progress bar and SKIP button. No user input required — pure cinematic preview to help players understand a mode before committing.
+
+| Mode | Demo Highlights |
+| :--- | :--- |
+| **CHRONOSHIFT** | Snake auto-playing, chrono meter charging, SLOW-MO activation at ~5s, REWIND at ~10s with ghost trail and screen flash |
+| **SENTINEL BREACH** | Sentinels spawning from edges and closing in on center nexus, player snake coiling defensively |
+| **GRID WARFARE** | Two AI snakes (cyan vs magenta) battling over food, arena borders and center line |
+| **NEURAL FIT** | Ghost trail drill path with active target ring, player snake tracking a figure-8 pattern |
+| **FIREWALL BREACH** | Firewall pushing from top, breach pattern animating, snake eating to push it back |
 
 ### [OTHER INVENTORY]
 - **900,000 PTS:** Decrypts the secret `9193` unlock sequence.

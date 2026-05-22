@@ -6,7 +6,7 @@
 ---
 
 ## 🔮 Power-Up System
-> **Priority:** HIGH — Implement now
+> **Priority:** ✅ IMPLEMENTED
 
 Food occasionally drops colored power-up items with timed effects.
 
@@ -27,7 +27,7 @@ Food occasionally drops colored power-up items with timed effects.
 ---
 
 ## ⚖️ Mercy System
-> **Priority:** HIGH — Implement now
+> **Priority:** ✅ IMPLEMENTED
 
 "Continue" option on game over to keep the run going.
 
