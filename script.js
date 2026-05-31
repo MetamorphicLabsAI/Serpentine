@@ -1410,11 +1410,13 @@ class SaveManager {
                 this._showCorruptionWarning(
                     'Failed to load save data: ' + (err.message || 'Unknown error'),
                     function() {
+                        // Recovery: migrate from v1
                         self.profile = self._migrateFromV1();
                         self.save(true);
                         resolve(self.profile);
                     },
                     function() {
+                        // Reset: start fresh
                         self.profile = createDefaultProfile();
                         self.save(true);
                         resolve(self.profile);
@@ -1422,6 +1424,9 @@ class SaveManager {
                 );
                 return;
             }
+        });
+
+        return this._loadPromise;
     }
 
     // ── Validate Profile ──────────────────────────────────────────────────────

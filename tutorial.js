@@ -598,10 +598,3 @@ function updateTutorialButton() {
         tutorialRow.remove();
     }
 }
-
-// Hook into initSettingsUI
-const _origInitSettingsUI = initSettingsUI;
-initSettingsUI = function() {
-    _origInitSettingsUI();
-    updateTutorialButton();
-};
