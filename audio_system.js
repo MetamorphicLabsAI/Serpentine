@@ -90,6 +90,11 @@
                 this.musicGain.gain.value = this._musicVolume;
                 this.sfxGain.gain.value = this._sfxVolume;
 
+                // Resume context (Chrome autoplay policy: needs explicit resume after user gesture)
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+
                 this.isInitialized = true;
                 console.log('[Audio] SerpentineAudio initialized');
 

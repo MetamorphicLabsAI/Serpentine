@@ -13,16 +13,15 @@ const TutorialSystem = {
     tutorialDirection: { dx: 0, dy: -1 },
     tutorialPendingDirection: null,
     tutorialDeathReplay: false,
-    deathReplayPosition: 0,
     deathReplayFrames: [],
-    tutorialGameLoop: null,
+    tutorialDrawLoop: null,
     bootInterval: null,
     bootProgress: 0,
+    tutorialInitialized: false, // guard so showStep1/showStep2 don't reinit
 
     // Check if tutorial should run (first time or re-accessible)
     shouldRunTutorial() {
         const tutorialComplete = localStorage.getItem('serpentineTutorialComplete') === 'true';
-        // If re-accessible from settings, always allow
         return !tutorialComplete;
     },
 
@@ -40,6 +39,8 @@ const TutorialSystem = {
         this.tutorialDeathReplay = false;
         this.tutorialSnake = [];
         this.tutorialFood = null;
+        this.tutorialInitialized = false;
+        this.tutorialPendingDirection = null;
 
         hideAllMenus();
         document.getElementById('tutorial-boot').classList.remove('hidden');
@@ -85,49 +86,64 @@ const TutorialSystem = {
 
     // Show welcome screen
     showWelcome() {
+        this.currentStep = 1;
         hideAllMenus();
         document.getElementById('tutorial-welcome').classList.remove('hidden');
 
-        // Debounce: ignore keydown for 300ms (prevents click/keyboard shortcut from auto-advancing)
+        // Debounce: ignore keydown for 400ms (prevents click/keyboard shortcut from auto-advancing)
         let welcomeReady = false;
-        setTimeout(() => { welcomeReady = true; }, 300);
+        setTimeout(() => { welcomeReady = true; }, 400);
 
-        // Listen for any key to continue
         const continueHandler = (e) => {
             if (!welcomeReady) return;
+            // Any key except Escape advances
             if (e.key !== 'Escape') {
                 document.removeEventListener('keydown', continueHandler);
-                this.currentStep = 2;
                 this.showStep1();
             }
         };
         document.addEventListener('keydown', continueHandler);
     },
 
-    // Step 1: Movement controls (user-driven, one move per key press)
+    // ── STEP 1: Movement Controls ─────────────────────────────────────────────
     showStep1() {
-        // Guard: if already in step 1, don't reinitialize
-        if (this.currentStep === 2 && this.tutorialSnake.length > 0) return;
+        this.currentStep = 2;
+
+        // Only initialize once — guard against re-entry on repeated calls
+        if (!this.tutorialInitialized) {
+            this.tutorialInitialized = true;
+            this.step1Moves = 0;
+            this.step2Collected = 0;
+            this.tutorialDeathReplay = false;
+            this.tutorialSnake = [];
+            this.tutorialFood = null;
+            this.tutorialDirection = { dx: 0, dy: -1 };
+            this.tutorialPendingDirection = null;
+        }
 
         hideAllMenus();
         document.getElementById('tutorial-step1').classList.remove('hidden');
 
-        // Initialize tutorial snake for demo
-        const cx = Math.floor(tileCount / 2);
-        const cy = Math.floor(tileCount / 2);
-        this.tutorialSnake = [
-            { x: cx, y: cy - 1 },
-            { x: cx, y: cy },
-            { x: cx, y: cy + 1 }
-        ];
-        this.tutorialDirection = { dx: 0, dy: -1 };
-        this.tutorialPendingDirection = null;
-        this.step1Moves = 0;
+        // Initialize snake (once per tutorial run)
+        if (this.tutorialSnake.length === 0) {
+            const cx = Math.floor(tileCount / 2);
+            const cy = Math.floor(tileCount / 2);
+            this.tutorialSnake = [
+                { x: cx, y: cy - 1 },
+                { x: cx, y: cy },
+                { x: cx, y: cy + 1 }
+            ];
+        }
 
-        // Start draw-only loop (no auto-ticking)
         this.startTutorialDrawLoop();
-
         this.updateStep1Progress();
+    },
+
+    // Step 1: user presses button to confirm they understand movement
+    confirmStep1() {
+        if (this.currentStep !== 2) return;
+        this.cancelTutorialDrawLoop();
+        this.showStep2();
     },
 
     // Update step 1 progress display
@@ -138,62 +154,220 @@ const TutorialSystem = {
         }
     },
 
-    // Draw-only loop for tutorial (no auto-tick — movement is user-driven)
-    startTutorialDrawLoop() {
-        if (this.tutorialGameLoop) cancelAnimationFrame(this.tutorialGameLoop);
+    // ── STEP 2: Food Collection ───────────────────────────────────────────────
+    showStep2() {
+        this.currentStep = 3;
 
-        const drawLoop = (currentTime) => {
-            if (!this.active) return;
-            this.tutorialGameLoop = requestAnimationFrame(drawLoop);
-            this.drawTutorialGame();
-        };
-
-        this.tutorialGameLoop = requestAnimationFrame(drawLoop);
-    },
-
-    // Move the tutorial snake one step (called on user input)
-    tutorialMoveSnake() {
-        // Apply pending direction
-        if (this.tutorialPendingDirection) {
-            this.tutorialDirection = this.tutorialPendingDirection;
+        // Only initialize once
+        if (this.tutorialSnake.length === 0) {
+            const cx = Math.floor(tileCount / 2);
+            const cy = Math.floor(tileCount / 2);
+            this.tutorialSnake = [
+                { x: cx, y: cy - 1 },
+                { x: cx, y: cy },
+                { x: cx, y: cy + 1 }
+            ];
+            this.tutorialDirection = { dx: 0, dy: -1 };
             this.tutorialPendingDirection = null;
         }
 
-        const head = this.tutorialSnake[0];
-        const newHead = {
-            x: head.x + this.tutorialDirection.dx,
-            y: head.y + this.tutorialDirection.dy
-        };
+        hideAllMenus();
+        document.getElementById('tutorial-step2').classList.remove('hidden');
 
-        // Wrap around for tutorial
-        if (newHead.x < 0) newHead.x = tileCount - 1;
-        if (newHead.x >= tileCount) newHead.x = 0;
-        if (newHead.y < 0) newHead.y = tileCount - 1;
-        if (newHead.y >= tileCount) newHead.y = 0;
+        // Spawn food (once)
+        if (!this.tutorialFood) {
+            this.spawnTutorialFood();
+        }
 
-        // Add new head, remove tail
-        this.tutorialSnake.unshift(newHead);
-        this.tutorialSnake.pop();
+        this.startTutorialDrawLoop();
+        this.updateStep2Progress();
+    },
 
-        // Step 1: count moves
-        if (this.currentStep === 2) {
-            this.step1Moves++;
-            this.updateStep1Progress();
-            if (this.step1Moves >= 5) {
-                this.cancelTutorialGameLoop();
-                this.showStep2();
+    // Step 2: user presses button to confirm food collection
+    confirmStep2() {
+        if (this.currentStep !== 3) return;
+        this.cancelTutorialDrawLoop();
+        this.tutorialFood = null; // clear food so no collision if we return
+        this.showStep3();
+    },
+
+    // Spawn food at random location
+    spawnTutorialFood() {
+        let pos;
+        let valid = false;
+        while (!valid) {
+            pos = {
+                x: Math.floor(Math.random() * tileCount),
+                y: Math.floor(Math.random() * tileCount)
+            };
+            valid = !this.tutorialSnake.some(seg => seg.x === pos.x && seg.y === pos.y);
+        }
+        this.tutorialFood = pos;
+    },
+
+    // Update step 2 progress display
+    updateStep2Progress() {
+        const progressEl = document.getElementById('tutorial-step2-progress');
+        if (progressEl) {
+            progressEl.textContent = `Collected: ${this.step2Collected} / 1`;
+        }
+    },
+
+    // ── STEP 3: Avoid Death ───────────────────────────────────────────────────
+    showStep3() {
+        this.currentStep = 4;
+        hideAllMenus();
+        document.getElementById('tutorial-step3').classList.remove('hidden');
+
+        // Run death replay after a moment
+        setTimeout(() => this.runDeathReplay(), 2000);
+    },
+
+    // Run simulated death replay
+    runDeathReplay() {
+        this.tutorialDeathReplay = true;
+
+        // Create a death scenario: snake moving toward wall
+        this.deathReplayFrames = [];
+        let x = Math.floor(tileCount / 2);
+        let y = Math.floor(tileCount / 2);
+        let dx = 1;
+        let dy = 0;
+
+        // Build frames moving right toward wall
+        for (let i = 0; i < 20; i++) {
+            this.deathReplayFrames.push([{ x, y }, { x: x - 1, y }, { x: x - 2, y }]);
+            x += dx;
+            if (x >= tileCount - 1) {
+                // Hit wall — add collision frames
+                for (let j = 0; j < 10; j++) {
+                    this.deathReplayFrames.push([{ x: tileCount - 1, y }, { x: tileCount - 2, y }, { x: tileCount - 3, y }]);
+                }
+                break;
             }
         }
 
-        // Step 2: check food collection
-        if (this.currentStep === 3 && this.tutorialFood) {
-            if (newHead.x === this.tutorialFood.x && newHead.y === this.tutorialFood.y) {
-                this.step2Collected++;
-                this.updateStep2Progress();
-                this.tutorialFood = null;
-                this.cancelTutorialGameLoop();
-                setTimeout(() => this.showStep3(), 500);
+        this.playSlowMoDeath();
+    },
+
+    // Slow-motion death replay
+    playSlowMoDeath() {
+        let frameIndex = 0;
+        const slowMoInterval = setInterval(() => {
+            if (!this.tutorialDeathReplay || frameIndex >= this.deathReplayFrames.length) {
+                clearInterval(slowMoInterval);
+                this.tutorialDeathReplay = false;
+                setTimeout(() => this.showStep4(), 1000);
+                return;
             }
+
+            ctx.fillStyle = '#0a0a0f';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            drawGrid();
+
+            const frame = this.deathReplayFrames[frameIndex];
+            for (let i = frame.length - 1; i >= 0; i--) {
+                const seg = frame[i];
+                ctx.save();
+                if (i === 0) {
+                    ctx.fillStyle = frameIndex >= 18 ? '#ff0055' : '#00ffcc';
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = frameIndex >= 18 ? '#ff0055' : '#ffffff';
+                } else {
+                    ctx.globalAlpha = Math.max(0.4, 1 - (i / frame.length) * 0.6);
+                    ctx.fillStyle = '#00cc99';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#00ffcc';
+                }
+                ctx.beginPath();
+                ctx.roundRect(seg.x * gridSize + 1, seg.y * gridSize + 1, gridSize - 2, gridSize - 2, 5);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Flash effect on wall collision
+            if (frameIndex >= 18) {
+                ctx.fillStyle = 'rgba(255, 0, 85, 0.3)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            frameIndex++;
+        }, 150);
+    },
+
+    // ── STEP 4: Power-Ups ───────────────────────────────────────────────────
+    showStep4() {
+        this.currentStep = 5;
+        hideAllMenus();
+
+        ctx.fillStyle = '#0a0a0f';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        drawGrid();
+
+        document.getElementById('tutorial-step4').classList.remove('hidden');
+    },
+
+    // Show complete screen
+    showComplete() {
+        this.currentStep = 6;
+        hideAllMenus();
+
+        ctx.fillStyle = '#0a0a0f';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        document.getElementById('tutorial-complete').classList.remove('hidden');
+    },
+
+    // Complete tutorial - save state
+    completeTutorial() {
+        localStorage.setItem('serpentineTutorialComplete', 'true');
+
+        if (typeof saveManager !== 'undefined' && saveManager.profile) {
+            saveManager.profile.progress.tutorialComplete = true;
+            saveManager.save(true);
+        }
+
+        this.active = false;
+        this.cancelTutorialDrawLoop();
+
+        hideAllMenus();
+        mainMenu.classList.remove('hidden');
+        startMenuMusic();
+        document.getElementById('btn-play-menu').focus();
+    },
+
+    // Skip tutorial (for returning players)
+    skipTutorial() {
+        this.cancelTutorialDrawLoop();
+        this.active = false;
+
+        if (this.currentStep >= 2) {
+            localStorage.setItem('serpentineTutorialComplete', 'true');
+        }
+
+        hideAllMenus();
+        mainMenu.classList.remove('hidden');
+        startMenuMusic();
+        document.getElementById('btn-play-menu').focus();
+    },
+
+    // ── Draw Loop ────────────────────────────────────────────────────────────
+    startTutorialDrawLoop() {
+        this.cancelTutorialDrawLoop();
+
+        const drawLoop = () => {
+            if (!this.active) return;
+            this.tutorialDrawLoop = requestAnimationFrame(drawLoop);
+            this.drawTutorialGame();
+        };
+
+        this.tutorialDrawLoop = requestAnimationFrame(drawLoop);
+    },
+
+    cancelTutorialDrawLoop() {
+        if (this.tutorialDrawLoop) {
+            cancelAnimationFrame(this.tutorialDrawLoop);
+            this.tutorialDrawLoop = null;
         }
     },
 
@@ -202,7 +376,6 @@ const TutorialSystem = {
         ctx.fillStyle = '#0a0a0f';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Draw grid
         drawGrid();
 
         // Draw food
@@ -233,8 +406,7 @@ const TutorialSystem = {
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = '#ffffff';
             } else {
-                const opacity = Math.max(0.4, 1 - (i / this.tutorialSnake.length) * 0.6);
-                ctx.globalAlpha = opacity;
+                ctx.globalAlpha = Math.max(0.4, 1 - (i / this.tutorialSnake.length) * 0.6);
                 ctx.fillStyle = '#00cc99';
                 ctx.shadowBlur = 10;
                 ctx.shadowColor = '#00ffcc';
@@ -246,266 +418,53 @@ const TutorialSystem = {
         }
     },
 
-    // Cancel tutorial game loop
-    cancelTutorialGameLoop() {
-        if (this.tutorialGameLoop) {
-            cancelAnimationFrame(this.tutorialGameLoop);
-            this.tutorialGameLoop = null;
-        }
-    },
-
-    // Step 2: Food collection demo (user-driven movement)
-    showStep2() {
-        // Guard: if already in step 2, don't reinitialize
-        if (this.currentStep === 3 && this.tutorialSnake.length > 0) return;
-
-        this.currentStep = 3;
-        hideAllMenus();
-        document.getElementById('tutorial-step2').classList.remove('hidden');
-
-        // Initialize snake
-        const cx = Math.floor(tileCount / 2);
-        const cy = Math.floor(tileCount / 2);
-        this.tutorialSnake = [
-            { x: cx, y: cy - 1 },
-            { x: cx, y: cy },
-            { x: cx, y: cy + 1 }
-        ];
-        this.tutorialDirection = { dx: 0, dy: -1 };
-        this.tutorialPendingDirection = null;
-
-        // Spawn food
-        this.spawnTutorialFood();
-
-        // Start draw-only loop (no auto-tick)
-        this.startTutorialDrawLoop();
-
-        this.updateStep2Progress();
-    },
-
-    // Spawn food at random location
-    spawnTutorialFood() {
-        let pos;
-        let valid = false;
-        while (!valid) {
-            pos = {
-                x: Math.floor(Math.random() * tileCount),
-                y: Math.floor(Math.random() * tileCount)
-            };
-            valid = !this.tutorialSnake.some(seg => seg.x === pos.x && seg.y === pos.y);
-        }
-        this.tutorialFood = pos;
-    },
-
-    // Update step 2 progress display
-    updateStep2Progress() {
-        const progressEl = document.getElementById('tutorial-step2-progress');
-        if (progressEl) {
-            progressEl.textContent = `Collected: ${this.step2Collected} / 1`;
-        }
-    },
-
-    // Step 3: Avoid death (slow-mo death demo)
-    showStep3() {
-        this.currentStep = 4;
-        hideAllMenus();
-        document.getElementById('tutorial-step3').classList.remove('hidden');
-
-        // Run death replay after showing message
-        setTimeout(() => this.runDeathReplay(), 2000);
-    },
-
-    // Run simulated death replay
-    runDeathReplay() {
-        this.tutorialDeathReplay = true;
-
-        // Create a death scenario: snake moving toward wall
-        this.deathReplayFrames = [];
-        let x = Math.floor(tileCount / 2);
-        let y = Math.floor(tileCount / 2);
-        let dx = 1;
-        let dy = 0;
-
-        // Generate frames moving right toward wall
-        for (let i = 0; i < 20; i++) {
-            this.deathReplayFrames.push([...this.tutorialSnake]);
-            // Move right
-            x += dx;
-            if (x >= tileCount - 1) {
-                // Hit wall - start collision frames
-                for (let j = 0; j < 10; j++) {
-                    this.deathReplayFrames.push([...this.tutorialSnake]);
-                }
-                break;
-            }
-            this.tutorialSnake = [{ x, y }, ...this.tutorialSnake.slice(0, 2)];
-        }
-
-        // Play slow-mo death animation
-        this.playSlowMoDeath();
-    },
-
-    // Slow-motion death replay
-    playSlowMoDeath() {
-        let frameIndex = 0;
-        const slowMoInterval = setInterval(() => {
-            if (!this.tutorialDeathReplay || frameIndex >= this.deathReplayFrames.length) {
-                clearInterval(slowMoInterval);
-                this.tutorialDeathReplay = false;
-                setTimeout(() => this.showStep4(), 1000);
-                return;
-            }
-
-            // Draw death frame
-            ctx.fillStyle = '#0a0a0f';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            drawGrid();
-
-            const frame = this.deathReplayFrames[frameIndex];
-            for (let i = frame.length - 1; i >= 0; i--) {
-                const seg = frame[i];
-                ctx.save();
-                if (i === 0) {
-                    ctx.fillStyle = frameIndex >= 18 ? '#ff0055' : '#00ffcc';
-                    ctx.shadowBlur = 15;
-                    ctx.shadowColor = frameIndex >= 18 ? '#ff0055' : '#ffffff';
-                } else {
-                    ctx.globalAlpha = Math.max(0.4, 1 - (i / frame.length) * 0.6);
-                    ctx.fillStyle = '#00cc99';
-                    ctx.shadowBlur = 10;
-                    ctx.shadowColor = '#00ffcc';
-                }
-                ctx.beginPath();
-                ctx.roundRect(seg.x * gridSize + 1, seg.y * gridSize + 1, gridSize - 2, gridSize - 2, 5);
-                ctx.fill();
-                ctx.restore();
-            }
-
-            // Flash effect when hitting wall
-            if (frameIndex >= 18) {
-                ctx.fillStyle = 'rgba(255, 0, 85, 0.3)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            }
-
-            frameIndex++;
-        }, 150); // Slow-mo at 150ms per frame
-    },
-
-    // Step 4: Power-ups overview
-    showStep4() {
-        this.cancelTutorialGameLoop();
-        this.currentStep = 5;
-        hideAllMenus();
-
-        // Clear canvas
-        ctx.fillStyle = '#0a0a0f';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawGrid();
-
-        document.getElementById('tutorial-step4').classList.remove('hidden');
-    },
-
-    // Show complete screen
-    showComplete() {
-        this.currentStep = 6;
-        hideAllMenus();
-
-        // Clear canvas
-        ctx.fillStyle = '#0a0a0f';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        document.getElementById('tutorial-complete').classList.remove('hidden');
-    },
-
-    // Complete tutorial - save state
-    completeTutorial() {
-        localStorage.setItem('serpentineTutorialComplete', 'true');
-
-        // Also update SaveManager profile if available
-        if (typeof saveManager !== 'undefined' && saveManager.profile) {
-            saveManager.profile.progress.tutorialComplete = true;
-            saveManager.save(true);
-        }
-
-        this.active = false;
-        this.cancelTutorialGameLoop();
-
-        hideAllMenus();
-        mainMenu.classList.remove('hidden');
-        startMenuMusic();
-        document.getElementById('btn-play-menu').focus();
-    },
-
-    // Skip tutorial (for returning players)
-    skipTutorial() {
-        this.cancelTutorialGameLoop();
-        this.active = false;
-
-        // Mark as complete if skipping from step 1+
-        if (this.currentStep >= 2) {
-            localStorage.setItem('serpentineTutorialComplete', 'true');
-        }
-
-        hideAllMenus();
-        mainMenu.classList.remove('hidden');
-        startMenuMusic();
-        document.getElementById('btn-play-menu').focus();
-    },
-
-    // Handle keyboard input during tutorial
-    handleTutorialInput(key) {
+    // Handle keyboard input during tutorial (Space/Enter to advance)
+    handleTutorialKey(e) {
         if (!this.active) return;
 
-        const activeDx = this.tutorialDirection.dx;
-        const activeDy = this.tutorialDirection.dy;
-
-        let newDir = null;
-        switch (key) {
-            case 'ArrowUp':
-            case 'w':
-            case 'W':
-                if (activeDy !== 1) newDir = { dx: 0, dy: -1 };
-                break;
-            case 'ArrowDown':
-            case 's':
-            case 'S':
-                if (activeDy !== -1) newDir = { dx: 0, dy: 1 };
-                break;
-            case 'ArrowLeft':
-            case 'a':
-            case 'A':
-                if (activeDx !== 1) newDir = { dx: -1, dy: 0 };
-                break;
-            case 'ArrowRight':
-            case 'd':
-            case 'D':
-                if (activeDx !== -1) newDir = { dx: 1, dy: 0 };
-                break;
+        // Space or Enter advances through info steps
+        if (e.key === ' ' || e.key === 'Enter') {
+            if (this.currentStep === 2) {
+                e.preventDefault();
+                this.confirmStep1();
+            } else if (this.currentStep === 3) {
+                e.preventDefault();
+                this.confirmStep2();
+            }
+            return;
         }
 
-        if (newDir) {
-            this.tutorialPendingDirection = newDir;
+        // Escape skips tutorial from welcome
+        if (e.key === 'Escape' && this.currentStep === 1) {
+            e.preventDefault();
+            this.skipTutorial();
         }
     },
 
     // Re-access tutorial from settings
     reaccessTutorial() {
-        // Reset tutorial state
         localStorage.removeItem('serpentineTutorialComplete');
         if (typeof saveManager !== 'undefined' && saveManager.profile) {
             saveManager.profile.progress.tutorialComplete = false;
             saveManager.save(true);
         }
 
-        // Start tutorial
         hideAllMenus();
         this.startTutorial();
     }
 };
 
-// Tutorial button handlers
+// ── Button Handlers ──────────────────────────────────────────────────────────
 document.getElementById('btn-tutorial-skip')?.addEventListener('click', () => {
     TutorialSystem.skipTutorial();
+});
+
+document.getElementById('btn-tutorial-next-step1')?.addEventListener('click', () => {
+    TutorialSystem.confirmStep1();
+});
+
+document.getElementById('btn-tutorial-next-step2')?.addEventListener('click', () => {
+    TutorialSystem.confirmStep2();
 });
 
 document.getElementById('btn-tutorial-continue')?.addEventListener('click', () => {
@@ -516,20 +475,14 @@ document.getElementById('btn-tutorial-start')?.addEventListener('click', () => {
     TutorialSystem.completeTutorial();
 });
 
-// Tutorial keyboard input handler
+// ── Keyboard Handler ─────────────────────────────────────────────────────────
 document.addEventListener('keydown', (e) => {
-    // Route to tutorial system if active and it's a movement key
-    if (TutorialSystem.active &&
-        (TutorialSystem.currentStep === 2 || TutorialSystem.currentStep === 3) &&
-        ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 's', 'S', 'a', 'A', 'd', 'D'].includes(e.key)) {
-        TutorialSystem.handleTutorialInput(e.key);
-        // Advance one step per keypress (user-driven, not auto)
-        TutorialSystem.tutorialMoveSnake();
-        e.preventDefault();
+    if (TutorialSystem.active) {
+        TutorialSystem.handleTutorialKey(e);
     }
 });
 
-// Tutorial input handlers for D-pad
+// ── D-pad Handlers ───────────────────────────────────────────────────────────
 const tutorialDPad = {
     up: document.getElementById('dpad-up'),
     down: document.getElementById('dpad-down'),
@@ -542,20 +495,8 @@ Object.entries(tutorialDPad).forEach(([dir, btn]) => {
     btn.addEventListener('touchstart', (e) => {
         if (!TutorialSystem.active) return;
         e.preventDefault();
-
-        let key = null;
-        switch (dir) {
-            case 'up': key = 'ArrowUp'; break;
-            case 'down': key = 'ArrowDown'; break;
-            case 'left': key = 'ArrowLeft'; break;
-            case 'right': key = 'ArrowRight'; break;
-        }
-
-        if (key) {
-            TutorialSystem.handleTutorialInput(key);
-            TutorialSystem.tutorialMoveSnake();
-            btn.classList.add('pressed');
-        }
+        // D-pad doesn't move snake in tutorial, just advance on tap
+        btn.classList.add('pressed');
     }, { passive: false });
 
     btn.addEventListener('touchend', (e) => {
@@ -564,17 +505,15 @@ Object.entries(tutorialDPad).forEach(([dir, btn]) => {
     }, { passive: false });
 });
 
-// Update tutorial button in settings
+// ── Settings Tutorial Re-access ──────────────────────────────────────────────
 function updateTutorialButton() {
     const settingsContainer = document.getElementById('settings-container');
     if (!settingsContainer) return;
 
-    // Check if tutorial button already exists
     let tutorialRow = document.getElementById('tutorial-reaccess-row');
 
     if (TutorialSystem.isComplete()) {
         if (!tutorialRow) {
-            // Create tutorial re-access row in DATA section
             const dataSection = document.querySelector('.settings-section:last-child');
             if (dataSection) {
                 tutorialRow = document.createElement('div');
@@ -586,7 +525,6 @@ function updateTutorialButton() {
                 `;
                 dataSection.insertBefore(tutorialRow, dataSection.querySelector('.danger-zone'));
 
-                // Add event listener
                 document.getElementById('btn-reaccess-tutorial')?.addEventListener('click', () => {
                     TutorialSystem.reaccessTutorial();
                 });
