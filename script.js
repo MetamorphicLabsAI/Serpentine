@@ -3923,15 +3923,18 @@ let currentMenuStep = 0;
 
 let princessBarkBuffer = null;
 async function loadPrincessBark() {
+    // Skip if audio context not ready or suspended
+    if (!audioCtx || audioCtx.state === 'suspended') return;
+    // On file:// protocol, fetch will fail - this is expected, fail silently
     try {
         const response = await fetch('./resources/sounds/princess_bark.mp3');
+        if (!response.ok) throw new Error('File not found');
         const arrayBuffer = await response.arrayBuffer();
         princessBarkBuffer = await audioCtx.decodeAudioData(arrayBuffer);
     } catch (e) {
-        console.warn("Could not load Princess bark sound.", e);
+        // Princess bark is optional - fail silently since procedural bark exists
     }
 }
-loadPrincessBark();
 
 // Logic for Menu UI Sounds
 function playMenuNavSound() {
@@ -8705,6 +8708,15 @@ document.getElementById('btn-pause-quit').addEventListener('click', () => {
 // Initialization - Check for tutorial on first run
 document.getElementById('btn-initialize').addEventListener('click', () => {
     hideAllMenus();
+
+    // Initialize audio on user gesture
+    if (window.serpentineAudio && !window.serpentineAudio.isInitialized) {
+        window.serpentineAudio.init();
+    }
+    // Resume audio context if suspended
+    if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
 
     // Check if tutorial should run (first time player)
     if (typeof TutorialSystem !== 'undefined' && TutorialSystem.shouldRunTutorial()) {
