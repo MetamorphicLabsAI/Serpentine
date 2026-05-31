@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Serpentine</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="os_desktop.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 
@@ -71,6 +72,7 @@
                 <div id="game-over" class="overlay hidden">
                     <h2 class="menu-title">SYSTEM FAILURE</h2>
                     <p>FINAL SCORE: <span id="final-score" class="highlight">0</span></p>
+                    <div id="replay-code-container" style="margin: 10px 0;"></div>
                     <button id="btn-continue" class="btn-menu" style="display: none;">CONTINUE (½ SCORE)</button>
                     <button id="restart-btn" class="btn-menu">REBOOT SYSTEM</button>
                     <button id="menu-btn" class="btn-menu btn-secondary">MAIN MENU</button>
@@ -90,6 +92,10 @@
 
                 <div id="leaderboard-screen" class="overlay hidden">
                     <h2 class="menu-title" style="font-size: 2.2rem; margin-bottom: 15px;">HIGH SCORES</h2>
+                    <div id="leaderboard-mode-tabs" style="display: flex; gap: 8px; margin-bottom: 10px;">
+                        <button class="btn-lb-mode-tab active" data-mode="standard">STANDARD</button>
+                        <button class="btn-lb-mode-tab" data-mode="chronoshift">CHRONOSHIFT</button>
+                    </div>
                     <div id="leaderboard-difficulty-tabs" style="display: flex; gap: 8px; margin-bottom: 15px;">
                         <button class="btn-lb-tab active" data-diff="easy">EASY</button>
                         <button class="btn-lb-tab" data-diff="medium">MED</button>
@@ -105,6 +111,155 @@
                     <button id="btn-initialize" class="btn-menu" style="font-size: 1.5rem; padding: 20px 60px;">INITIALIZE</button>
                 </div>
 
+                <!-- TUTORIAL SCREENS -->
+                <!-- Boot Sequence Screen -->
+                <div id="tutorial-boot" class="overlay hidden">
+                    <div class="tutorial-boot-content">
+                        <h2 class="tutorial-title">INITIALIZING SERPENTINE OS...</h2>
+                        <div class="tutorial-progress-container">
+                            <div id="tutorial-boot-progress" class="tutorial-progress-bar"></div>
+                        </div>
+                        <p id="tutorial-boot-status" class="tutorial-status">LOADING KERNEL</p>
+                    </div>
+                </div>
+
+                <!-- Welcome Screen -->
+                <div id="tutorial-welcome" class="overlay hidden">
+                    <div class="tutorial-welcome-content">
+                        <h2 class="tutorial-title" style="font-size: 2.5rem;">Welcome to Serpentine OS</h2>
+                        <p class="tutorial-subtitle">Operator</p>
+                        <div class="tutorial-narrative">
+                            <p>You have been granted access to the grid.</p>
+                            <p>Navigate your protocol. Collect data fragments.</p>
+                            <p>Survive the system.</p>
+                        </div>
+                        <p class="tutorial-hint blink">PRESS ANY KEY TO CONTINUE</p>
+                    </div>
+                </div>
+
+                <!-- Tutorial Step 1: Movement -->
+                <div id="tutorial-step1" class="overlay hidden">
+                    <div class="tutorial-step-content">
+                        <div class="tutorial-step-header">
+                            <span class="tutorial-step-number">STEP 1</span>
+                            <span class="tutorial-step-title">NAVIGATION PROTOCOL</span>
+                        </div>
+                        <h2 class="tutorial-title">Movement Controls</h2>
+                        <div class="tutorial-controls-display">
+                            <div class="tutorial-key-group">
+                                <div class="tutorial-key tutorial-key-highlight">W</div>
+                                <div class="tutorial-key-row">
+                                    <div class="tutorial-key tutorial-key-highlight">A</div>
+                                    <div class="tutorial-key tutorial-key-highlight">S</div>
+                                    <div class="tutorial-key tutorial-key-highlight">D</div>
+                                </div>
+                            </div>
+                            <div class="tutorial-or">OR</div>
+                            <div class="tutorial-key-group">
+                                <div class="tutorial-key tutorial-key-highlight">↑</div>
+                                <div class="tutorial-key-row">
+                                    <div class="tutorial-key tutorial-key-highlight">←</div>
+                                    <div class="tutorial-key tutorial-key-highlight">↓</div>
+                                    <div class="tutorial-key tutorial-key-highlight">→</div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="tutorial-instruction">Move freely using the arrow keys or WASD</p>
+                        <div class="tutorial-progress-indicator">
+                            <span id="tutorial-step1-progress">Moves: 0 / 5</span>
+                        </div>
+                        <button id="btn-tutorial-skip" class="btn-menu btn-secondary" style="margin-top: 20px; font-size: 0.8rem; padding: 8px 20px;">SKIP TUTORIAL</button>
+                    </div>
+                </div>
+
+                <!-- Tutorial Step 2: Collect Food -->
+                <div id="tutorial-step2" class="overlay hidden">
+                    <div class="tutorial-step-content">
+                        <div class="tutorial-step-header">
+                            <span class="tutorial-step-number">STEP 2</span>
+                            <span class="tutorial-step-title">DATA COLLECTION</span>
+                        </div>
+                        <h2 class="tutorial-title">Collect DATA FRAGMENTS</h2>
+                        <div class="tutorial-food-demo">
+                            <div class="tutorial-food-icon">◈</div>
+                            <p class="tutorial-instruction">DATA FRAGMENTS appear throughout the grid</p>
+                            <p class="tutorial-instruction">Move your protocol over them to collect</p>
+                        </div>
+                        <div class="tutorial-progress-indicator">
+                            <span id="tutorial-step2-progress">Collected: 0 / 1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tutorial Step 3: Avoid Death -->
+                <div id="tutorial-step3" class="overlay hidden">
+                    <div class="tutorial-step-content">
+                        <div class="tutorial-step-header">
+                            <span class="tutorial-step-number">STEP 3</span>
+                            <span class="tutorial-step-title">SURVIVAL PROTOCOL</span>
+                        </div>
+                        <h2 class="tutorial-title">Avoid System Errors</h2>
+                        <div class="tutorial-danger-display">
+                            <div class="tutorial-danger-item">
+                                <span class="tutorial-danger-icon">▣</span>
+                                <span class="tutorial-danger-text">WALLS</span>
+                            </div>
+                            <div class="tutorial-danger-item">
+                                <span class="tutorial-danger-icon">◈</span>
+                                <span class="tutorial-danger-text">YOUR OWN CODE</span>
+                            </div>
+                        </div>
+                        <p class="tutorial-instruction tutorial-warning">Don't hit walls or your own code</p>
+                        <p class="tutorial-hint blink">A demonstration will play...</p>
+                    </div>
+                </div>
+
+                <!-- Tutorial Step 4: Power-ups -->
+                <div id="tutorial-step4" class="overlay hidden">
+                    <div class="tutorial-step-content">
+                        <div class="tutorial-step-header">
+                            <span class="tutorial-step-number">STEP 4</span>
+                            <span class="tutorial-step-title">AUGMENTATION SYSTEM</span>
+                        </div>
+                        <h2 class="tutorial-title">Power-Ups</h2>
+                        <p class="tutorial-instruction">Power-ups spawn occasionally during gameplay</p>
+                        <div class="tutorial-powerup-grid">
+                            <div class="tutorial-powerup-item">
+                                <div class="tutorial-powerup-icon" style="background: rgba(0, 255, 0, 0.2); border-color: #00ff00;">⚡</div>
+                                <span class="tutorial-powerup-name">SPEED BOOST</span>
+                                <span class="tutorial-powerup-desc">Increases velocity</span>
+                            </div>
+                            <div class="tutorial-powerup-item">
+                                <div class="tutorial-powerup-icon" style="background: rgba(255, 0, 255, 0.2); border-color: #ff00ff;">🛡️</div>
+                                <span class="tutorial-powerup-name">SHIELD</span>
+                                <span class="tutorial-powerup-desc">Absorbs one hit</span>
+                            </div>
+                            <div class="tutorial-powerup-item">
+                                <div class="tutorial-powerup-icon" style="background: rgba(0, 255, 255, 0.2); border-color: #00ffff;">💎</div>
+                                <span class="tutorial-powerup-name">GHOST MODE</span>
+                                <span class="tutorial-powerup-desc">Phase through walls</span>
+                            </div>
+                            <div class="tutorial-powerup-item">
+                                <div class="tutorial-powerup-icon" style="background: rgba(255, 215, 0, 0.2); border-color: #ffd700;">⭐</div>
+                                <span class="tutorial-powerup-name">MULTIPLY</span>
+                                <span class="tutorial-powerup-desc">2x score multiplier</span>
+                            </div>
+                        </div>
+                        <button id="btn-tutorial-continue" class="btn-menu" style="margin-top: 20px;">CONTINUE</button>
+                    </div>
+                </div>
+
+                <!-- Tutorial Complete Screen -->
+                <div id="tutorial-complete" class="overlay hidden">
+                    <div class="tutorial-complete-content">
+                        <div class="tutorial-complete-icon">✓</div>
+                        <h2 class="tutorial-title" style="font-size: 2.5rem;">TRAINING COMPLETE</h2>
+                        <p class="tutorial-subtitle">You understand the basics.</p>
+                        <p class="tutorial-subtitle" style="margin-top: 10px;">Good luck, Operator.</p>
+                        <button id="btn-tutorial-start" class="btn-menu" style="margin-top: 30px; font-size: 1.2rem; padding: 15px 40px;">ENTER THE GRID</button>
+                    </div>
+                </div>
+
                 <div id="main-menu" class="overlay hidden">
                     <h2 class="menu-title" style="font-size: 3.5rem; margin-bottom: 40px;">SERPENTINE</h2>
                     <div id="main-menu-stats" style="display: flex; gap: 30px; margin-bottom: 30px; justify-content: center;">
@@ -117,6 +272,13 @@
                             <div id="menu-bank" style="font-size: 1.6rem; font-weight: 900; color: var(--accent-color); text-shadow: 0 0 10px var(--accent-color);">0</div>
                         </div>
                     </div>
+                    <!-- Replay Code Input -->
+                    <div id="replay-paste-section" style="margin-bottom: 20px; display: none;">
+                        <div style="display: flex; gap: 8px; max-width: 300px; margin: 0 auto;">
+                            <input type="text" id="replay-code-input" placeholder="PASTE REPLAY CODE" style="flex: 1; padding: 8px 12px; font-family: 'Orbitron', sans-serif; font-size: 0.7rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.3); border-radius: 4px; color: #ffd700; letter-spacing: 1px;">
+                            <button id="btn-load-replay" class="btn-menu btn-secondary" style="width: auto; padding: 8px 15px; font-size: 0.75rem; border-color: #ffd700; color: #ffd700;">▶</button>
+                        </div>
+                    </div>
                     <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 15px;">
                         <button id="btn-play-menu" class="btn-menu">GAME MODES</button>
                         <button id="btn-char-menu" class="btn-menu">CHARACTER SELECT</button>
@@ -127,6 +289,7 @@
                         <button id="btn-shop-menu" class="btn-menu">SYSTEM SHOP</button>
                         <button id="btn-controls-menu" class="btn-menu">CONTROLS</button>
                         <button id="btn-settings-menu" class="btn-menu">SETTINGS</button>
+                        <button id="btn-achievements-menu" class="btn-menu" style="border-color: #ffd700; color: #ffd700;">ACHIEVEMENTS</button>
                         <button id="btn-exit-menu" class="btn-menu btn-danger">EXIT SYSTEM</button>
                     </div>
                 </div>
@@ -583,6 +746,10 @@
                                 <span class="settings-label" id="setting-fullscreen-label">FULLSCREEN</span>
                                 <button id="setting-fullscreen" class="settings-toggle" data-setting="fullscreen" data-value="false">OFF</button>
                             </div>
+                            <div class="settings-row">
+                                <span class="settings-label" id="setting-battery-saver-label">BATTERY SAVER</span>
+                                <button id="setting-battery-saver" class="settings-toggle" data-setting="batterySaver" data-value="false">OFF</button>
+                            </div>
                         </div>
 
                         <!-- CONTROLS Section -->
@@ -644,7 +811,7 @@
                                 <button id="btn-open-reset-modal" class="btn-menu btn-danger" style="width: auto; padding: 5px 12px; font-size: 0.75rem;">DANGER</button>
                             </div>
                             <div class="settings-row" style="justify-content: center;">
-                                <span class="settings-version">v1.0.0</span>
+                                <span class="settings-version">v3.0.0</span>
                             </div>
                         </div>
                     </div>
@@ -676,8 +843,40 @@
                     </div>
                 </div>
 
+                <!-- CORRUPTION WARNING MODAL -->
+                <div id="corruption-modal" class="modal-overlay hidden">
+                    <div class="modal-content">
+                        <h3 class="modal-title" style="color: #ff0055;">⚠️ DATA CORRUPTION DETECTED</h3>
+                        <p class="modal-body" id="corruption-message">Your save data appears to be corrupted. You can start fresh or attempt recovery.</p>
+                        <div id="corruption-details" style="background: rgba(255,0,85,0.1); border: 1px solid #ff0055; border-radius: 8px; padding: 10px; margin: 10px 0; font-size: 0.75rem; color: #aaa; display: none;"></div>
+                        <div class="modal-buttons">
+                            <button id="btn-corruption-reset" class="btn-menu btn-danger" style="width: auto; padding: 8px 20px; font-size: 0.85rem;">START FRESH</button>
+                            <button id="btn-corruption-recover" class="btn-menu" style="width: auto; padding: 8px 20px; font-size: 0.85rem;">ATTEMPT RECOVERY</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IMPORT PREVIEW MODAL -->
+                <div id="import-preview-modal" class="modal-overlay hidden">
+                    <div class="modal-content">
+                        <h3 class="modal-title" style="color: #00ffcc;">📥 IMPORT SAVE DATA</h3>
+                        <p class="modal-body">The following data will be imported:</p>
+                        <div id="import-preview-content" style="background: rgba(0,255,204,0.1); border: 1px solid #00ffcc; border-radius: 8px; padding: 15px; margin: 10px 0; font-size: 0.85rem; color: #fff;">
+                            <!-- Preview content injected by JS -->
+                        </div>
+                        <p class="modal-body" style="color: #ff0055; font-size: 0.8rem;">Warning: This will replace your current save data!</p>
+                        <div class="modal-buttons">
+                            <button id="btn-import-confirm" class="btn-menu" style="width: auto; padding: 8px 20px; font-size: 0.85rem;">CONFIRM IMPORT</button>
+                            <button id="btn-import-cancel" class="btn-menu btn-secondary" style="width: auto; padding: 8px 20px; font-size: 0.85rem;">CANCEL</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Screen Reader Announcer -->
                 <div id="sr-announcer" role="status" aria-live="polite" aria-atomic="true"></div>
+
+                <!-- Celebration Particles Container -->
+                <div id="celebration-particles"></div>
 
                 <!-- Challenge Celebration Overlay -->
                 <div id="challenge-celebration" class="hidden">
@@ -701,6 +900,31 @@
                         <div class="celebration-character-name" id="celebration-character-name">VOID WALKER</div>
                     </div>
                     <button id="btn-celebration-close" class="btn-menu" style="margin-top: 30px;">CONTINUE</button>
+                </div>
+
+                <!-- ACHIEVEMENTS SCREEN -->
+                <div id="achievements-screen" class="overlay hidden">
+                    <h2 class="menu-title" style="font-size: 2.5rem; margin-bottom: 10px;">ACHIEVEMENTS</h2>
+
+                    <div id="achievements-progress-container" style="width: 340px; margin-bottom: 5px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="color: #888; font-size: 0.7rem; letter-spacing: 2px;">PROGRESS</span>
+                            <span id="achievements-progress-text" style="color: #00ffcc; font-size: 0.8rem; font-weight: bold;">0 / 0</span>
+                        </div>
+                        <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                            <div id="achievements-progress-fill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #00ffcc, #b026ff); transition: width 0.3s ease;"></div>
+                        </div>
+                    </div>
+
+                    <div id="achievements-category-tabs" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; max-width: 380px; justify-content: center;">
+                        <!-- Category tabs generated by JS -->
+                    </div>
+
+                    <div id="achievements-list" style="display: flex; flex-direction: column; gap: 10px; width: 360px; max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                        <!-- Achievement cards generated by JS -->
+                    </div>
+
+                    <button id="btn-back-achievements" class="btn-menu btn-secondary" style="margin-top: 20px;">BACK</button>
                 </div>
 
                 <div id="start-screen" class="overlay hidden">
@@ -770,7 +994,13 @@
     <script src="audio_system.js"></script>
     <script src="script.js"></script>
     <script src="character_renderers.js"></script>
+    <script src="tutorial.js"></script>
+    <script src="mode_tutorials.js"></script>
+    <script src="achievements.js"></script>
     <script src="sentinel_breach_impl.js"></script>
+    <script src="chronoshift_impl.js"></script>
+    <script src="replay_system.js"></script>
+    <script src="os_desktop.js"></script>
 </body>
 
 </html>

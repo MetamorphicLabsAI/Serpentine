@@ -617,6 +617,11 @@ function triggerSentinelGameOver() {
             ChallengeManager.onWaveReached(SentinelBreach.currentWave);
             ChallengeManager.onScoreReached(SentinelBreach.score, 'sentinel');
         }
+        // Achievement progress tracking
+        if (typeof AchievementManager !== 'undefined') {
+            AchievementManager.onGameEnded('sentinel', SentinelBreach.score, SentinelBreach.difficulty);
+            AchievementManager.onWaveCleared(SentinelBreach.currentWave, 'sentinel');
+        }
         if (isHighScore(`sentinel_${SentinelBreach.difficulty}`, SentinelBreach.score)) {
             isEnteringInitials = true;
             initialsChars = [0, 0, 0];
@@ -852,12 +857,6 @@ const EXPORT_MAGIC = 'serpentine_export';
 const LEGACY_KEYS = {
     highScore: 'serpentineHighScore',
     bank: 'serpentineBank',
-    unlockedSpectrum: 'serpentineUnlockedSpectrum',
-    unlocked9193: 'serpentineUnlocked9193',
-    unlockedPrincess: 'serpentineUnlockedPrincess',
-    unlockedArthropod: 'serpentineUnlockedArthropod',
-    unlockedDragon: 'serpentineUnlockedDragon',
-    unlockedCentipede: 'serpentineUnlockedCentipede',  // Legacy alias
     bought9193Hint: 'bought9193Hint',
     boughtMasterHint: 'boughtMasterHint',
     optPrincessPlayStyle: 'serpentineOpt_princess_playStyle',
@@ -866,7 +865,60 @@ const LEGACY_KEYS = {
     leaderboardMedium: 'serpentineLB_medium',
     leaderboardHard: 'serpentineLB_hard',
     leaderboardInsane: 'serpentineLB_insane',
-    tutorialComplete: 'serpentineTutorialComplete'
+    tutorialComplete: 'serpentineTutorialComplete',
+    // Character unlock keys (all40+ characters)
+    unlockedSpectrum: 'serpentineUnlockedSpectrum',
+    unlocked9193: 'serpentineUnlocked9193',
+    unlockedPrincess: 'serpentineUnlockedPrincess',
+    unlockedArthropod: 'serpentineUnlockedArthropod',
+    unlockedDragon: 'serpentineUnlockedDragon',
+    unlockedCentipede: 'serpentineUnlockedCentipede',  // Legacy alias for arthropod
+    unlockedCrimsonFang: 'serpentineUnlockedCrimsonFang',
+    unlockedCobaltGrid: 'serpentineUnlockedCobaltGrid',
+    unlockedEmeraldCore: 'serpentineUnlockedEmeraldCore',
+    unlockedVoidStar: 'serpentineUnlockedVoidStar',
+    unlockedPlasmaHydra: 'serpentineUnlockedPlasmaHydra',
+    unlockedMonochrome: 'serpentineUnlockedMonochrome',
+    unlockedMoltenCore: 'serpentineUnlockedMoltenCore',
+    unlockedTitaniumCoil: 'serpentineUnlockedTitaniumCoil',
+    unlockedQuicksilver: 'serpentineUnlockedQuicksilver',
+    unlockedPhotonDash: 'serpentineUnlockedPhotonDash',
+    unlockedNokiaNostalgia: 'serpentineUnlockedNokiaNostalgia',
+    unlockedKonamiCode: 'serpentineUnlockedKonamiCode',
+    unlockedMissingNo: 'serpentineUnlockedMissingNo',
+    unlockedDogecoin: 'serpentineUnlockedDogecoin',
+    unlockedBinaryConstrictor: 'serpentineUnlockedBinaryConstrictor',
+    unlockedTheDev: 'serpentineUnlockedTheDev',
+    unlockedError404: 'serpentineUnlockedError404',
+    unlockedBlueScreen: 'serpentineUnlockedBlueScreen',
+    unlockedScanlineSamurai: 'serpentineUnlockedScanlineSamurai',
+    unlockedSynthesizer: 'serpentineUnlockedSynthesizer',
+    unlockedMachMach: 'serpentineUnlocked_machmach',
+    unlockedSonicBoom: 'serpentineUnlocked_sonicboom',
+    unlockedQuantumLeap: 'serpentineUnlocked_quantumleap',
+    unlockedWarpPython: 'serpentineUnlocked_warppython',
+    unlockedFlashProtocol: 'serpentineUnlocked_flashprotocol',
+    unlockedAegisDefender: 'serpentineUnlocked_aegisdefender',
+    unlockedPhoenixProtocol: 'serpentineUnlocked_phoenixprotocol',
+    unlockedJuggernaut: 'serpentineUnlocked_juggernaut',
+    unlockedInfinityScale: 'serpentineUnlocked_infinityscale',
+    unlockedZenithSerpent: 'serpentineUnlocked_zenithserpent',
+    unlockedPumpkinProtocol: 'serpentineUnlocked_pumpkinprotocol',
+    unlockedFrostSerpent: 'serpentineUnlocked_frostserpent',
+    unlockedHeartCore: 'serpentineUnlocked_heartcore',
+    unlockedNeonClassic: 'serpentineUnlocked_neon_classic',
+    unlockedNeonPulse: 'serpentineUnlocked_neon_pulse',
+    unlockedVoidShadow: 'serpentineUnlocked_void_shadow',
+    unlockedVoidNova: 'serpentineUnlocked_void_nova',
+    unlockedGlitchClassic: 'serpentineUnlocked_glitch_classic',
+    unlockedGlitchDebug: 'serpentineUnlocked_glitch_debug',
+    // Stats tracking
+    speedrunTimes: 'serpentineSpeedrunTimes',
+    maxSurvival: 'serpentineStats_maxSurvival',
+    sessionDeaths: 'serpentineStats_sessionDeaths',
+    maxSnakeLength: 'serpentineStats_maxSnakeLength',
+    standardGames: 'serpentineStats_standardGames',
+    leaderboardTop3: 'serpentineStats_leaderboardTop3'
 };
 
 // Default v2 profile structure
@@ -964,7 +1016,19 @@ function createDefaultProfile() {
         statsMeta: {
             totalRewindsUsed: 0,        // For Temporal Wizard
             gridWarfareWins: 0,         // For Competitor
-            highestWave: 0              // For Sentinel Hunter
+            highestWave: 0,              // For Sentinel Hunter
+            // Additional stats for migration
+            speedrunTimes: {
+                insane90: false,
+                hard60: false,
+                chronoNoRewind: false,
+                chronoInsane120: false,
+                sentinelWave20: false
+            },
+            maxSurvivalTime: 0,
+            sessionDeaths: 0,
+            maxSnakeLength: 0,
+            leaderboardTop3: {}
         },
         // Legacy migration tracking
         _migratedAt: null,
@@ -1302,8 +1366,25 @@ class SaveManager {
                         console.log('[SaveManager] Loaded v2 profile');
                         this._restoreLegacyState();
                     } else {
-                        console.warn('[SaveManager] Corrupt profile detected, migrating from v1');
-                        this.profile = this._migrateFromV1();
+                        // ════ Corruption Detected — Show Warning UI ════
+                        console.warn('[SaveManager] Corrupt profile detected');
+                        const self = this;
+                        this._showCorruptionWarning(
+                            'Invalid profile structure detected. Your save data may be corrupted.',
+                            function() {
+                                // Recovery: migrate from v1
+                                self.profile = self._migrateFromV1();
+                                self.save(true);
+                                resolve(self.profile);
+                            },
+                            function() {
+                                // Reset: start fresh
+                                self.profile = createDefaultProfile();
+                                self.save(true);
+                                resolve(self.profile);
+                            }
+                        );
+                        return; // Don't resolve yet - wait for user action
                     }
                 } else {
                     // No v2 profile — check for v1 data and migrate
@@ -1324,13 +1405,23 @@ class SaveManager {
 
             } catch (err) {
                 console.error('[SaveManager] Load error:', err);
-                this.profile = createDefaultProfile();
+                // ════ Show Recovery Option on Error ════
+                const self = this;
+                this._showCorruptionWarning(
+                    'Failed to load save data: ' + (err.message || 'Unknown error'),
+                    function() {
+                        self.profile = self._migrateFromV1();
+                        self.save(true);
+                        resolve(self.profile);
+                    },
+                    function() {
+                        self.profile = createDefaultProfile();
+                        self.save(true);
+                        resolve(self.profile);
+                    }
+                );
+                return;
             }
-
-            resolve(this.profile);
-        });
-
-        return this._loadPromise;
     }
 
     // ── Validate Profile ──────────────────────────────────────────────────────
@@ -1346,6 +1437,48 @@ class SaveManager {
         }
 
         return true;
+    }
+
+    // ── Show Corruption Warning Modal ────────────────────────────────────────
+    _showCorruptionWarning(message, onRecover, onReset) {
+        const modal = document.getElementById('corruption-modal');
+        const msgEl = document.getElementById('corruption-message');
+        const detailsEl = document.getElementById('corruption-details');
+
+        if (modal && msgEl) {
+            msgEl.textContent = message;
+            if (detailsEl) {
+                detailsEl.style.display = 'none';
+            }
+            modal.classList.remove('hidden');
+
+            // Set up button handlers
+            const resetBtn = document.getElementById('btn-corruption-reset');
+            const recoverBtn = document.getElementById('btn-corruption-recover');
+
+            const cleanup = () => {
+                modal.classList.add('hidden');
+                if (resetBtn) resetBtn.replaceWith(resetBtn.cloneNode(true));
+                if (recoverBtn) recoverBtn.replaceWith(recoverBtn.cloneNode(true));
+            };
+
+            const handleReset = () => {
+                cleanup();
+                onReset();
+            };
+
+            const handleRecover = () => {
+                cleanup();
+                onRecover();
+            };
+
+            if (resetBtn) resetBtn.addEventListener('click', handleReset);
+            if (recoverBtn) recoverBtn.addEventListener('click', handleRecover);
+        } else {
+            // Fallback if modal not found
+            console.warn('[SaveManager] Corruption modal not found, using recovery');
+            onRecover();
+        }
     }
 
     // ── Upgrade Profile ───────────────────────────────────────────────────────
@@ -1397,22 +1530,72 @@ class SaveManager {
             // Migrate bank
             profile.economy.bank = parseInt(localStorage.getItem(LEGACY_KEYS.bank) || '0');
 
-            // Migrate character unlocks
-            const unlockMap = {
-                unlockedSpectrum: 'spectrum',
-                unlocked9193: '9193',
-                unlockedPrincess: 'princess',
-                unlockedArthropod: 'arthropod',
-                unlockedDragon: 'dragon'
+            // ════ Comprehensive Character Unlock Migration ════
+            // Map all legacy unlock keys to character IDs
+            const characterUnlockMap = {
+                // Default + Shop characters (5)
+                'unlockedSpectrum': 'spectrum',
+                'unlocked9193': '9193',
+                'unlockedPrincess': 'princess',
+                'unlockedArthropod': 'arthropod',
+                'unlockedDragon': 'dragon',
+                'unlockedCentipede': 'arthropod',  // Legacy alias for arthropod
+                // Food milestone characters (10)
+                'unlockedCrimsonFang': 'crimson_fang',
+                'unlockedCobaltGrid': 'cobalt_grid',
+                'unlockedEmeraldCore': 'emerald_core',
+                'unlockedVoidStar': 'void_star',
+                'unlockedPlasmaHydra': 'plasma_hydra',
+                'unlockedMonochrome': 'monochrome',
+                'unlockedMoltenCore': 'molten_core',
+                'unlockedTitaniumCoil': 'titanium_coil',
+                'unlockedQuicksilver': 'quicksilver',
+                'unlockedPhotonDash': 'photon_dash',
+                // Secret/Easter Egg characters (10)
+                'unlockedNokiaNostalgia': 'nokia_nostalgia',
+                'unlockedKonamiCode': 'konami_code',
+                'unlockedMissingNo': 'missing_no',
+                'unlockedDogecoin': 'dogecoin',
+                'unlockedBinaryConstrictor': 'binary_constrictor',
+                'unlockedTheDev': 'the_dev',
+                'unlockedError404': 'error_404',
+                'unlockedBlueScreen': 'blue_screen',
+                'unlockedScanlineSamurai': 'scanline_samurai',
+                'unlockedSynthesizer': 'synthesizer',
+                // Speedrun/Survival characters (10)
+                'unlockedMachMach': 'mach_mach',
+                'unlockedSonicBoom': 'sonic_boom',
+                'unlockedQuantumLeap': 'quantum_leap',
+                'unlockedWarpPython': 'warp_python',
+                'unlockedFlashProtocol': 'flash_protocol',
+                'unlockedAegisDefender': 'aegis_defender',
+                'unlockedPhoenixProtocol': 'phoenix_protocol',
+                'unlockedJuggernaut': 'juggernaut',
+                'unlockedInfinityScale': 'infinity_scale',
+                'unlockedZenithSerpent': 'zenith_serpent',
+                // Seasonal characters (3)
+                'unlockedPumpkinProtocol': 'pumpkin_protocol',
+                'unlockedFrostSerpent': 'frost_serpent',
+                'unlockedHeartCore': 'heart_core',
+                // Character variants (6)
+                'unlockedNeonClassic': 'neon_classic',
+                'unlockedNeonPulse': 'neon_pulse',
+                'unlockedVoidShadow': 'void_shadow',
+                'unlockedVoidNova': 'void_nova',
+                'unlockedGlitchClassic': 'glitch_classic',
+                'unlockedGlitchDebug': 'glitch_debug'
             };
 
-            for (const [key, charId] of Object.entries(unlockMap)) {
+            // Shop-purchased characters that should be in shopPurchases
+            const shopCharacters = ['princess', 'arthropod', 'dragon'];
+
+            for (const [key, charId] of Object.entries(characterUnlockMap)) {
                 if (localStorage.getItem(LEGACY_KEYS[key]) === 'true') {
                     if (!profile.progress.charactersUnlocked.includes(charId)) {
                         profile.progress.charactersUnlocked.push(charId);
                     }
                     // Track shop purchases
-                    if (['princess', 'arthropod', 'dragon'].includes(charId)) {
+                    if (shopCharacters.includes(charId)) {
                         if (!profile.economy.shopPurchases.includes(charId)) {
                             profile.economy.shopPurchases.push(charId);
                         }
@@ -1420,21 +1603,50 @@ class SaveManager {
                 }
             }
 
-            // Legacy alias check for arthropod (was called Centipede)
-            if (localStorage.getItem(LEGACY_KEYS.unlockedCentipede) === 'true') {
-                if (!profile.progress.charactersUnlocked.includes('arthropod')) {
-                    profile.progress.charactersUnlocked.push('arthropod');
-                    profile.economy.shopPurchases.push('arthropod');
-                }
-            }
-
-            // Migrate shop hints
+            // Migrate shop hints (secrets)
             if (localStorage.getItem(LEGACY_KEYS.bought9193Hint) === 'true') {
                 profile.secrets.cheatCodeUsed = true;
             }
             if (localStorage.getItem(LEGACY_KEYS.boughtMasterHint) === 'true') {
                 profile.secrets.masterRitualUsed = true;
             }
+
+            // ════ Migrate Stats Tracking ════
+            // Speedrun times
+            try {
+                const speedrunTimes = JSON.parse(localStorage.getItem(LEGACY_KEYS.speedrunTimes) || '{}');
+                profile.statsMeta.speedrunTimes = speedrunTimes;
+            } catch (e) { /* use default */ }
+
+            // Max survival time
+            const maxSurvival = parseInt(localStorage.getItem(LEGACY_KEYS.maxSurvival) || '0');
+            if (maxSurvival > 0) {
+                profile.statsMeta.maxSurvivalTime = maxSurvival;
+            }
+
+            // Session deaths
+            const sessionDeaths = parseInt(localStorage.getItem(LEGACY_KEYS.sessionDeaths) || '0');
+            if (sessionDeaths > 0) {
+                profile.statsMeta.sessionDeaths = sessionDeaths;
+            }
+
+            // Max snake length
+            const maxSnakeLength = parseInt(localStorage.getItem(LEGACY_KEYS.maxSnakeLength) || '0');
+            if (maxSnakeLength > 0) {
+                profile.statsMeta.maxSnakeLength = maxSnakeLength;
+            }
+
+            // Standard games completed
+            const standardGames = parseInt(localStorage.getItem(LEGACY_KEYS.standardGames) || '0');
+            if (standardGames > 0) {
+                profile.stats.totalGamesPlayed = standardGames;
+            }
+
+            // Leaderboard top 3 tracking
+            try {
+                const top3 = JSON.parse(localStorage.getItem(LEGACY_KEYS.leaderboardTop3) || '{}');
+                profile.statsMeta.leaderboardTop3 = top3;
+            } catch (e) { /* use default */ }
 
             // Migrate leaderboards
             const diffs = ['easy', 'medium', 'hard', 'insane'];
@@ -1467,6 +1679,21 @@ class SaveManager {
             if (localStorage.getItem(LEGACY_KEYS.tutorialComplete) === 'true') {
                 profile.progress.tutorialComplete = true;
             }
+
+            // Migrate character options (Princess play style, Arthropod skin)
+            try {
+                const princessStyle = localStorage.getItem(LEGACY_KEYS.optPrincessPlayStyle);
+                if (princessStyle) {
+                    profile.settings.princessPlayStyle = princessStyle;
+                }
+ } catch (e) { /* use default */ }
+
+            try {
+                const arthropodSkin = localStorage.getItem(LEGACY_KEYS.optArthropodSkin);
+                if (arthropodSkin) {
+                    profile.settings.arthropodSkin = arthropodSkin;
+                }
+            } catch (e) { /* use default */ }
 
         } catch (err) {
             console.error('[SaveManager] Migration error:', err);
@@ -1570,7 +1797,7 @@ class SaveManager {
     }
 
     // ── Increment Stats (run-end) ─────────────────────────────────────────────
-    recordGameEnd({ score, foodEaten, snakeLength, tickSpeed, characterId, mode }) {
+    recordGameEnd({ score, foodEaten, snakeLength, tickSpeed, characterId, mode, playTimeSeconds }) {
         if (!this.profile) return;
 
         // Stats update incrementally, not recalculated
@@ -1584,10 +1811,24 @@ class SaveManager {
             this.profile.stats.highestSpeed = tickSpeed;
         }
 
-        // Track favorite character
+        // Track favorite character (simple: most recent)
         if (characterId) {
-            // Simple: just set it if played often (could be smarter)
             this.profile.stats.favoriteCharacter = characterId;
+        }
+
+        // ════ Update Play Time Per Mode ════
+        if (mode && playTimeSeconds > 0) {
+            if (!this.profile.stats.hoursPerMode) {
+                this.profile.stats.hoursPerMode = {
+                    standard: 0, chronoshift: 0, sentinel: 0,
+                    breach: 0, grid: 0, neural: 0
+                };
+            }
+            if (this.profile.stats.hoursPerMode.hasOwnProperty(mode)) {
+                this.profile.stats.hoursPerMode[mode] += playTimeSeconds;
+            }
+            // Also update total play time
+            this.profile.meta.totalPlayTime += playTimeSeconds;
         }
 
         // Update streak
@@ -1614,23 +1855,18 @@ class SaveManager {
             this.profile.progress.currentStreak
         );
 
-        // Add score to leaderboard
+        // ════ Add Score to Leaderboard (per difficulty) ════
         if (score > 0 && mode) {
             const modeScores = this.profile.scores[mode];
             if (modeScores) {
-                // Find a good difficulty mapping (use currentDifficultyLabel)
-                // Scores are stored per-mode per-difficulty
-                const diffs = ['easy', 'medium', 'hard', 'insane'];
-                // We'll store in all diffs for broad leaderboard visibility on import
-                // but flag for display
+                // Determine difficulty from tickSpeed
+                const difficulty = this._tickSpeedToDifficulty(tickSpeed);
                 const entry = { initials: '', score, gameOverTime: Date.now() };
 
-                // Add to all difficulties (player can earn in any)
-                diffs.forEach(diff => {
-                    modeScores[diff].push({ ...entry });
-                    modeScores[diff].sort((a, b) => b.score - a.score);
-                    modeScores[diff] = modeScores[diff].slice(0, 10);
-                });
+                // Add to the correct difficulty only
+                modeScores[difficulty].push({ ...entry });
+                modeScores[difficulty].sort((a, b) => b.score - a.score);
+                modeScores[difficulty] = modeScores[difficulty].slice(0, 10);
             }
         }
 
@@ -1638,6 +1874,15 @@ class SaveManager {
         checkSecretUnlocks(this.profile);
 
         this.save(false);  // Non-blocking auto-save
+    }
+
+    // ── Map tickSpeed to difficulty ─────────────────────────────────────────
+    _tickSpeedToDifficulty(tickSpeed) {
+        if (!tickSpeed) return 'medium';
+        if (tickSpeed <= 50) return 'insane';
+        if (tickSpeed <= 80) return 'hard';
+        if (tickSpeed <= 120) return 'medium';
+        return 'easy';
     }
 
     // ── Add Bank Points ───────────────────────────────────────────────────────
@@ -1709,8 +1954,119 @@ class SaveManager {
         URL.revokeObjectURL(url);
     }
 
-    // ── Import Profile ────────────────────────────────────────────────────────
-    importProfile(jsonString) {
+    // ── Preview Import Data ──────────────────────────────────────────────────
+    previewImport(jsonString) {
+        try {
+            const data = JSON.parse(jsonString);
+
+            // Validate export format
+            if (!data[EXPORT_MAGIC]) {
+                throw new Error('Invalid save file format: missing magic marker');
+            }
+            if (!data.profile) {
+                throw new Error('Invalid save file: missing profile data');
+            }
+
+            // Validate the embedded profile
+            if (!this._validateProfile(data.profile)) {
+                throw new Error('Corrupted profile data in save file');
+            }
+
+            // Build preview
+            const profile = data.profile;
+            const preview = {
+                version: profile.meta?.version || 'unknown',
+                createdAt: profile.meta?.createdAt ? new Date(profile.meta.createdAt).toLocaleDateString() : 'unknown',
+                lastPlayed: profile.meta?.lastPlayedAt ? new Date(profile.meta.lastPlayedAt).toLocaleDateString() : 'unknown',
+                totalPlayTime: Math.round((profile.meta?.totalPlayTime || 0) / 60) + ' min',
+                gamesPlayed: profile.stats?.totalGamesPlayed || 0,
+                totalDeaths: profile.stats?.totalDeaths || 0,
+                bank: (profile.economy?.bank || 0).toLocaleString() + ' PTS',
+                charactersUnlocked: profile.progress?.charactersUnlocked?.length || 0,
+                achievementsUnlocked: profile.progress?.achievementsUnlocked?.length || 0,
+                seasonTier: profile.season?.currentTier || 0,
+                modesPlayed: Object.keys(profile.stats?.hoursPerMode || {}).filter(m => profile.stats.hoursPerMode[m] > 0).length
+            };
+
+            return { success: true, preview };
+        } catch (err) {
+            return { success: false, error: err.message };
+        }
+    }
+
+    // ── Show Import Preview Modal ─────────────────────────────────────────────
+    _showImportPreview(preview, jsonString, onConfirm) {
+        const modal = document.getElementById('import-preview-modal');
+        const contentEl = document.getElementById('import-preview-content');
+
+        if (modal && contentEl) {
+            // Build preview HTML
+            let html = '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<tr><td style="padding: 4px 8px; color: #888;">Version:</td><td style="padding: 4px 8px; color: #00ffcc;">' + preview.version + '</td></tr>';
+            html += '<tr><td style="padding: 4px 8px; color: #888;">Games Played:</td><td style="padding: 4px 8px; color: #fff;">' + preview.gamesPlayed + '</td></tr>';
+            html += '<tr><td style="padding: 4px 8px; color: #888;">Total Deaths:</td><td style="padding: 4px 8px; color: #fff;">' + preview.totalDeaths + '</td></tr>';
+            html += '<tr><td style="padding: 4px 8px; color: #888;">Bank:</td><td style="padding: 4px 8px; color: #ffd700;">' + preview.bank + '</td></tr>';
+            html += '<tr><td style="padding: 4px 8px; color: #888;">Characters:</td><td style="padding: 4px 8px; color: #fff;">' + preview.charactersUnlocked + '</td></tr>';
+            html += '<tr><td style="padding: 4px 8px; color: #888;">Season Tier:</td><td style="padding: 4px 8px; color: #ffd700;">' + preview.seasonTier + '</td></tr>';
+            html += '<tr><td style="padding: 4px 8px; color: #888;">Modes Played:</td><td style="padding: 4px 8px; color: #fff;">' + preview.modesPlayed + '</td></tr>';
+            html += '<tr><td style="padding: 4px 8px; color: #888;">Play Time:</td><td style="padding: 4px 8px; color: #fff;">' + preview.totalPlayTime + '</td></tr>';
+            html += '<tr><td style="padding: 4px 8px; color: #888;">Last Played:</td><td style="padding: 4px 8px; color: #fff;">' + preview.lastPlayed + '</td></tr>';
+            html += '</table>';
+            contentEl.innerHTML = html;
+
+            modal.classList.remove('hidden');
+
+            // Set up button handlers
+            const confirmBtn = document.getElementById('btn-import-confirm');
+            const cancelBtn = document.getElementById('btn-import-cancel');
+
+            const cleanup = () => {
+                modal.classList.add('hidden');
+                if (confirmBtn) confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+                if (cancelBtn) cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+            };
+
+            const handleConfirm = () => {
+                cleanup();
+                onConfirm();
+            };
+
+            const handleCancel = () => {
+                cleanup();
+            };
+
+            if (confirmBtn) confirmBtn.addEventListener('click', handleConfirm);
+            if (cancelBtn) cancelBtn.addEventListener('click', handleCancel);
+        } else {
+            // Fallback if modal not found - just import directly
+            onConfirm();
+        }
+    }
+
+    // ── Import Profile (returns preview first) ───────────────────────────────
+    importProfile(jsonString, skipPreview = false) {
+        // First get preview
+        const previewResult = this.previewImport(jsonString);
+        if (!previewResult.success) {
+            return { success: false, error: previewResult.error, previewFailed: true };
+        }
+
+        if (skipPreview) {
+            // Direct import (from preview confirm)
+            return this._applyImport(jsonString);
+        }
+
+        // Return preview for UI to handle
+        return {
+            success: true,
+            needsConfirmation: true,
+            preview: previewResult.preview,
+            jsonString: jsonString
+        };
+    }
+
+    // ── Apply Import (internal) ──────────────────────────────────────────────
+    _applyImport(jsonString) {
         try {
             const data = JSON.parse(jsonString);
 
@@ -1728,14 +2084,13 @@ class SaveManager {
             }
 
             // Apply the profile
-            const oldProfile = this.profile;
             this.profile = this._upgradeProfile(data.profile);
             this.save(true);
 
             // Sync legacy state
             this._restoreLegacyState();
 
-            // Show what was imported
+            // Return what was imported
             return {
                 success: true,
                 profile: this.profile,
@@ -2964,17 +3319,21 @@ function isHighScore(diff, score) {
     return board.length < 10 || score > board[board.length - 1].score;
 }
 
-function addHighScore(diff, initials, score, isCheater) {
-    const board = getLeaderboard(diff);
+function addHighScore(diff, initials, score, isCheater, isChronoMode = false) {
+    // ChronoShift uses separate leaderboard
+    const lbKey = isChronoMode ? `chrono_${diff}` : diff;
+    const board = getLeaderboard(lbKey);
     board.push({ initials, score, cheater: isCheater || false });
     board.sort((a, b) => b.score - a.score);
-    saveLeaderboard(diff, board.slice(0, 10));
+    saveLeaderboard(lbKey, board.slice(0, 10));
 }
 
 function renderLeaderboard(diff) {
     const list = document.getElementById('leaderboard-list');
-    const board = getLeaderboard(diff);
-    
+    // Get the appropriate leaderboard key based on current mode
+    const lbKey = currentLeaderboardMode === 'chronoshift' ? `chrono_${diff}` : diff;
+    const board = getLeaderboard(lbKey);
+
     // Update active tab
     document.querySelectorAll('.btn-lb-tab').forEach(t => t.classList.remove('active'));
     const activeTab = document.querySelector(`.btn-lb-tab[data-diff="${diff}"]`);
@@ -2999,6 +3358,7 @@ let initialsChars = [0, 0, 0]; // indices into ALPHABET
 let initialsSlot = 0;
 let pendingHighScoreDiff = null;
 let pendingHighScoreValue = 0;
+let pendingHighScoreIsChrono = false;
 
 /* --- 9193 Master Unlock Ritual --- */
 let masterUnlockHoldStart = null; // timestamp when 9 was first pressed
@@ -4939,12 +5299,23 @@ function main(currentTime) {
 
     if (!isPlaying || isPaused) return;
 
+    // Handle ChronoShift mode updates
+    if (ChronoShift.active) {
+        const deltaTime = currentTime - lastRenderTime;
+        updateChronoShift(deltaTime, currentTime);
+    }
+
     const secondsSinceLastLogic = (currentTime - lastRenderTime) / 1000;
 
     // Apply speed boost power-up (×1.5 speed = shorter interval)
     let effectiveSpeed = currentSpeed;
     if (activePowerUp && activePowerUp.id === 'speed') {
         effectiveSpeed = currentSpeed / 1.5;
+    }
+
+    // Apply ChronoShift speed modifiers
+    if (ChronoShift.active) {
+        effectiveSpeed /= getChronoShiftSpeedModifier();
     }
 
     // Logic updates happen at dynamic intervals (game speed)
@@ -4973,16 +5344,23 @@ function updateLogic() {
             else if (head.x >= tileCount) head.x = 0;
             if (head.y < 0) head.y = tileCount - 1;
             else if (head.y >= tileCount) head.y = 0;
-        } else {
+        } else if (ChronoShift.active && checkChronoShiftCollision(head.x, head.y)) {
+            // ChronoShift uses its own collision handling (for invincibility)
+            triggerGameOver();
+            return;
+        } else if (!ChronoShift.active) {
             triggerGameOver();
             return;
         }
     }
-    
+
     // 2. Collision Check - Self
     // 9193 (isCheater) can safely pass through its own segments
     // SHIELD and GHOST power-ups also disable self-collision
-    const selfCollisionDisabled = profile.isCheater || (activePowerUp && (activePowerUp.id === 'shield' || activePowerUp.id === 'ghost'));
+    // ChronoShift invincibility after rewind also disables self-collision
+    const selfCollisionDisabled = profile.isCheater ||
+                                (activePowerUp && (activePowerUp.id === 'shield' || activePowerUp.id === 'ghost')) ||
+                                (ChronoShift.active && ChronoShift.invincibilityTimer > 0);
     if (!selfCollisionDisabled && (dx !== 0 || dy !== 0)) {
         for (let i = 0; i < snake.length; i++) {
             if (head.x === snake[i].x && head.y === snake[i].y) {
@@ -4993,8 +5371,13 @@ function updateLogic() {
     }
     
     // Move Head Forward
-    snake.unshift(head); 
-    
+    snake.unshift(head);
+
+    // ════ REPLAY SYSTEM: Record frame ════
+    if (typeof ReplaySystem !== 'undefined' && isPlaying && !ReplaySystem.isReplaying) {
+        ReplaySystem.recordFrame(snake, food, score, dx, dy);
+    }
+
     // 3. Collision Check - Food
     if (head.x === food.x && head.y === food.y) {
         // Handle Breach mode food collision
@@ -5012,6 +5395,11 @@ function updateLogic() {
         // Challenge progress tracking
         if (typeof ChallengeManager !== 'undefined') {
             ChallengeManager.onFoodCollected(1);
+        }
+
+        // Achievement progress tracking
+        if (typeof AchievementManager !== 'undefined') {
+            AchievementManager.onFoodCollected();
         }
 
         // Reset consecutive deaths counter (survived and ate food)
@@ -5046,7 +5434,10 @@ function updateLogic() {
         }
 
         burstParticles(food.x, food.y);
-        placeFood();
+        // ChronoShift: Suppress food spawn during fast-forward
+        if (!ChronoShift.active || !ChronoShift.fastForwardActive) {
+            placeFood();
+        }
         
         // 9193 keeps fixed speed, normal snakes accelerate
         if (!profile.isCheater) {
@@ -5128,17 +5519,28 @@ function updateLogic() {
         powerUpFood = null;
     }
 
+    // Time Orb collision check (ChronoShift mode)
+    if (ChronoShift.active) {
+        checkTimeOrbCollision(head.x, head.y);
+    }
+
     // Expire power-up if time is up
     if (activePowerUp && Date.now() > powerUpEndTime) {
         deactivatePowerUp();
     }
-        // Pop Tail if we didn't eat
-        // 9193 never grows past 9
-        if (profile.isCheater && snake.length > 9) {
-            snake.pop();
-        } else if (!profile.isCheater) {
-            snake.pop();
-        }
+
+    // Push current state to ChronoShift history buffer
+    if (ChronoShift.active) {
+        pushToHistoryBuffer();
+    }
+
+    // Pop Tail if we didn't eat
+    // 9193 never grows past 9
+    if (profile.isCheater && snake.length > 9) {
+        snake.pop();
+    } else if (!profile.isCheater) {
+        snake.pop();
+    }
 }
 
 // Draw the static grid
@@ -5222,6 +5624,17 @@ function draw() {
         return;
     }
 
+    // Fill Background
+    ctx.fillStyle = colors.bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // ChronoShift mode: Draw temporal effects first (background layer)
+    if (ChronoShift.active) {
+        const time = Date.now();
+        drawChronoShift(ctx, time);
+    }
+
+    // Character shifting effect (Spectrum etc.)
     const profile = snakeProfiles[selectedProfileIndex];
     if (profile.isShifting && !profile.locked) {
         const time = Date.now() / 15;
@@ -5232,10 +5645,6 @@ function draw() {
         document.documentElement.style.setProperty('--snake-color', colors.snakeBody);
         document.documentElement.style.setProperty('--snake-glow', `0 0 10px ${colors.snakeBody}, 0 0 20px ${colors.snakeBody}`);
     }
-
-    // Fill Background
-    ctx.fillStyle = colors.bg;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     drawGrid();
     drawPowerUpIndicator();
@@ -6436,6 +6845,11 @@ function startGame() {
     // Start speedrun tracking for Characters 31-40
     startSpeedrunTracking(currentDifficultyLabel, 'standard');
 
+    // Start achievement tracking for this run
+    if (typeof AchievementManager !== 'undefined') {
+        AchievementManager.startRun('standard');
+    }
+
     initGrid();
     lastRenderTime = performance.now();
     startMusic();
@@ -6445,6 +6859,12 @@ function triggerGameOver() {
     isPlaying = false;
     isPaused = false;
     stopMusic();
+
+    // ChronoShift: End run and calculate bonuses before death sound
+    if (ChronoShift.active) {
+        endChronoShiftRun();
+    }
+
     playDeathSound();
 
     // ════ Secret Character Unlock Tracking ════
@@ -6518,21 +6938,60 @@ function triggerGameOver() {
             snakeLength: snake.length,
             tickSpeed: currentSpeed,
             characterId: snakeProfiles[selectedProfileIndex]?.id || 'neon',
-            mode: 'standard'
+            mode: ChronoShift.active ? 'chronoshift' : 'standard'
         });
     }
 
     // Challenge progress tracking
     if (typeof ChallengeManager !== 'undefined') {
-        ChallengeManager.onGameEnded('standard', score, foodEaten, snake.length, currentDifficultyLabel);
+        ChallengeManager.onGameEnded(ChronoShift.active ? 'chronoshift' : 'standard', score, foodEaten, snake.length, currentDifficultyLabel);
         ChallengeManager.onFoodCollected(foodEaten);
-        ChallengeManager.onScoreReached(score, 'standard');
+        ChallengeManager.onScoreReached(score, ChronoShift.active ? 'chronoshift' : 'standard');
+    }
+
+    // Achievement progress tracking
+    if (typeof AchievementManager !== 'undefined') {
+        AchievementManager.onGameEnded(ChronoShift.active ? 'chronoshift' : 'standard', score, currentDifficultyLabel);
     }
 
     // Season points tracking for meta-progression
     if (score > 0) {
         addSeasonPoints(score);
         checkTitleUnlocks(score);
+    }
+
+    // ════ REPLAY SYSTEM: Save run and show copy button ════
+    if (typeof ReplaySystem !== 'undefined' && ReplaySystem.currentRun) {
+        const replayCode = ReplaySystem.saveRun(score);
+        if (replayCode) {
+            // Show copy replay button on game over screen
+            const container = document.getElementById('replay-code-container');
+            if (container) {
+                container.innerHTML = `
+                    <button id="btn-copy-replay" class="btn-menu btn-secondary" style="border-color: #ffd700; color: #ffd700; width: 100%; font-size: 0.85rem; padding: 10px;">
+                        📋 COPY REPLAY CODE
+                    </button>
+                `;
+                document.getElementById('btn-copy-replay')?.addEventListener('click', () => {
+                    navigator.clipboard.writeText(replayCode).then(() => {
+                        // Show success feedback
+                        const btn = document.getElementById('btn-copy-replay');
+                        if (btn) {
+                            btn.textContent = '✓ COPIED!';
+                            setTimeout(() => {
+                                if (btn) btn.textContent = '📋 COPY REPLAY CODE';
+                            }, 2000);
+                        }
+                    }).catch(() => {
+                        // Fallback: show in prompt
+                        prompt('Share this replay code:', replayCode);
+                    });
+                });
+            }
+
+            // Store code globally for share functionality
+            window.currentReplayCode = replayCode;
+        }
     }
 
     // ════ TIME-BASED UNLOCK CHECKS (Quicksilver, Photon Dash) ════
@@ -6563,22 +7022,25 @@ function triggerGameOver() {
         checkVariantUnlocks(currentChar.id, 1);
     }
 
-    // Check if this score qualifies for leaderboard
+    // Check if this score qualifies for leaderboard (use ChronoShift-specific leaderboard if active)
     const profile = snakeProfiles[selectedProfileIndex];
-    
+    const lbDifficulty = currentDifficultyLabel;
+    const isChronoLB = ChronoShift.active;
+
     setTimeout(() => {
-        if (isHighScore(currentDifficultyLabel, score)) {
+        if (isHighScore(lbDifficulty, score)) {
             if (profile.isCheater) {
                 // 9193 auto-submits as CTR in yellow
-                addHighScore(currentDifficultyLabel, 'CTR', score, true);
+                addHighScore(lbDifficulty, 'CTR', score, true);
                 gameOverScreen.classList.remove('hidden');
             } else {
                 // Show initials entry
                 isEnteringInitials = true;
                 initialsChars = [0, 0, 0];
                 initialsSlot = 0;
-                pendingHighScoreDiff = currentDifficultyLabel;
+                pendingHighScoreDiff = lbDifficulty;
                 pendingHighScoreValue = score;
+                pendingHighScoreIsChrono = isChronoLB;
                 updateInitialsDisplay();
                 document.getElementById('initials-score').textContent = score;
                 initialsScreen.classList.remove('hidden');
@@ -6600,6 +7062,18 @@ function useMercy() {
     // Deactivate any active power-up
     deactivatePowerUp();
 
+    // ChronoShift: Reset temporal abilities on mercy
+    if (ChronoShift.active) {
+        ChronoShift.slowMoActive = false;
+        ChronoShift.fastForwardActive = false;
+        ChronoShift.rewindInProgress = false;
+        ChronoShift.historyBuffer = []; // Clear history on mercy
+        ChronoShift.invincibilityTimer = 500; // Brief invincibility
+        ChronoShift.survivalBonusTimer = 0;
+        ChronoShift.survivalBonusAwarded = true;
+        updateChronoHUD();
+    }
+
     // Reset snake to starting length (3 segments), keep head position
     const headX = snake[0].x;
     const headY = snake[0].y;
@@ -6614,6 +7088,11 @@ function useMercy() {
 
     // Play mercy activate sound (Session 21: Audio Expansion)
     serpentineAudio.playSFX('mercy_activate');
+
+    // Achievement tracking: track mercy usage
+    if (typeof AchievementManager !== 'undefined') {
+        AchievementManager.onMercyUsed();
+    }
 
     // Resume gameplay
     hideAllMenus();
@@ -6633,7 +7112,7 @@ function updateInitialsDisplay() {
 
 function submitInitials() {
     const initials = initialsChars.map(i => ALPHABET[i] || ' ').join('');
-    addHighScore(pendingHighScoreDiff, initials, pendingHighScoreValue, false);
+    addHighScore(pendingHighScoreDiff, initials, pendingHighScoreValue, false, pendingHighScoreIsChrono);
     isEnteringInitials = false;
     hideAllMenus();
     gameOverScreen.classList.remove('hidden');
@@ -6731,6 +7210,7 @@ const DEFAULT_SETTINGS = {
     screenShake: true,
     particles: 'HIGH',
     fullscreen: false,
+    batterySaver: false,
     keyboardScheme: 'WASD',
     touchControls: true,
     swipeSensitivity: 'MEDIUM',
@@ -6805,6 +7285,71 @@ function applyScanlines(enabled) {
     if (w) w.classList.toggle('no-scanlines', !enabled);
 }
 
+function applyBatterySaver(enabled) {
+    document.body.classList.toggle('battery-saver', enabled);
+    if (enabled) {
+        MobileOptimizer.maxParticles = 30;
+        MobileOptimizer.targetFPS = 30;
+    } else {
+        MobileOptimizer.maxParticles = MobileOptimizer.isLowEnd ? 50 : 200;
+        MobileOptimizer.targetFPS = 60;
+    }
+}
+
+// Keyboard Scheme Application - updates key bindings based on selected scheme
+function applyKeyboardScheme(scheme) {
+    switch (scheme) {
+        case 'WASD':
+            settings.keyBindings = {
+                UP: ['ArrowUp', 'w', 'W'],
+                DOWN: ['ArrowDown', 's', 'S'],
+                LEFT: ['ArrowLeft', 'a', 'A'],
+                RIGHT: ['ArrowRight', 'd', 'D'],
+                PAUSE: ['Escape']
+            };
+            break;
+        case 'ARROWS':
+            settings.keyBindings = {
+                UP: ['ArrowUp'],
+                DOWN: ['ArrowDown'],
+                LEFT: ['ArrowLeft'],
+                RIGHT: ['ArrowRight'],
+                PAUSE: ['Escape']
+            };
+            break;
+        case 'CUSTOM':
+            // CUSTOM - keep existing bindings, user can remap
+            break;
+    }
+    saveSettings();
+}
+
+// Swipe Sensitivity - updates the deadzone based on sensitivity
+function applySwipeSensitivity(sensitivity) {
+    switch (sensitivity) {
+        case 'LOW': MobileOptimizer.touchSwipeDeadzone = 50; break;
+        case 'MEDIUM': MobileOptimizer.touchSwipeDeadzone = 30; break;
+        case 'HIGH': MobileOptimizer.touchSwipeDeadzone = 15; break;
+        default: MobileOptimizer.touchSwipeDeadzone = 30;
+    }
+    saveSettings();
+}
+
+// Get action for a key code - checks against current keyBindings
+function getActionForKey(keyCode) {
+    for (const [action, keys] of Object.entries(settings.keyBindings)) {
+        if (keys.includes(keyCode)) {
+            return action;
+        }
+    }
+    return null;
+}
+
+// Update input handling to use dynamic key bindings
+function updateInputHandlingForScheme() {
+    // This will be called to process direction changes using keyBindings
+}
+
 function applySettingChange(setting, value) {
     switch (setting) {
         case 'scanlines': applyScanlines(value); break;
@@ -6815,8 +7360,11 @@ function applySettingChange(setting, value) {
             if (value) { (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullScreen)?.call(document.documentElement); }
             else { (document.exitFullscreen || document.webkitCancelFullScreen)?.call(document); }
             break;
+        case 'batterySaver': applyBatterySaver(value); break;
         case 'sfxVolume': serpentineAudio.setSFXVolume(value); break;
         case 'musicVolume': serpentineAudio.setMusicVolume(value); break;
+        case 'keyboardScheme': applyKeyboardScheme(value); break;
+        case 'swipeSensitivity': applySwipeSensitivity(value); break;
     }
 }
 
@@ -6845,6 +7393,10 @@ function initSettingsUI() {
     applyReducedMotion(settings.reducedMotion);
     applyHighContrast(settings.highContrast);
     applyScanlines(settings.scanlines);
+    applyBatterySaver(settings.batterySaver);
+    // Apply keyboard scheme and swipe sensitivity on init
+    applyKeyboardScheme(settings.keyboardScheme);
+    applySwipeSensitivity(settings.swipeSensitivity);
 }
 
 function setupToggleHandlers() {
@@ -7167,25 +7719,20 @@ window.addEventListener('keydown', e => {
     const activeDx = pendingDirection ? pendingDirection.dx : dx;
     const activeDy = pendingDirection ? pendingDirection.dy : dy;
 
-    switch (e.key) {
-        case 'ArrowUp':
-        case 'w':
-        case 'W':
+    // Check key against dynamic keyBindings
+    const action = getActionForKey(e.code) || getActionForKey(e.key);
+
+    switch (action) {
+        case 'UP':
             if (activeDy !== 1) pendingDirection = { dx: 0, dy: -1 };
             break;
-        case 'ArrowDown':
-        case 's':
-        case 'S':
+        case 'DOWN':
             if (activeDy !== -1) pendingDirection = { dx: 0, dy: 1 };
             break;
-        case 'ArrowLeft':
-        case 'a':
-        case 'A':
+        case 'LEFT':
             if (activeDx !== 1) pendingDirection = { dx: -1, dy: 0 };
             break;
-        case 'ArrowRight':
-        case 'd':
-        case 'D':
+        case 'RIGHT':
             if (activeDx !== -1) pendingDirection = { dx: 1, dy: 0 };
             break;
     }
@@ -7213,8 +7760,8 @@ canvas.addEventListener('touchend', e => {
     let dxTouch = touchEndX - touchStartX;
     let dyTouch = touchEndY - touchStartY;
 
-    // Use configurable deadzone from SwipeController (default 30px)
-    const deadzone = SwipeController.deadzone;
+    // Use configurable deadzone from MobileOptimizer (respects swipe sensitivity setting)
+    const deadzone = MobileOptimizer.touchSwipeDeadzone;
     if (Math.abs(dxTouch) < deadzone && Math.abs(dyTouch) < deadzone) return;
 
     const activeDx = pendingDirection ? pendingDirection.dx : dx;
@@ -7354,6 +7901,21 @@ document.getElementById('btn-profile-menu')?.addEventListener('click', () => {
     showProfileScreen();
 });
 
+document.getElementById('btn-achievements-menu')?.addEventListener('click', () => {
+    hideAllMenus();
+    if (typeof AchievementManager !== 'undefined') {
+        AchievementManager.showAchievementsScreen();
+    } else {
+        document.getElementById('achievements-screen')?.classList.remove('hidden');
+    }
+});
+
+document.getElementById('btn-back-achievements')?.addEventListener('click', () => {
+    hideAllMenus();
+    mainMenu.classList.remove('hidden');
+    document.getElementById('btn-achievements-menu')?.focus();
+});
+
 document.getElementById('btn-back-profile')?.addEventListener('click', () => {
     hideAllMenus();
     mainMenu.classList.remove('hidden');
@@ -7463,6 +8025,18 @@ document.getElementById('btn-back-leaderboard').addEventListener('click', () => 
 });
 
 // Leaderboard tab switching
+let currentLeaderboardMode = 'standard'; // standard or chronoshift
+
+document.querySelectorAll('.btn-lb-mode-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.btn-lb-mode-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentLeaderboardMode = tab.dataset.mode;
+        // Default to medium difficulty when switching modes
+        renderLeaderboard('medium');
+    });
+});
+
 document.querySelectorAll('.btn-lb-tab').forEach(tab => {
     tab.addEventListener('click', () => {
         renderLeaderboard(tab.dataset.diff);
@@ -8118,16 +8692,23 @@ document.getElementById('btn-pause-controls').addEventListener('click', () => {
 document.getElementById('btn-pause-quit').addEventListener('click', () => {
     isPaused = false; 
     hideAllMenus(); 
-    triggerGameOver(); 
+    triggerGameOver();
     startMenuMusic(); // Immediate return of atmosphere
 });
 
-// Initialization
+// Initialization - Check for tutorial on first run
 document.getElementById('btn-initialize').addEventListener('click', () => {
     hideAllMenus();
-    mainMenu.classList.remove('hidden');
-    startMenuMusic();
-    document.getElementById('btn-play-menu').focus();
+
+    // Check if tutorial should run (first time player)
+    if (typeof TutorialSystem !== 'undefined' && TutorialSystem.shouldRunTutorial()) {
+        TutorialSystem.startTutorial();
+    } else {
+        // Skip tutorial, go straight to main menu
+        mainMenu.classList.remove('hidden');
+        startMenuMusic();
+        document.getElementById('btn-play-menu').focus();
+    }
 });
 
 // ── Save System v2 UI Bindings ──────────────────────────────────────────────
@@ -8157,15 +8738,27 @@ document.getElementById('import-file-input')?.addEventListener('change', (e) => 
             return;
         }
 
-        if (typeof saveManager !== 'undefined') {
-            const result = saveManager.importProfile(json);
-            if (result.success) {
-                showUnlockPopup(`PROFILE IMPORTED\nGames: ${result.stats.gamesPlayed} | Chars: ${result.stats.characters}`, '#00ffcc');
-                // Reload the page to reflect all changes
-                setTimeout(() => location.reload(), 2000);
-            } else {
-                showUnlockPopup('IMPORT FAILED\n' + (result.error || 'Unknown error'), '#ff0055');
+        if (typeof saveManager !== 'undefined' && saveManager) {
+            // First try to preview
+            const previewResult = saveManager.previewImport(json);
+
+            if (!previewResult.success) {
+                showUnlockPopup('IMPORT FAILED\n' + (previewResult.error || 'Unknown error'), '#ff0055');
+                return;
             }
+
+            // Show preview modal
+            saveManager._showImportPreview(previewResult.preview, json, () => {
+                // User confirmed - apply import
+                const result = saveManager._applyImport(json);
+                if (result.success) {
+                    showUnlockPopup(`PROFILE IMPORTED\nGames: ${result.stats.gamesPlayed} | Chars: ${result.stats.characters}`, '#00ffcc');
+                    // Reload the page to reflect all changes
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    showUnlockPopup('IMPORT FAILED\n' + (result.error || 'Unknown error'), '#ff0055');
+                }
+            });
         }
     };
     reader.onerror = () => {
@@ -9075,6 +9668,12 @@ GridWarfare.endMatch = function(winner) {
         ChallengeManager.onGameEnded('grid', this.players[1].score, 0, this.players[1].snake.length, this.aiDifficulty);
     }
 
+    // Achievement progress tracking
+    if (typeof AchievementManager !== 'undefined' && winner === 1) {
+        // Track total wins (this.players[1].wins is set to 5 when match won)
+        AchievementManager.onGridWarfareWin(this.players[1].wins);
+    }
+
     // Show match end screen
     document.getElementById('grid-warfare-hud')?.remove();
 
@@ -9561,16 +10160,20 @@ document.getElementById('btn-chronoshift')?.addEventListener('click', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// CHRONOSHIFT MODE (Placeholder - implemented separately)
+// CHRONOSHIFT MODE - Integrated via chronoshift_impl.js
 // ═══════════════════════════════════════════════════════════════════════════
 
-function startChronoMode(difficulty) {
-    // ChronoShift would be implemented here
-    // For now, fall back to standard game
-    const diffMap = { easy: 180, medium: 120, hard: 80, insane: 50 };
-    currentDifficultySpeed = diffMap[difficulty] || 120;
-    currentDifficultyLabel = difficulty;
-    startGame();
+function startChronoShiftGame() {
+    // Initialize ChronoShift mode
+    initChronoShift(currentDifficultyLabel);
+
+    // Initialize grid with standard snake
+    initGrid();
+
+    // Sync the game state with ChronoShift
+    lastRenderTime = performance.now();
+    startMusic();
+    isPlaying = true;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -11515,3 +12118,54 @@ document.getElementById("btn-initialize").focus();
 updateProfileStyle();
 initGrid();
 window.requestAnimationFrame(main);
+
+// ── Replay Code Paste Input ─────────────────────────────────────────────────
+document.getElementById('replay-code-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const code = document.getElementById('replay-code-input')?.value?.trim();
+        if (code && typeof ReplaySystem !== 'undefined') {
+            if (ReplaySystem.startCinematicReplay(code, () => {
+                // On replay complete, show main menu
+                hideAllMenus();
+                mainMenu.classList.remove('hidden');
+            })) {
+                // Replay started, hide main menu
+                document.getElementById('replay-paste-section').style.display = 'none';
+                playMenuSelectSound();
+            } else {
+                showNotification('INVALID REPLAY CODE', '#ff0055');
+            }
+        }
+    }
+});
+
+document.getElementById('btn-load-replay')?.addEventListener('click', () => {
+    const input = document.getElementById('replay-code-input');
+    if (input) {
+        const code = input.value?.trim();
+        if (code && typeof ReplaySystem !== 'undefined') {
+            if (ReplaySystem.startCinematicReplay(code, () => {
+                hideAllMenus();
+                mainMenu.classList.remove('hidden');
+            })) {
+                document.getElementById('replay-paste-section').style.display = 'none';
+                playMenuSelectSound();
+            } else {
+                showNotification('INVALID REPLAY CODE', '#ff0055');
+            }
+        }
+    }
+});
+
+// Show replay input when main menu is shown (if there's a code in clipboard)
+const replayInputSection = document.getElementById('replay-paste-section');
+if (replayInputSection) {
+    const mainMenuObserver = new MutationObserver((mutations) => {
+        const mainMenu = document.getElementById('main-menu');
+        if (mainMenu && !mainMenu.classList.contains('hidden')) {
+            // Main menu is visible, show replay input
+            replayInputSection.style.display = 'block';
+        }
+    });
+    mainMenuObserver.observe(document.getElementById('main-menu'), { attributes: true, attributeFilter: ['class'] });
+}
