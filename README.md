@@ -149,7 +149,7 @@ open index.html
 
 ---
 
-### 6. NEURAL FIT 🧠
+### 6. Trace Protocol 🧠
 ```
 ┌─────────────────────────────────────┐
 │  ╭─────────────────────────────╮    │
@@ -639,7 +639,7 @@ Earn 10 additional soundtrack tracks through season tiers.
 For deep-dives into the game's architecture and features, refer to:
 
 - 🐍 **[Field Manual](FIELD_MANUAL.md)**: Full character lore, unlock guides, and secret system protocols.
-- 🧪 **[Concepts Lab](concepts.md)**: Detailed mechanics for advanced modes like Sentinel Breach and Neural Fit.
+- 🧪 **[Concepts Lab](concepts.md)**: Detailed mechanics for advanced modes like Sentinel Breach and Trace Protocol.
 - 🎵 **[Audio Manifest](AUDIO_MANIFEST.md)**: Full breakdown of procedural synth tracks and tactical sound effects.
 - ⚖️ **[Legal Audit](LEGAL_OBSERVATIONS.md)**: Full IP review of the "Zero-Asset" procedural architecture.
 
@@ -708,7 +708,7 @@ SOFTWARE.
 ║                         SERPENTINE OS                              ║
 ╠═══════════════════════════════════════════════════════════════════╣
 ║  Game Modes:     6 (Standard, ChronoShift, Sentinel, Grid,       ║
-║                       Breach, Neural Fit)                          ║
+║                       Breach, Trace Protocol)                          ║
 ║  Characters:     49 (5 default + 44 unlockable/secret)          ║
 ║  Power-ups:       5                                                ║
 ║  Achievements:    20+ across 6 categories                          ║

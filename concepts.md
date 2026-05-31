@@ -311,7 +311,7 @@ Each **Grid Warfare** mode behaves differently across the two primary architectu
 #### 🛒 Shop Unlock: `25,000,000 PTS`
 *(Note: The flagship Multiplayer/AI Competitive mode of Serpentine.)*
 
-### 🧩 NEURAL FIT (Inspired by Shape-Matching)
+### 🧩 Trace Protocol (Inspired by Shape-Matching)
 *A logic-based reflex puzzle where your body is the missing piece.*
 
 - **The Hook:** Falling digital archetypes (blocks) must be matched by the exact geometry of your snake.
@@ -320,6 +320,6 @@ Each **Grid Warfare** mode behaves differently across the two primary architectu
     - **The Fit:** Your snake is locked at 5 segments. You must maneuver into the correct orientation and **shape your body** to match the falling block exactly before it reaches the bottom.
     - **Success:** Matching clearing the block and awards massive points.
     - **Failure:** If the block lands and you haven't matched its shape/position, you lose a "Sync Charge."
-- **Hard Difficulty:** Unlocks "Advanced Neural Fit" with **7-segment** complex shapes.
+- **Hard Difficulty:** Unlocks "Advanced Trace Protocol" with **7-segment** complex shapes.
 - **The Transformation:** This shifts the focus from "clearing lines" to "geometric mimicry." The challenge is in the movement and self-intersection prevention to form the shape. It’s a "Shape-Sync" puzzle, not a Tetris clone.
 - **Shop Unlock:** `10,000,000 PTS`.

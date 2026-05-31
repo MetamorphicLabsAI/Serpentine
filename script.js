@@ -2243,7 +2243,7 @@ const ChallengeManager = {
         { id: 'chrono_survive_3m', type: 'chrono_survive', minutes: 3, description: 'Survive 3 minutes in ChronoShift', target: 180, modes: ['chronoshift'] },
         { id: 'chrono_rewinds_10', type: 'chrono_rewinds', count: 10, description: 'Use rewind 10 times in ChronoShift', target: 10, modes: ['chronoshift'] },
         { id: 'breach_score_2000', type: 'breach_score', score: 2000, description: 'Score 2,000 in Firewall Breach', target: 2000, modes: ['breach'] },
-        { id: 'neural_score_1000', type: 'neural_score', score: 1000, description: 'Score 1,000 in Neural Fit', target: 1000, modes: ['neural'] },
+        { id: 'neural_score_1000', type: 'neural_score', score: 1000, description: 'Score 1,000 in Trace Protocol', target: 1000, modes: ['neural'] },
         { id: 'sentinel_kills_50', type: 'sentinel_kills', count: 50, description: 'Destroy 50 Sentinels', target: 50, modes: ['sentinel'] },
         { id: 'win_insane_2', type: 'win_insane', count: 2, description: 'Win on Insane difficulty twice', target: 2 },
         { id: 'games_played_20', type: 'games_played', count: 20, description: 'Play 20 games total', target: 20 },
@@ -4710,7 +4710,7 @@ function runGridWarfareDemo(ctx, t, elapsed) {
     ctx.fillText('P2 (AI)', 490, 25);
 }
 
-// ─── NEURAL FIT DEMO ───
+// ─── Trace Protocol DEMO ───
 function runNeuralFitDemo(ctx, t, elapsed) {
     const state = demoState;
     if (!state.drillPath) {
@@ -8243,7 +8243,7 @@ document.getElementById('btn-breach')?.addEventListener('click', () => {
 });
 
 document.getElementById('btn-neural')?.addEventListener('click', () => {
-    // Neural Fit has its own drill selection, not difficulty selection
+    // Trace Protocol has its own drill selection, not difficulty selection
     loadNeuralUnlockProgress();
     hideAllMenus();
     showNeuralDrillSelect();
@@ -10142,21 +10142,21 @@ document.getElementById('btn-breach')?.addEventListener('click', () => {
     document.getElementById('btn-medium').focus();
 });
 
-// Neural Fit mode button
+// Trace Protocol mode button
 document.getElementById('btn-neural')?.addEventListener('click', () => {
     selectedMode = 'neural';
     loadNeuralUnlockProgress();
     showNeuralDrillSelect();
 });
 
-// Neural Fit drill selection back button
+// Trace Protocol drill selection back button
 document.getElementById('btn-back-neural')?.addEventListener('click', () => {
     hideAllMenus();
     modeSelect.classList.remove('hidden');
     document.getElementById('btn-neural').focus();
 });
 
-// Neural Fit results buttons
+// Trace Protocol results buttons
 document.getElementById('btn-neural-retry')?.addEventListener('click', () => {
     if (NeuralFit.pendingRetryDrill) {
         hideAllMenus();
@@ -10201,7 +10201,7 @@ function startChronoShiftGame() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// NEURAL FIT DRILL DATA (from NEURAL_FIT.md spec)
+// Trace Protocol DRILL DATA (from NEURAL_FIT.md spec)
 // ═══════════════════════════════════════════════════════════════════════════
 
 // Drill definitions (also in firewall_neural_modes.js but referenced here)
@@ -10590,7 +10590,7 @@ function triggerBreachGameOver() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// NEURAL FIT MODE
+// Trace Protocol MODE
 // ═══════════════════════════════════════════════════════════════════════════
 
 const NeuralFit = {
@@ -10617,7 +10617,7 @@ const NeuralFit = {
     pendingRetryDrill: null
 };
 
-// Neural Fit path generation
+// Trace Protocol path generation
 function generateNeuralPath(type) {
     const path = [];
     const cx = Math.floor(tileCount / 2);
@@ -10683,7 +10683,7 @@ function generateNeuralPath(type) {
     return path.slice(0, 30);
 }
 
-// Neural Fit unlock progress
+// Trace Protocol unlock progress
 function loadNeuralUnlockProgress() {
     const unlocked = JSON.parse(localStorage.getItem('serpentineUnlocked_neuralfit_drills') || '["warmup", "figure8"]');
     const bestScores = JSON.parse(localStorage.getItem('serpentineNeural_bestScores') || '{}');
@@ -10719,7 +10719,7 @@ function saveNeuralUnlockProgress() {
     localStorage.setItem('serpentineNeural_bestAccuracy', JSON.stringify(bestAccuracy));
 }
 
-// Neural Fit drill selection UI
+// Trace Protocol drill selection UI
 function showNeuralDrillSelect() {
     loadNeuralUnlockProgress();
     hideAllMenus();
@@ -10784,7 +10784,7 @@ function showNeuralDrillSelect() {
     document.getElementById('neural-select').classList.remove('hidden');
 }
 
-// Start Neural Fit drill
+// Start Trace Protocol drill
 function startNeuralDrill(drillId) {
     hideAllMenus();
 
@@ -10834,7 +10834,7 @@ function startNeuralDrill(drillId) {
     lastRenderTime = performance.now();
 }
 
-// Neural Fit audio
+// Trace Protocol audio
 function initNeuralAudio() {
     if (NeuralFit.padOsc) {
         NeuralFit.padOsc.stop();
@@ -10875,7 +10875,7 @@ function stopNeuralAudio() {
     NeuralFit.padGain = null;
 }
 
-// Neural Fit sounds
+// Trace Protocol sounds
 function playNeuralHitSound(rating) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
 
@@ -10923,7 +10923,7 @@ function playNeuralComboSound() {
     });
 }
 
-// Neural Fit update
+// Trace Protocol update
 function updateNeuralLogic(deltaTime) {
     if (!NeuralFit.isActive || !isPlaying) return;
 
@@ -11005,7 +11005,7 @@ function getComboMultiplier() {
     return 1 + NeuralFit.combo * 0.1;
 }
 
-// Neural Fit end
+// Trace Protocol end
 function endNeuralDrill() {
     NeuralFit.isActive = false;
     isPlaying = false;
@@ -11095,7 +11095,7 @@ function showNeuralResults(drill, accuracy, badge, bonus) {
     document.getElementById('neural-results')?.classList.remove('hidden');
 }
 
-// Neural Fit rendering
+// Trace Protocol rendering
 function drawNeuralFit(time) {
     if (!NeuralFit.isActive) return;
 
@@ -11208,7 +11208,7 @@ function drawNeuralHUD(time) {
     ctx.restore();
 }
 
-// Neural Fit keyboard input
+// Trace Protocol keyboard input
 document.addEventListener('keydown', (e) => {
     if (!NeuralFit.isActive || !isPlaying) return;
 

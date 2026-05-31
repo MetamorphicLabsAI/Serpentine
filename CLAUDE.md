@@ -15,7 +15,7 @@ Phase 2: Mode Expansion (Sessions 5-12)
 ├── 2a: ChronoShift
 ├── 2b: Sentinel Breach
 ├── 2c: Grid Warfare
-└── 2d: Firewall Breach & Neural Fit
+└── 2d: Firewall Breach & Trace Protocol
 
 Phase 3: Content Depth (Sessions 13-20)
 ├── 3a: Characters 11-20

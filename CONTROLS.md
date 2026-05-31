@@ -12,7 +12,7 @@ Welcome to the complete control reference for Serpentine. This document covers e
 4. [Sentinel Breach Mode](#4-sentinel-breach-mode)
 5. [Grid Warfare Mode](#5-grid-warfare-mode)
 6. [Firewall Breach Mode](#6-firewall-breach-mode)
-7. [Neural Fit Mode](#7-neural-fit-mode)
+7. [Trace Protocol Mode](#7-neural-fit-mode)
 8. [Mobile Touch Controls](#8-mobile-touch-controls)
 9. [Menu Navigation](#9-menu-navigation)
 10. [Special Commands](#10-special-commands)
@@ -232,7 +232,7 @@ Shrinking arena survival - outpace the collapsing firewall.
 
 ---
 
-## 7. NEURAL FIT MODE
+## 7. Trace Protocol MODE
 
 Shape-matching reflex puzzle - match falling archetype patterns.
 
@@ -335,7 +335,7 @@ MAIN MENU
 │   │   ├── Sentinel Breach
 │   │   ├── Grid Warfare
 │   │   ├── Firewall Breach
-│   │   └── Neural Fit
+│   │   └── Trace Protocol
 │   └── Quick Play
 ├── [2] CHALLENGES
 ├── [3] OPERATOR PROFILE

@@ -1,4 +1,4 @@
-# NEURAL FIT — Mode Design Document
+# Trace Protocol — Mode Design Document
 > **Classification:** LEVEL 9 PROTOCOL
 > **Mode Type:** ENDURANCE / WELLNESS SIMULATION
 > **Canonical ID:** `neural_fit`
@@ -7,7 +7,7 @@
 
 ## 1. Concept & Vision
 
-NEURAL FIT reimagines Serpentine as a **neural exercise routine** — a calm, rhythmic game where the snake moves through a series of predetermined "drills" rather than hunting food freely. Each drill is a hand-crafted sequence of direction inputs that the player must mirror. A glowing **target trail** shows the path to follow; the player's snake must match it. Eating food is replaced by **hitting the correct poses** at the right time. The game is less about survival and more about **focus, precision, and flow state**.
+Trace Protocol reimagines Serpentine as a **neural exercise routine** — a calm, rhythmic game where the snake moves through a series of predetermined "drills" rather than hunting food freely. Each drill is a hand-crafted sequence of direction inputs that the player must mirror. A glowing **target trail** shows the path to follow; the player's snake must match it. Eating food is replaced by **hitting the correct poses** at the right time. The game is less about survival and more about **focus, precision, and flow state**.
 
 The tone is deliberately different from other modes: meditative music, soft colors, gentle particle effects. The snake is serene and fluid, not aggressive. This is the "chill" mode.
 
@@ -70,7 +70,7 @@ Drills are named, timed sequences of grid movements. A drill lasts 15–30 secon
 ```
 
 ### 3.2 Session Menu
-- The drill selection is the "character select" equivalent of NEURAL FIT.
+- The drill selection is the "character select" equivalent of Trace Protocol.
 - A list of drills is shown, each with:
   - **Name** (e.g., "Figure-8 Sweep")
   - **Duration** (e.g., "20s")
@@ -121,7 +121,7 @@ Drills are named, timed sequences of grid movements. A drill lasts 15–30 secon
 ### 5.1 Movement
 - **4-directional** (no diagonals) — WASD or Arrow Keys.
 - **Tick rate:** Fixed per drill (not player-settable). EASY drills: 200ms/tick. INSANE drills: 100ms/tick.
-- **Own-body collision:** Disabled in NEURAL FIT — player snakes follow the path and their own body is always behind them.
+- **Own-body collision:** Disabled in Trace Protocol — player snakes follow the path and their own body is always behind them.
 - **Wall collision:** If the drill path goes to a wall, the drill is designed to turn before hitting the wall. If the player hits a wall: **MISS** for the next cell.
 - **Reverse direction:** Not allowed (180° reversal = MISS).
 
@@ -161,7 +161,7 @@ Drills are named, timed sequences of grid movements. A drill lasts 15–30 secon
 | Drill end | Gentle bell fade (1200Hz, 800ms decay) |
 
 ### 6.3 Music Integration
-- NEURAL FIT background uses a **generative sequenced pad** rather than a looping track.
+- Trace Protocol background uses a **generative sequenced pad** rather than a looping track.
 - The pad's tempo matches the drill's tick rate.
 - BPM = 60000 / tick_rate_ms. EASY (200ms) = 50 BPM. HARD (120ms) = 83 BPM.
 
@@ -240,13 +240,13 @@ Warm Up (unlocked by default)
 
 ### 9.3 Shop Integration
 - **UNLOCKED BY:** Not available in the shop. Pure skill-based progression.
-- The shop item for NEURAL FIT mode itself (if it were a purchasable mode) costs **50,000 PTS**. But since progression is skill-gated, it starts unlocked.
+- The shop item for Trace Protocol mode itself (if it were a purchasable mode) costs **50,000 PTS**. But since progression is skill-gated, it starts unlocked.
 
 ---
 
 ## 10. Point Bank Interaction
 
-- Points earned in NEURAL FIT **DO** contribute to the Point Bank.
+- Points earned in Trace Protocol **DO** contribute to the Point Bank.
 - Each drill completion adds to `serpentineBank`.
 - This is the primary reward loop — practice drills → earn points → unlock shop items for other modes.
 
@@ -269,9 +269,9 @@ Each drill has its own inherent difficulty (tick rate):
 
 ## 12. Visual Theme: Calm Neon
 
-NEURAL FIT uses a distinct visual language compared to the other modes:
+Trace Protocol uses a distinct visual language compared to the other modes:
 
-| Element | Standard Mode | NEURAL FIT |
+| Element | Standard Mode | Trace Protocol |
 | :--- | :--- | :--- |
 | Background | `#050505` | `#050510` (slight blue tint) |
 | Grid opacity | `rgba(26,26,46,0.5)` | `rgba(26,26,46,0.25)` (subtler) |
@@ -295,7 +295,7 @@ NEURAL FIT uses a distinct visual language compared to the other modes:
   - HUD layer (DOM overlay).
 - **Input:** WASD / Arrow Keys, direction queued per tick.
 - **Timing:** `performance.now()` for precise hit detection vs. target path times.
-- **Collision:** No snake-to-snake collision in NEURAL FIT. Grid boundary checked but drill is designed to avoid walls.
+- **Collision:** No snake-to-snake collision in Trace Protocol. Grid boundary checked but drill is designed to avoid walls.
 - **Audio:** Web Audio API, single AudioContext, generative pad + event sounds.
 - **Persistence:** `serpentineLB_neural_[drillname]` for high scores; `serpentineUnlocked_neuralfit_drills` for drill unlock states.
 

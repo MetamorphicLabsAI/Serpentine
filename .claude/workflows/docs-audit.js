@@ -39,7 +39,7 @@ MISSION: Produce a comprehensive audit of what the game actually contains.
       - Sentinel Breach (wave defense)
       - Grid Warfare (2-player battle)
       - Firewall Breach (shrinking arena)
-      - Neural Fit (rhythm/path matching)
+      - Trace Protocol (rhythm/path matching)
       For each: What buttons launch it? What HTML screens exist? What JS logic runs it?
 
    B. CHARACTERS - Find ALL characters in snakeProfiles or character registry:
@@ -222,7 +222,7 @@ MUST COVER:
 - Keyboard controls for ChronoShift (QWER for time abilities)
 - Keyboard controls for Sentinel Breach
 - Keyboard controls for Grid Warfare
-- Keyboard controls for Neural Fit
+- Keyboard controls for Trace Protocol
 - Touch controls for mobile
 - Menu navigation
 - Pause/unpause
@@ -258,7 +258,7 @@ MODES COVERED:
 - Sentinel Breach
 - Grid Warfare
 - Firewall Breach
-- Neural Fit
+- Trace Protocol
 
 FORMAT: Deep dive markdown doc, use headers, lists, and clear explanations.
 

@@ -146,7 +146,7 @@ Points earned across all game sessions are accumulated into a global **Point Ban
 | Sector | Inventory |
 | :--- | :--- |
 | **SNAKES** | Includes `PRINCESS`, `ARTHROPOD`, and `KITE DRAGON`. |
-| **MODES** | Includes `CHRONOSHIFT`, `FIREWALL BREACH`, `SENTINEL BREACH`, `GRID WARFARE`, `NEURAL FIT`. All currently in testing/available status. |
+| **MODES** | Includes `CHRONOSHIFT`, `FIREWALL BREACH`, `SENTINEL BREACH`, `GRID WARFARE`, `Trace Protocol`. All currently in testing/available status. |
 | **OTHER** | Contains classified system hints/codes. |
 
 ### [SHOP DEMO MODE]
@@ -157,7 +157,7 @@ Each mode in the MODES shop has a **DEMO** button that plays a 15-second automat
 | **CHRONOSHIFT** | Snake auto-playing, chrono meter charging, SLOW-MO activation at ~5s, REWIND at ~10s with ghost trail and screen flash |
 | **SENTINEL BREACH** | Sentinels spawning from edges and closing in on center nexus, player snake coiling defensively |
 | **GRID WARFARE** | Two AI snakes (cyan vs magenta) battling over food, arena borders and center line |
-| **NEURAL FIT** | Ghost trail drill path with active target ring, player snake tracking a figure-8 pattern |
+| **Trace Protocol** | Ghost trail drill path with active target ring, player snake tracking a figure-8 pattern |
 | **FIREWALL BREACH** | Firewall pushing from top, breach pattern animating, snake eating to push it back |
 
 ### [OTHER INVENTORY]

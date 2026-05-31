@@ -44,7 +44,7 @@ The foundation is solid. The architecture (canvas rendering, Web Audio, localSto
 |-------|-------|----------|--------------|
 | **Phase 1** | Foundation Polish | 4 sessions | Tutorial, accessibility, save system v2, mobile polish |
 | **Phase 2** | Mode Expansion | 8 sessions | ChronoShift, Sentinel Breach, Firewall Breach |
-| **Phase 3** | Content Depth | 8 sessions | Grid Warfare, Neural Fit, 30 new characters |
+| **Phase 3** | Content Depth | 8 sessions | Grid Warfare, Trace Protocol, 30 new characters |
 | **Phase 4** | Polish & Systems | 6 sessions | Achievements, meta-progression, audio expansion, tutorial |
 
 **Total Estimated Development Time:** 26 focused sessions (~52 hours of coding)
@@ -114,7 +114,7 @@ The foundation is solid. The architecture (canvas rendering, Web Audio, localSto
 3. **No mobile optimization** — Touch controls exist but feel clunky; no mobile-specific layout
 4. **Save system v1 only** — No cloud save, no export/import, no profile system
 5. **No achievement system** — No meta-progression beyond character unlocks
-6. **Only 1 of 5 planned modes playable** — Standard is complete; ChronoShift, Sentinel Breach, Firewall Breach, Grid Warfare, Neural Fit are designed but not implemented
+6. **Only 1 of 5 planned modes playable** — Standard is complete; ChronoShift, Sentinel Breach, Firewall Breach, Grid Warfare, Trace Protocol are designed but not implemented
 
 **Audio Gaps**
 - Only 2 music tracks (game + menu)
@@ -347,10 +347,10 @@ const saveProfile = {
 - Session 5-6: ChronoShift ✅
 - Session 7-8: Sentinel Breach ✅
 - Session 9-10: Grid Warfare ✅
-- Session 11-12: Firewall Breach & Neural Fit ✅
+- Session 11-12: Firewall Breach & Trace Protocol ✅
 
 **Deliverables Implemented:**
-- All 6 game modes playable (Standard, ChronoShift, Sentinel Breach, Grid Warfare, Firewall Breach, Neural Fit)
+- All 6 game modes playable (Standard, ChronoShift, Sentinel Breach, Grid Warfare, Firewall Breach, Trace Protocol)
 - Chrono-Meter with Rewind, Slow-Mo, Fast-Forward, Temporal Pulse
 - Wave-based Sentinel Defense system with 4 enemy types
 - 2-player local multiplayer with AI opponent
@@ -529,7 +529,7 @@ const saveProfile = {
    - Wall border glow
    - Win pips (filled circles for wins out of 5)
 
-### Session 11-12: Firewall Breach & Neural Fit
+### Session 11-12: Firewall Breach & Trace Protocol
 
 **Firewall Breach** (Session 11)
 **Priority:** MEDIUM  
@@ -542,7 +542,7 @@ const saveProfile = {
 - Game over when playable space shrinks to nothing
 - Visual: Pulsing red glow, crackling particle static, alarm-drone audio
 
-**Neural Fit** (Session 12)
+**Trace Protocol** (Session 12)
 **Priority:** LOW (most complex, do after others)  
 **Reference:** `NEURAL_FIT.md` (fully designed document)
 
@@ -1227,7 +1227,7 @@ serpentine/
 │   ├── sentinel.js     # Sentinel Breach logic + waves
 │   ├── breach.js       # Firewall Breach logic
 │   ├── warfare.js      # Grid Warfare logic + AI
-│   └── neural.js       # Neural Fit logic + drills
+│   └── neural.js       # Trace Protocol logic + drills
 │
 ├── entities/
 │   ├── Snake.js        # Snake entity (handles all character rendering)
@@ -1570,7 +1570,7 @@ Session 9-10: Grid Warfare
              ├── Character select (2-player)
              └── Victory screen
              
-Session 11-12: Firewall Breach + Neural Fit
+Session 11-12: Firewall Breach + Trace Protocol
               (see Phase 2 description above)
 ```
 
@@ -1624,7 +1624,7 @@ Current Files (existing):
 ├── CHRONOSHIFT.md        ← ChronoShift design document
 ├── SENTINEL_BREACH.md    ← Sentinel Breach design document
 ├── GRID_WARFARE.md       ← Grid Warfare design document
-├── NEURAL_FIT.md         ← Neural Fit design document
+├── NEURAL_FIT.md         ← Trace Protocol design document
 ├── PRICING_STRATEGY.md   ← Commercial analysis
 ├── LEGAL_OBSERVATIONS.md ← IP review
 ├── LICENSE.md           ← FDG proprietary license
@@ -1660,7 +1660,7 @@ New Files (to create):
 | Sentinel Breach | Wave Defense | 4 levels | Coiling defense, wave combat | 2 |
 | Firewall Breach | Environmental | 4 levels | Shrinking arena | 1 |
 | Grid Warfare | Competitive | 4 levels | Two-player battle | 2 |
-| Neural Fit | Rhythm/Puzzle | 6 drills | Path matching, combo system | 2 |
+| Trace Protocol | Rhythm/Puzzle | 6 drills | Path matching, combo system | 2 |
 
 ### Character Unlock Methods
 | Method | Count | Examples |

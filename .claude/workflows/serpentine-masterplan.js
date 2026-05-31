@@ -4,7 +4,7 @@ export const meta = {
   phases: [
     { title: 'Audit', detail: 'Scout current codebase state' },
     { title: 'Phase1', detail: 'Foundation: Tutorial, Settings, Mobile, Save v2' },
-    { title: 'Phase 2', detail: 'Mode Expansion: ChronoShift, Sentinel, Grid Warfare, Breach, Neural Fit' },
+    { title: 'Phase 2', detail: 'Mode Expansion: ChronoShift, Sentinel, Grid Warfare, Breach, Trace Protocol' },
     { title: 'Phase 3', detail: 'Content: 30 new characters + Achievement System' },
     { title: 'Phase 4', detail: 'Polish: Audio, Meta-progression, Challenges, Replay, Final Polish' }
   ]
@@ -27,7 +27,7 @@ READ these files and produce a structured audit report:
 For each system, categorize status: IMPLEMENTED | PARTIAL | MISSING | DESIGNED_BUT_NOT_IMPLEMENTED
 
 AUDIT CHECKLIST:
-- Game modes: Which of Standard/ChronoShift/Sentinel Breach/Grid Warfare/Firewall Breach/Neural Fit are working?
+- Game modes: Which of Standard/ChronoShift/Sentinel Breach/Grid Warfare/Firewall Breach/Trace Protocol are working?
 - Characters: How many of the 40 are implemented? List each one found.
 - Audio: What tracks and SFX exist? Read the audio synthesis code.
 - UI screens: Which menus/screens exist (main menu, game over, leaderboard, shop, character select, settings)?
@@ -501,9 +501,9 @@ CONSTRAINTS:
 Output: Full implementation with file-level diffs. Mark each file changed with [FILE: filename] and show the code to add.
 `, { label: 'phase2:warfare', phase: 'Phase 2', isolation: 'worktree' }),
 
-  // Sessions 11-12: Firewall Breach + Neural Fit
+  // Sessions 11-12: Firewall Breach + Trace Protocol
   () => agent(`
-You are a senior game developer implementing Firewall Breach and Neural Fit modes for Serpentine.
+You are a senior game developer implementing Firewall Breach and Trace Protocol modes for Serpentine.
 Project: C:\\Users\\rickm\\Projects\\Serpentine
 Reference: NEURAL_FIT.md (fully designed document — READ THIS FIRST) and concepts.md Section "FIREWALL BREACH"
 
@@ -518,9 +518,9 @@ FIREWALL BREACH SPEC:
 - Separate leaderboard: serpentineLB_breach_[difficulty]
 - Audio: 20s pulsing alarm track
 
-TASK B: Implement Neural Fit mode.
+TASK B: Implement Trace Protocol mode.
 
-NEURAL FIT SPEC:
+Trace Protocol SPEC:
 - Pre-defined drill paths (ghost trail shows target path)
 - Player must match path with correct timing
 - Combo system: Perfect/Good/OK/Miss ratings
@@ -547,7 +547,7 @@ COMBO SYSTEM:
 CONSTRAINTS:
 - Both modes must be selectable from OS desktop
 - Must not break existing SVG filter/color blind support
-- Neural Fit must have clear path preview that doesn't obscure gameplay
+- Trace Protocol must have clear path preview that doesn't obscure gameplay
 - Firewall Breach visual effects must not cause performance issues
 
 Output: Full implementation with file-level diffs for both modes. Mark each file changed with [FILE: filename] and show the code to add.
@@ -1141,7 +1141,7 @@ const summary = {
     localStorageKeys: auditResult.localStorageKeys ? auditResult.localStorageKeys.length : 0
   },
   phase1: { sessions: 4, areas: ['Tutorial System', 'Settings& Accessibility', 'Mobile Optimization', 'Save System v2'] },
-  phase2: { sessions: 8, areas: ['ChronoShift', 'Sentinel Breach', 'Grid Warfare', 'Firewall Breach + Neural Fit'] },
+  phase2: { sessions: 8, areas: ['ChronoShift', 'Sentinel Breach', 'Grid Warfare', 'Firewall Breach + Trace Protocol'] },
   phase3: { sessions: 8, areas: ['Characters 11-20', 'Characters 21-30', 'Characters 31-40 + Skins', 'Achievement System'] },
   phase4: { sessions: 6, areas: ['Audio Expansion', 'Meta-progression', 'Daily/Weekly Challenges', 'Replay System + Final Polish'] },
   totalSessions: 26,

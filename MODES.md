@@ -11,7 +11,7 @@ Welcome to the complete guide for all game modes in Serpentine. Each mode offers
 3. [Sentinel Breach](#sentinel-breach)
 4. [Grid Warfare](#grid-warfare)
 5. [Firewall Breach](#firewall-breach)
-6. [Neural Fit](#neural-fit)
+6. [Trace Protocol](#neural-fit)
 
 ---
 
@@ -307,18 +307,18 @@ Main Menu > GAME MODES > FIREWALL BREACH
 
 ---
 
-## Neural Fit
+## Trace Protocol
 
 *Match the pattern. Sharpen your reflexes. Unlock your potential.*
 
 ### What Is It?
 
-Neural Fit is a shape-matching reflex puzzle mode. Archetype patterns fall from the top of the screen, and you must match them by guiding your snake into the corresponding configuration. It's a test of speed, accuracy, and pattern recognition.
+Trace Protocol is a shape-matching reflex puzzle mode. Archetype patterns fall from the top of the screen, and you must match them by guiding your snake into the corresponding configuration. It's a test of speed, accuracy, and pattern recognition.
 
 ### How to Launch
 
 ```
-Main Menu > GAME MODES > NEURAL FIT > Select Drill
+Main Menu > GAME MODES > Trace Protocol > Select Drill
 ```
 
 ### How You Win / Lose
@@ -377,7 +377,7 @@ Main Menu > GAME MODES > NEURAL FIT > Select Drill
 | Sentinel Breach | Wave Defense | Solo | Threat prioritization |
 | Grid Warfare | Battle | 1P vs AI / 2P local | Prediction & tactics |
 | Firewall Breach | Survival | Solo | Risk management |
-| Neural Fit | Reflex Puzzle | Solo | Speed & pattern recognition |
+| Trace Protocol | Reflex Puzzle | Solo | Speed & pattern recognition |
 
 ---
 
@@ -388,7 +388,7 @@ Not sure which mode to play? Here's a quick guide:
 - **New to Serpentine?** Start with **Standard Mode** on Easy to learn the basics.
 - **Want a challenge?** Try **Sentinel Breach** or **ChronoShift** for intense action.
 - **Competitive spirit?** **Grid Warfare** offers head-to-head local multiplayer.
-- **Puzzle lover?** **Neural Fit** tests your reflexes and pattern skills.
+- **Puzzle lover?** **Trace Protocol** tests your reflexes and pattern skills.
 - **Last-stand intensity?** **Firewall Breach** offers escalating pressure.
 
 ---
