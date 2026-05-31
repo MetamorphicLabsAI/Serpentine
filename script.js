@@ -3954,7 +3954,7 @@ function playMenuSelectSound() {
 }
 
 function playMenuBackSound() {
-    if (!audioCtx) return;
+    if (!audioCtx || audioCtx.state !== 'running') return;
     // Whooshing downward frequency shift
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -3970,8 +3970,7 @@ function playMenuBackSound() {
 }
 
 function playTone(freq, type, duration, vol = 0.1) {
-    if (!audioCtx) return;
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (!audioCtx || audioCtx.state !== 'running') return;
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     

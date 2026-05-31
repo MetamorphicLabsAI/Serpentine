@@ -102,9 +102,9 @@
          * Resume audio context if suspended
          */
         _ensureContext() {
-            if (this.ctx && this.ctx.state === 'suspended') {
-                this.ctx.resume();
-            }
+            // If context not ready, skip audio
+            if (!this.ctx || this.ctx.state !== 'running') return false;
+            return true;
         }
 
         // ─────────────────────────────────────────
@@ -141,7 +141,7 @@
          * @param {string} trackName - Track identifier
          */
         playTrack(trackName) {
-            this._ensureContext();
+            if (!this._ensureContext()) return;
 
             // Stop current track first
             this.stopTrack();
@@ -206,7 +206,7 @@
          * @param {object} options - Optional parameters (pan, volume multiplier)
          */
         playSFX(name, options = {}) {
-            this._ensureContext();
+            if (!this._ensureContext()) return;
 
             const volMultiplier = options.volume || 1;
 
@@ -587,7 +587,7 @@
          * Full chord sweep, brass approximation
          */
         _playVictoryFanfare() {
-            this._ensureContext();
+            if (!this._ensureContext()) return;
 
             const time = this.ctx.currentTime;
 
@@ -643,7 +643,7 @@
          * Descending minor chord with delay
          */
         _playGameOverRequiem() {
-            this._ensureContext();
+            if (!this._ensureContext()) return;
 
             const time = this.ctx.currentTime;
 
