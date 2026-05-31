@@ -8235,20 +8235,6 @@ document.getElementById('btn-chronoshift')?.addEventListener('click', () => {
     document.getElementById('btn-medium').focus();
 });
 
-document.getElementById('btn-breach')?.addEventListener('click', () => {
-    selectedMode = 'breach';
-    hideAllMenus();
-    diffSelect.classList.remove('hidden');
-    document.getElementById('btn-medium').focus();
-});
-
-document.getElementById('btn-neural')?.addEventListener('click', () => {
-    // Trace Protocol has its own drill selection, not difficulty selection
-    loadNeuralUnlockProgress();
-    hideAllMenus();
-    showNeuralDrillSelect();
-});
-
 document.getElementById('btn-back-mode').addEventListener('click', () => {
     hideAllMenus();
     mainMenu.classList.remove('hidden');
@@ -10146,6 +10132,7 @@ document.getElementById('btn-breach')?.addEventListener('click', () => {
 document.getElementById('btn-neural')?.addEventListener('click', () => {
     selectedMode = 'neural';
     loadNeuralUnlockProgress();
+    hideAllMenus();
     showNeuralDrillSelect();
 });
 
