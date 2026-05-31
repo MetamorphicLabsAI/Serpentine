@@ -106,6 +106,9 @@ const TutorialSystem = {
 
     // Step 1: Movement controls (user-driven, one move per key press)
     showStep1() {
+        // Guard: if already in step 1, don't reinitialize
+        if (this.currentStep === 2 && this.tutorialSnake.length > 0) return;
+
         hideAllMenus();
         document.getElementById('tutorial-step1').classList.remove('hidden');
 
@@ -253,6 +256,9 @@ const TutorialSystem = {
 
     // Step 2: Food collection demo (user-driven movement)
     showStep2() {
+        // Guard: if already in step 2, don't reinitialize
+        if (this.currentStep === 3 && this.tutorialSnake.length > 0) return;
+
         this.currentStep = 3;
         hideAllMenus();
         document.getElementById('tutorial-step2').classList.remove('hidden');
