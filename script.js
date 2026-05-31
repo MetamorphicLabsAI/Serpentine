@@ -845,7 +845,9 @@ Object.entries(sentinelDPad).forEach(([dir, btn]) => {
 document.getElementById('mobile-pause')?.addEventListener('touchstart', e => {
     e.preventDefault();
     if (SentinelBreach.active) toggleSentinelPause();
-}, { passive: false });// ═══════════════════════════════════════════════════════════════════════════
+}, { passive: false });
+
+// ═══════════════════════════════════════════════════════════════════════════
 // SAVE SYSTEM v2 — Profile Manager
 // ═══════════════════════════════════════════════════════════════════════════
 
