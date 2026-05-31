@@ -104,7 +104,7 @@ const TutorialSystem = {
         document.addEventListener('keydown', continueHandler);
     },
 
-    // Step 1: Movement controls (free movement for 5 moves)
+    // Step 1: Movement controls (user-driven, one move per key press)
     showStep1() {
         hideAllMenus();
         document.getElementById('tutorial-step1').classList.remove('hidden');
@@ -119,13 +119,10 @@ const TutorialSystem = {
         ];
         this.tutorialDirection = { dx: 0, dy: -1 };
         this.tutorialPendingDirection = null;
+        this.step1Moves = 0;
 
-        // Hide overlay so player can move on canvas
-        const overlay = document.getElementById('tutorial-step1');
-        overlay.style.pointerEvents = 'none';
-
-        // Start game loop for free movement
-        this.startTutorialGameLoop();
+        // Start draw-only loop (no auto-ticking)
+        this.startTutorialDrawLoop();
 
         this.updateStep1Progress();
     },
@@ -138,30 +135,21 @@ const TutorialSystem = {
         }
     },
 
-    // Tutorial game loop (simplified for tutorial)
-    startTutorialGameLoop() {
+    // Draw-only loop for tutorial (no auto-tick — movement is user-driven)
+    startTutorialDrawLoop() {
         if (this.tutorialGameLoop) cancelAnimationFrame(this.tutorialGameLoop);
 
-        let lastTime = performance.now();
-        const gameLoop = (currentTime) => {
+        const drawLoop = (currentTime) => {
             if (!this.active) return;
-
-            this.tutorialGameLoop = requestAnimationFrame(gameLoop);
-
-            const deltaTime = currentTime - lastTime;
-            if (deltaTime >= 150) { // Tutorial moves slower
-                lastTime = currentTime;
-                this.updateTutorialGame();
-            }
-
+            this.tutorialGameLoop = requestAnimationFrame(drawLoop);
             this.drawTutorialGame();
         };
 
-        this.tutorialGameLoop = requestAnimationFrame(gameLoop);
+        this.tutorialGameLoop = requestAnimationFrame(drawLoop);
     },
 
-    // Update tutorial game logic
-    updateTutorialGame() {
+    // Move the tutorial snake one step (called on user input)
+    tutorialMoveSnake() {
         // Apply pending direction
         if (this.tutorialPendingDirection) {
             this.tutorialDirection = this.tutorialPendingDirection;
@@ -180,15 +168,21 @@ const TutorialSystem = {
         if (newHead.y < 0) newHead.y = tileCount - 1;
         if (newHead.y >= tileCount) newHead.y = 0;
 
-        // Add new head
+        // Add new head, remove tail
         this.tutorialSnake.unshift(newHead);
         this.tutorialSnake.pop();
 
-        // Count moves for step 1
-        this.step1Moves++;
-        this.updateStep1Progress();
+        // Step 1: count moves
+        if (this.currentStep === 2) {
+            this.step1Moves++;
+            this.updateStep1Progress();
+            if (this.step1Moves >= 5) {
+                this.cancelTutorialGameLoop();
+                this.showStep2();
+            }
+        }
 
-        // Step 2: Food collection
+        // Step 2: check food collection
         if (this.currentStep === 3 && this.tutorialFood) {
             if (newHead.x === this.tutorialFood.x && newHead.y === this.tutorialFood.y) {
                 this.step2Collected++;
@@ -197,12 +191,6 @@ const TutorialSystem = {
                 this.cancelTutorialGameLoop();
                 setTimeout(() => this.showStep3(), 500);
             }
-        }
-
-        // Step 1 completion
-        if (this.currentStep === 2 && this.step1Moves >= 5) {
-            this.cancelTutorialGameLoop();
-            this.showStep2();
         }
     },
 
@@ -263,7 +251,7 @@ const TutorialSystem = {
         }
     },
 
-    // Step 2: Food collection demo
+    // Step 2: Food collection demo (user-driven movement)
     showStep2() {
         this.currentStep = 3;
         hideAllMenus();
@@ -280,15 +268,11 @@ const TutorialSystem = {
         this.tutorialDirection = { dx: 0, dy: -1 };
         this.tutorialPendingDirection = null;
 
-        // Show overlay but allow canvas interaction
-        const overlay = document.getElementById('tutorial-step2');
-        overlay.style.pointerEvents = 'none';
-
         // Spawn food
         this.spawnTutorialFood();
 
-        // Start game loop
-        this.startTutorialGameLoop();
+        // Start draw-only loop (no auto-tick)
+        this.startTutorialDrawLoop();
 
         this.updateStep2Progress();
     },
@@ -528,12 +512,14 @@ document.getElementById('btn-tutorial-start')?.addEventListener('click', () => {
 
 // Tutorial keyboard input handler
 document.addEventListener('keydown', (e) => {
-    // Route to tutorial system if active
-    if (TutorialSystem.active && (TutorialSystem.currentStep === 2 || TutorialSystem.currentStep === 3)) {
-        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 's', 'S', 'a', 'A', 'd', 'D'].includes(e.key)) {
-            TutorialSystem.handleTutorialInput(e.key);
-            e.preventDefault();
-        }
+    // Route to tutorial system if active and it's a movement key
+    if (TutorialSystem.active &&
+        (TutorialSystem.currentStep === 2 || TutorialSystem.currentStep === 3) &&
+        ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 's', 'S', 'a', 'A', 'd', 'D'].includes(e.key)) {
+        TutorialSystem.handleTutorialInput(e.key);
+        // Advance one step per keypress (user-driven, not auto)
+        TutorialSystem.tutorialMoveSnake();
+        e.preventDefault();
     }
 });
 
@@ -561,6 +547,7 @@ Object.entries(tutorialDPad).forEach(([dir, btn]) => {
 
         if (key) {
             TutorialSystem.handleTutorialInput(key);
+            TutorialSystem.tutorialMoveSnake();
             btn.classList.add('pressed');
         }
     }, { passive: false });
