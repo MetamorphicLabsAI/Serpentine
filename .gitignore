@@ -1,5 +1,17 @@
-.claude/settings.local.json
-.claude/settings.json
+# Claude worktrees (generated during workflows)
+.claude/worktrees/
+
+# OS files
 .DS_Store
 Thumbs.db
-*.sw?
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Backup files
+*.bak
+*.backup
