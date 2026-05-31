@@ -1095,6 +1095,7 @@
         // ═════════════════════════════════════════
 
         _sfxTone(freq, type, duration, vol) {
+            if (!this.ctx) return; // Audio not initialized yet
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
 
