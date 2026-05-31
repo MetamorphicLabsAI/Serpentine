@@ -809,11 +809,10 @@ main = function(currentTime) {
     }
 };
 
-// Modified togglePause
-const _originalTogglePause = togglePause;
-togglePause = function() {
+// Sentinel Breach toggle (redirects to sentinel pause)
+const sentinelTogglePause = function() {
     if (SentinelBreach.active) { toggleSentinelPause(); return; }
-    _originalTogglePause();
+    togglePause();
 };
 
 // Mobile D-pad for Sentinel
@@ -7625,7 +7624,7 @@ window.addEventListener('keydown', e => {
     }
     
     if (e.key === 'Escape' && isPlaying && !isEnteringInitials) {
-        togglePause();
+        sentinelTogglePause();
         return;
     }
 
