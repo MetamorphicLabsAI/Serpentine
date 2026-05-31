@@ -798,6 +798,15 @@ main = function(currentTime) {
         return;
     }
 
+    // Trace Protocol — own render/update loop
+    if (NeuralFit.isActive) {
+        const deltaTime = currentTime - (NeuralFit._lastTime || currentTime);
+        NeuralFit._lastTime = currentTime;
+        drawNeuralFit(currentTime);
+        if (!isPaused) updateNeuralLogic(deltaTime);
+        return;
+    }
+
     draw();
     if (!isPlaying || isPaused) return;
     const secondsSinceLastLogic = (currentTime - lastRenderTime) / 1000;
@@ -832,6 +841,13 @@ Object.entries(sentinelDPad).forEach(([dir, btn]) => {
     if (!btn) return;
     btn.addEventListener('touchstart', e => {
         e.preventDefault();
+        if (NeuralFit.isActive) {
+            // Trace Protocol: directional movement via D-pad
+            NeuralFit.snakeDx = dpadDirs[dir].dx;
+            NeuralFit.snakeDy = dpadDirs[dir].dy;
+            btn.classList.add('pressed');
+            return;
+        }
         if (!SentinelBreach.active || SentinelBreach.paused) return;
         SentinelBreach.pendingDirection = dpadDirs[dir];
         btn.classList.add('pressed');
@@ -12090,6 +12106,8 @@ window.updateLogic = function() {
 const _origTriggerGameOver = triggerGameOver;
 window.triggerGameOver = function() {
     if (ChronoShift.active) { triggerChronoShiftGameOver(); return; }
+    // NeuralFit has its own end sequence — don't call the standard game over path
+    if (NeuralFit.isActive) { endNeuralDrill(); return; }
     _origTriggerGameOver();
 };
 
