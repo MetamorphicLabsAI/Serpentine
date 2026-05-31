@@ -88,8 +88,13 @@ const TutorialSystem = {
         hideAllMenus();
         document.getElementById('tutorial-welcome').classList.remove('hidden');
 
+        // Debounce: ignore keydown for 300ms (prevents click/keyboard shortcut from auto-advancing)
+        let welcomeReady = false;
+        setTimeout(() => { welcomeReady = true; }, 300);
+
         // Listen for any key to continue
         const continueHandler = (e) => {
+            if (!welcomeReady) return;
             if (e.key !== 'Escape') {
                 document.removeEventListener('keydown', continueHandler);
                 this.currentStep = 2;
