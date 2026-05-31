@@ -1344,6 +1344,8 @@ function showTitleUnlockPopup(titleName, description) {
 
 // ─── Game State Variables (needed early by SaveManager) ───────────────────────
 let bank = 0; // Will be set from profile after load
+let bought9193Hint = false; // Will be set from profile after load
+let boughtMasterHint = false; // Will be set from profile after load
 
 // ─── SaveManager Class ───────────────────────────────────────────────────────
 
@@ -3888,8 +3890,8 @@ let foodEaten = 0; // Track food consumed per round
 let standardRunStartTime = 0; // Track time for speed-based unlocks
 let barkCounter = 3; // Track when princess barks
 bank = parseInt(localStorage.getItem('serpentineBank')) || 0;
-let bought9193Hint = localStorage.getItem('bought9193Hint') === 'true';
-let boughtMasterHint = localStorage.getItem('boughtMasterHint') === 'true';
+bought9193Hint = localStorage.getItem('bought9193Hint') === 'true';
+boughtMasterHint = localStorage.getItem('boughtMasterHint') === 'true';
 let isPaused = false;
 
 // --- Power-Up System ---
